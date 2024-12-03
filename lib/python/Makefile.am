@@ -1,22 +1,14 @@
-SUFFIXES = .py 
 
-pythonlibdir = $(libdir)/python
 
-#python_PYTHON  
-#pkgpython_PYTHON
-#pyexecdir_PYTHON
-#pkgpyexecdir_PYTHON
-#pyexecdir_PYTHON
+# python_PYTHON = # => /usr/local/lib/python3.9/site-packages
+# pkgpython_PYTHON = # => /usr/local/lib/python3.9/site-packages/vodafoneoem
 
-pythonlib_PYTHON = \
-	create_gold_agent_image.py \
-	create_group.py \
-	get_add_host_status.py \
-	get_targets.py \
-	promote_cluster.py \
-	promote_discovered_targets.py \
-	promote_gold_agent_image.py \
-	submit_add_host.py \
-	update_group_of_agents.py
+# The following will not be found in %{_libdir} in RPM (you have to use
+# %{prefix}/lib in the .spec file to package:
 
-#CLEANFILES = $(python_PYTHON)
+# Really for shared libraries (i.e. C etc)
+# pyexec_PYTHON = # => /usr/local/lib64/python3.9/site-packages
+# pkgpyexec_PYTHON = # =>  /usr/local/lib64/python3.9/site-packages/vodafoneoem
+
+pkgpython_PYTHON = \
+	password_handler.py

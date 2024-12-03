@@ -13,8 +13,8 @@ Packager:	Simon Anthony
 Source0:	%{name}-%{version}.tar.gz
 
 #Requires: jq, libnotify, bash, bind-utils
-Requires: bash
-BuildRequires: bash
+Requires: bash, python3
+BuildRequires: bash, python3, autoconf, automake
 
 BuildArch: noarch
 
@@ -38,6 +38,7 @@ Supporting scripts and tools for Oracle Enterprise Manager deployment
 	--libdir=%_libdir \
 	--includedir=%_includedir \
 	--localstatedir=%{_localstatedir} \
+	--libexecdir=%{_libexecdir} \
 	--mandir=%{_prefix}/share/man 
 make %{?_smp_mflags}
 
@@ -58,8 +59,9 @@ make DESTDIR=%buildroot install
 
 %files
 %{_bindir}/*
-%{_libdir}/*
+%{_prefix}/lib/*
 %{_sysconfdir}/*
+%{_libexecdir}/*
 
 
 %changelog

@@ -3,7 +3,9 @@
 PATH=/usr/bin:BINDIR export PATH
 prog=`basename $0 .sh`
 
-export PYTHONPATH=LIBDIR/python
+export PYTHONPATH=LIBEXECDIR/PACKAGE
+# EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to work
+export EMCLI_PYTHONPATH=PREFIX/lib/pythonPYTHON_VERSION/site-packages/PACKAGE:$EMCLI_PYTHONPATH
 
 prog=`basename $0 .sh`
 
@@ -93,6 +95,7 @@ then
 	exit 1
 	# $ORACLE_HOME/bin/emcliext/__pycache__ for compiled stuff
 fi
+EMCLI_PYTHONPATH=$ORACLE_HOME/bin/emcliext:$EMCLI_PYTHONPATH
 
 if [ ! -r $PYTHONPATH/$file.py ] 
 then

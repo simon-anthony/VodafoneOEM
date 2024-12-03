@@ -15,5 +15,6 @@ bin/Makefile
 etc/Makefile
 lib/Makefile
 lib/python/Makefile
+libexec/Makefile
 ])
 AC_OUTPUT
