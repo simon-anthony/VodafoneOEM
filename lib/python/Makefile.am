@@ -13,6 +13,7 @@ pythonlib_PYTHON = \
 	create_group.py \
 	get_add_host_status.py \
 	get_targets.py \
+	promote_cluster.py \
 	promote_discovered_targets.py \
 	promote_gold_agent_image.py \
 	submit_add_host.py \

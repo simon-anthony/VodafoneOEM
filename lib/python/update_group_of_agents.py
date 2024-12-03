@@ -12,6 +12,7 @@ parser.add_argument('-u', '--username', default='SYSMAN', help='sysman user')
 parser.add_argument('-p', '--password', required=True, help='sysman password')
 parser.add_argument('-g', '--group', required=True, help='group')
 parser.add_argument('-i', '--image', required=True, help='gold agent image name')
+parser.add_argument('-v', '--validate_only', action='store_true', default=False, help='gold agent image name')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -32,7 +33,18 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 # extract the target names and create a ';' separated string from the list
-target_names = ','.join([i['Target Name'] for i in members if i['Target Type'] == 'oracle_emd']])
+target_names = ','.join([i['Target Name'] for i in members if i['Target Type'] == 'oracle_emd'])
+
+if args.validate_only:
+    try:
+        resp = update_agents(
+            image_name=args.image,
+            agents=target_names,
+            validate_only=true)
+    except emcli.exception.VerbExecutionError, e:
+       print e.error()
+       exit(1)
+    exit(0)
 
 try:
     resp = update_agents(
