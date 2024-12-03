@@ -1,0 +1,30 @@
+# vim: syntax=systemd:ts=4:sw=4:
+# It's not recommended to modify this file in-place, because it will be
+# overwritten during package upgrades.  If you want to customize, the
+# best way is to create an override file.
+# If the command cannot be run check SELinux and try:
+# sudo restorecon -F <ExecStart command>
+
+[Unit]
+Description=Oracle Enterprise Manager 13c Agent
+After=syslog.target network.target
+
+[Service]
+Type=forking
+RemainAfterExit=no
+KillMode=mixed
+TimeoutStopSec=10min
+
+User=oracle
+Group=oinstall
+
+ExecStart=/opt/oracle/product/13c/agent/agent_13.5.0.0.0/bin/emctl start agent
+ExecStop=/opt/oracle/product/13c/agent/agent_13.5.0.0.0/bin/emctl stop agent
+ExecStopPost=/usr/bin/pkill -KILL -fu oracle oracle.sysman.gcagent.tmmain.TMMain
+ExecCondition=-sh -c "if [ ! -u /opt/oracle/product/13c/agent/agent_13.5.0.0.0/sbin/nmo ]; then echo 'Running root.sh'; sudo /opt/oracle/product/13c/agent/agent_13.5.0.0.0/root.sh; fi"
+
+# Give a reasonable amount of time for the server to start up/shut down
+TimeoutSec=600
+
+[Install]
+WantedBy=multi-user.target

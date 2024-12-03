@@ -1,0 +1,29 @@
+# vim: syntax=systemd:sw=4:ts=4:
+# It's not recommended to modify this file in-place, because it will be
+# overwritten during package upgrades.  If you want to customize, the
+# best way is to create an override file.
+# If the command cannot be run check SELinux and try:
+# sudo restorecon -F <ExecStart command>
+
+[Unit]
+Description=Oracle Enterprise Manager 13c
+After=syslog.target network.target
+Requisite=oracle-database-ee-19c.service
+
+[Service]
+Type=forking
+#RemainAfterExit=yes
+KillMode=control-group
+TimeoutStopSec=15min
+
+User=oracle
+Group=oinstall
+
+ExecStart=/opt/oracle/product/13c/mw/bin/emctl start oms
+ExecStop=/opt/oracle/product/13c/mw/bin/emctl stop oms -all -force
+
+# Give a reasonable amount of time for the server to start up/shut down
+TimeoutSec=1000
+
+[Install]
+WantedBy=multi-user.target
