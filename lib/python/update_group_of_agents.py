@@ -32,7 +32,7 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 # extract the target names and create a ';' separated string from the list
-target_names = ';'.join([i['Target Name'] for i in members])
+target_names = ','.join([i['Target Name'] for i in members if i['Target Type'] == 'oracle_emd']])
 
 try:
     resp = update_agents(

@@ -3,45 +3,30 @@
 PATH=/usr/bin:BINDIR export PATH
 prog=`basename $0 .sh`
 
-if [ "X$ORACLE_HOME" = "X" ]
-then
-	echo "$prog: ORACLE_HOME not set" >&2
-	exit 1
-fi
-PATH=$PATH:$ORACLE_HOME/bin
-
-if [ ! -d $ORACLE_HOME/bin/emcliext ]
-then
-	echo "$prog: directory $ORACLE_HOME/bin/emcliext does not exist" >&2
-	exit 1
-fi
-# /opt/oracle/product/13c/mw/bin/emcliext/__pycache__
-
 export PYTHONPATH=LIBDIR/python
 
 prog=`basename $0 .sh`
 
 usage() {
     cat >&2 <<-!
-		usage: $prog [OPTION] -- <prog> [<args>]
+		usage: $prog [OPTION] -- <module> [-h|--help] [<args>]
 		OPTION:
 		  -l, --list                 List modules
-		  -u, --username=NAME        Name of OMS user, default 'SYSMAN'
+		  -s, --sid=NAME             Set ORACLE_HOME for NAME
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 	!
     exit 2
 }
 
-TEMP=`getopt -o lu:vh --long user,verbose,help \
+TEMP=`getopt -o ls:vh --long sid,verbose,help \
      -n "$prog" -- "$@"`
 
 [ $? != 0 ] && { usage; exit 1; }
 
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
-typeset lflg= uflg= hflg= vflg= errflg=  
-typeset username="SYSMAN"
+typeset lflg= sflg= hflg= vflg= errflg=  
 
 while true
 do
@@ -49,9 +34,9 @@ do
 	-l|--list)
 		lflg=y
 		shift ;;
-	-u|--username)
-		uflg=y
-		user=$2
+	-s|--sid)
+		sflg=y
+		sid=$2
 		shift 2 ;;
     -v|--verbose)
         vflg=y
@@ -87,6 +72,27 @@ fi
 
 file=`basename $1 .py`
 shift
+
+[ -r SYSCONFDIR/profile.d/setoraenv.sh ] && . SYSCONFDIR/profile.d/setoraenv.sh
+
+if [ $sflg ] # set ORACLE_HOME
+then
+	setoraenv -s $sid || exit
+else # pick up from env
+	if [ "X$ORACLE_HOME" = "X" ]
+	then
+		echo "$prog: ORACLE_HOME not set" >&2
+		exit 1
+	fi
+	PATH=$PATH:$ORACLE_HOME/bin
+fi
+
+if [ ! -d $ORACLE_HOME/bin/emcliext ]
+then
+	echo "$prog: directory $ORACLE_HOME/bin/emcliext does not exist" >&2
+	exit 1
+	# $ORACLE_HOME/bin/emcliext/__pycache__ for compiled stuff
+fi
 
 if [ ! -r $PYTHONPATH/$file.py ] 
 then
