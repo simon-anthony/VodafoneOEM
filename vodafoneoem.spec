@@ -59,7 +59,7 @@ make DESTDIR=%buildroot install
 
 %files
 %{_bindir}/*
-%{_prefix}/lib/*
+%{_libdir}/*
 %{_sysconfdir}/*
 %{_libexecdir}/*
 

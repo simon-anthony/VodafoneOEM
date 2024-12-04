@@ -10,5 +10,5 @@
 # pyexec_PYTHON = # => /usr/local/lib64/python3.9/site-packages
 # pkgpyexec_PYTHON = # =>  /usr/local/lib64/python3.9/site-packages/vodafoneoem
 
-pkgpython_PYTHON = \
+pkgpyexec_PYTHON = \
 	password_handler.py

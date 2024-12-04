@@ -5,7 +5,7 @@ prog=`basename $0 .sh`
 
 export PYTHONPATH=LIBEXECDIR/PACKAGE
 # EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to work
-export EMCLI_PYTHONPATH=PREFIX/lib/pythonPYTHON_VERSION/site-packages/PACKAGE:$EMCLI_PYTHONPATH
+export EMCLI_PYTHONPATH=LIBDIR/pythonPYTHON_VERSION/site-packages/PACKAGE:$EMCLI_PYTHONPATH
 
 prog=`basename $0 .sh`
 
