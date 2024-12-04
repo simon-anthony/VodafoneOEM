@@ -170,6 +170,14 @@ The corresponding version must also be changed in the arguments to the
 <pre class=console><code>AC_INIT([vodafoneoem],[<b>1.2</b>],[bugs@vodafone.com])
 </code></pre>
 
+NB to avoid the need to change two files to update the version number, we can
+use RPM's macro feature to extract the version from only the `configure.ac`
+file. Our `.spec` file then becomes:
+
+<pre class=console><code>Version:    <b>%(sed -n '/AC_INIT/ s;.*\[\(.*\)\],.*;\1;p' configure.ac)</b>
+Release:    1
+</code></pre>
+
 ##### Ensure that all changes are committed
 
 Check commits:
@@ -184,8 +192,10 @@ If ncessary, commit:
 </code></pre>
 
 #### Tag the commit with the Version and Rlease
+Tag the commit:
 <pre class=console><code>$ <b>git tag 1.2-1"</b> 
-
+And push it to the central repository:
+<pre class=console><code>$ <b>git push --tags"</b> 
 
 ### Build Steps
 
