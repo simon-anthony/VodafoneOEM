@@ -150,8 +150,17 @@ the software is built. It is, in effect, the number of times this version of the
 
 ### Version Changes
 
-When you wish to freeze a version of the software and commit the changes, do
-the following:
+When you wish to freeze a version of the software and commit the changes, we 
+need to change the version number in both the `.spec` and `configure.ac`
+files. We make sure that all changes are committed as required and push to the
+central repository. Finally we tag the committed code with the version and release and
+push the tags to the central repository.
+
+These steps are explained in detail below.
+
+Note that the requirement to change the version number in
+both the `.spec` and `configure.ac` files can be reduced to only needing to
+change the latter by employing a macro in the former.
 
 #### Change the .spec File 
 
@@ -162,20 +171,21 @@ Change the Version to that which is desired, for example, to create version
 Release:    1
 </code></pre>
 
+##### Using a macro
+To avoid the need to change two files to update the version number, we can
+use RPM's macro feature to extract the version from only the `configure.ac`
+file. Our `.spec` file then becomes:
+
+<pre class=console><code>Version:    <b>%(sed -n '/AC_INIT/ s;.*\[\(.*\)\],.*;\1;p' configure.ac)</b>
+Release:    1
+</code></pre>
+
 #### Change the configure.ac file
 
 The corresponding version must also be changed in the arguments to the
 `AC_INIT()` macro in the `configure.ac` file:
 
 <pre class=console><code>AC_INIT([vodafoneoem],[<b>1.2</b>],[bugs@vodafone.com])
-</code></pre>
-
-NB to avoid the need to change two files to update the version number, we can
-use RPM's macro feature to extract the version from only the `configure.ac`
-file. Our `.spec` file then becomes:
-
-<pre class=console><code>Version:    <b>%(sed -n '/AC_INIT/ s;.*\[\(.*\)\],.*;\1;p' configure.ac)</b>
-Release:    1
 </code></pre>
 
 ##### Ensure that all changes are committed

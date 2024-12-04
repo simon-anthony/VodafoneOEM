@@ -2,7 +2,7 @@
 
 Name:		vodafoneoem
 Version:	%(sed -n '/AC_INIT/ s;.*\[\(.*\)\],.*;\1;p' configure.ac)
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Utilities for OEM Management
 
 Group:		Productivity/Database/Tools
