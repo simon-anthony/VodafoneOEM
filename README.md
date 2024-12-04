@@ -66,47 +66,72 @@ PATH=$PATH:/opt/VODAFONEoem/bin
 Details to follow.
 
 ### Examples
-Default user is sysman
+
+We use a wrapper to invoke programs from our catalogue. To list the modules
+installed:
+
+#### List all installed modules
+<pre class=console><code>$ <b>emrun -l</b>
+create_gold_agent_image
+create_group
+get_add_host_status
+get_targets
+promote_cluster
+promote_discovered_targets
+promote_gold_agent_image
+submit_add_host
+update_group_of_agents 
+...
+</code></pre>
+
+#### To get help on an individual module
+<pre class=console><code>$ <b>emrun -- update_group_of_agents -h</b>
+usage: update_group_of_agents [-h] [-o OMS] [-u USERNAME] -p PASSWORD -g GROUP
+                              -i IMAGE [-v]
+
+Update a group of agents
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OMS, --oms OMS     URL
+  -u USERNAME, --username USERNAME
+                        sysman user
+  -p PASSWORD, --password PASSWORD
+                        sysman password
+  -g GROUP, --group GROUP
+                        group
+  -i IMAGE, --image IMAGE
+                        gold agent image name
+  -v, --validate_only   check whether agents can be updated
+</code></pre>
+
+
+#### Further examples
+Having set the following:
+
 <pre><code>
+user=sysman
 oms=https://oms.example.com:7803
 password=Naxy7839 
+</code></pre>
 
-execem -- create_gold_agent_image -o $oms -p $password \
+We can then performa tasks like:
+
+#### Create a Gold Agent Image
+<pre class=console><code>$ <b>emrun -- create_gold_agent_image -u $user -o $oms -p $password \
 	-s oel.example.com \
 	-v AGENT_RU24 \
     -d "Base Agent Image for RU24" \
-    -i DB_MONITORING
+    -i DB_MONITORING</b>
+</code></pre>
 
-execem.sh -- promote_gold_agent_image -o $oms -p $password \
-	-v AGENT_RU24 
-
-execem.sh -- submit_add_host -o $oms -p $password \
+#### Add a Number of Hosts
+<pre class=console><code>$ <b>emrun -- submit_add_host -u $user -o $oms -p $password \
 	-d example.com \
     -i DB_MONITORING \
 	-c 'NC-ORACLE' \
 	-w \
-	oim
-
-execem.sh -- get_add_host_status -o $oms -p $password \
-	-s ADD_HOST_SYSMAN_02-Dec-2024_17:19:50_GMT
-
-execem.sh -- create_group -o $oms -p $password \
-	-d example.com \
-	-g test \
-	oim
-
-execem.sh -- create_group -o $oms -p $password \
-	-d example.com \
-	-g all_hosts \
-	oim oms oel
-
-execem.sh -- update_group_of_agents -o $oms -p $password \
-	-g all_hosts \
-	-i DB_MONITORING
-
-execem.sh -- update_group_of_agents -o $oms -p $password \
-	-g test \
-	-i DB_MONITORING
+	oim rhl mon</b>
 </code></pre>
 
 ## Developing

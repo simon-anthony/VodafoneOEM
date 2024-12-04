@@ -4,7 +4,8 @@ PATH=/usr/bin:BINDIR export PATH
 prog=`basename $0 .sh`
 
 export PYTHONPATH=LIBEXECDIR/PACKAGE
-# EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to work
+# EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to
+# work...
 export EMCLI_PYTHONPATH=LIBDIR/pythonPYTHON_VERSION/site-packages/PACKAGE:$EMCLI_PYTHONPATH
 
 prog=`basename $0 .sh`
@@ -14,7 +15,7 @@ usage() {
 		usage: $prog [OPTION] -- <module> [-h|--help] [<args>]
 		OPTION:
 		  -l, --list                 List modules
-		  -s, --sid=NAME             Set ORACLE_HOME for NAME
+		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 	!
@@ -46,9 +47,6 @@ do
     -h|--help)
         hflg=y
         shift ;;
-    #-h|--help)
-    #    errflg=y
-    #    shift; break ;;
     --) shift; break ;;
     *)  errflg=y; break ;;
     esac
@@ -87,6 +85,12 @@ else # pick up from env
 		exit 1
 	fi
 	PATH=$PATH:$ORACLE_HOME/bin
+fi
+
+if ! which emcli >/dev/null 2>&1
+then
+	echo "$prog: emcli not in PATH" >&2
+	exit 1
 fi
 
 if [ ! -d $ORACLE_HOME/bin/emcliext ]
