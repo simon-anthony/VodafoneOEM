@@ -115,16 +115,22 @@ Next run the build script:
 
 * `./build.sh`
 
-The RPM file will be created at:
+The RPM file will be created at, for example:
 
-* %\_topdir/RPMS/noarch/vodafoneoem-<i>m</i>.<i>n</i>-<i>r</i>.el9.noarch.rpm
+* `%\_topdir/RPMS/noarch/vodafoneoem-1.1-1.el9.noarch.rpm`
 
-* `%\_topdir/RPMS/noarch/vodafoneoem-<i>m</i>.<i>n</i>-<i>r</i>.el9.noarch.rpm`
+Where 1.1 is the version and 1 is the release.
 
 Which you can then copy or move as you see fit and install with <b>rpm</b>(8), <b>dnf</b>(8) or <b>yum</b>(8). For example:
 
-<pre class=console><code>$ <b>dnf install -y vodafoneoem-1.1-1.el9.noarch.rpm</b>
+<pre class=console><code># <b>dnf -y install vodafoneoem-1.1-1.el9.noarch.rpm</b>
 </code></pre>
+
+To remove the currently installed package version:
+
+<pre class=console><code># <b>dnf -y remove vodafoneoem</b>
+</code></pre>
+
 
 ### Build Steps
 
