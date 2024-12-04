@@ -148,7 +148,7 @@ dependencies change. The release would be reset to 1 when a new _version_ of
 the software is built. It is, in effect, the number of times this version of the software was released. 
 
 
-### Version Changes
+### Version (and Release) Changes
 
 When you wish to freeze a version of the software and commit the changes, we 
 need to change the version number in both the `.spec` and `configure.ac`
@@ -202,10 +202,40 @@ If ncessary, commit:
 </code></pre>
 
 #### Tag the commit with the Version and Rlease
+
 Tag the commit:
 <pre class=console><code>$ <b>git tag 1.2-1"</b> 
+</code></pre>
+
 And push it to the central repository:
 <pre class=console><code>$ <b>git push --tags"</b> 
+</code></pre>
+
+Note that tags can be listed with:
+<pre class=console><code>$ <b>git tag"</b> 
+1.1-1
+1.1-2
+</code></pre>
+
+And a view of the logs of the repository will show our tagged verion/release.
+In the example below, note that the release 2 of version 1.1 has just been
+committed/tagged and is the same as the current HEAD.
+<pre class=console><code>$ <b>git log --oneline"</b> 
+git log --oneline
+20645b2 (HEAD -> main, tag: 1.1-2) Version 1.1 Release 2
+4f7a5ad (origin/main) README
+059509e (tag: 1.1-1) Version 1.1 Release 1
+e524994 README updates
+3979962 README updates
+70a2ec2 Moved libraries to pkgpyexec
+5914994 Re-arranged
+a6c822d Added verify_only
+9924dbf Jo's file added to list of modules
+cf323fe Made emrun relocatable
+97296b2 First collection of files
+a254d09 First commit
+</code></pre>
+
 
 ### Build Steps
 
