@@ -109,8 +109,7 @@ From Linux these can be installe with yum/dnf:
 ## Building RPMS from the Source Tree
 Set `%_topdir` in the file `$HOME/.rpmmacros`. For example:
 
-<pre><code>%__topdir %{getenv:HOME}/.rpm
-</code></pre>
+* `%_topdir %{getenv:HOME}/.rpm`
 
 Next run the build script:
 
@@ -118,7 +117,9 @@ Next run the build script:
 
 The RPM file will be created at:
 
-<pre>%\_topdir/RPMS/noarch/vodafoneoem-<i>m</i>.<i>n</i>-<i>r</i>.el9.noarch.rpm</pre>
+* %\_topdir/RPMS/noarch/vodafoneoem-<i>m</i>.<i>n</i>-<i>r</i>.el9.noarch.rpm
+
+* `%\_topdir/RPMS/noarch/vodafoneoem-<i>m</i>.<i>n</i>-<i>r</i>.el9.noarch.rpm`
 
 Which you can then copy or move as you see fit and install with <b>rpm</b>(8), <b>dnf</b>(8) or <b>yum</b>(8). For example:
 
