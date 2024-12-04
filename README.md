@@ -180,6 +180,8 @@ file. Our `.spec` file then becomes:
 Release:    1
 </code></pre>
 
+And we need only change the version in the file `configure.ac`.
+
 #### Change the configure.ac file
 
 The corresponding version must also be changed in the arguments to the
@@ -198,29 +200,29 @@ If ncessary, commit:
 <pre class=console><code>$ <b>git commit -a -m "Version 1.2 Release 1"</b> 
 </code></pre>
 
-<pre class=console><code>$ <b>git push -u origin main"</b> 
+<pre class=console><code>$ <b>git push -u origin main</b> 
 </code></pre>
 
 #### Tag the commit with the Version and Rlease
 
 Tag the commit:
-<pre class=console><code>$ <b>git tag 1.2-1"</b> 
+<pre class=console><code>$ <b>git tag 1.2-1</b> 
 </code></pre>
 
 And push it to the central repository:
-<pre class=console><code>$ <b>git push --tags"</b> 
+<pre class=console><code>$ <b>git push --tags</b> 
 </code></pre>
 
 Note that tags can be listed with:
-<pre class=console><code>$ <b>git tag"</b> 
+<pre class=console><code>$ <b>git tag</b> 
 1.1-1
 1.1-2
 </code></pre>
 
-And a view of the logs of the repository will show our tagged verion/release.
+And a view of the logs of the repository will show our tagged version/release.
 In the example below, note that the release 2 of version 1.1 has just been
 committed/tagged and is the same as the current HEAD.
-<pre class=console><code>$ <b>git log --oneline"</b> 
+<pre class=console><code>$ <b>git log --oneline</b> 
 git log --oneline
 20645b2 (HEAD -> main, tag: 1.1-2) Version 1.1 Release 2
 4f7a5ad (origin/main) README

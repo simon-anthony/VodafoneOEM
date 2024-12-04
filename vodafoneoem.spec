@@ -1,8 +1,8 @@
 %define _prefix /usr/local
 
-Name:		vodafoneoem
-Version:	%(sed -n '/AC_INIT/ s;.*\[\(.*\)\],.*;\1;p' configure.ac)
-Release:	2%{?dist}
+Name:		%(sed -n '/AC_INIT/ s;.*\[\(.*\)\],.*,.*;\1;p' configure.ac)
+Version:	%(sed -n '/AC_INIT/ s;.*,\[\(.*\)\],.*;\1;p' configure.ac)
+Release:	3%{?dist}
 Summary:	Utilities for OEM Management
 
 Group:		Productivity/Database/Tools
