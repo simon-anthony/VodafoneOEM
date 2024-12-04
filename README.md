@@ -117,7 +117,7 @@ Next run the build script:
 
 The RPM file will be created at, for example:
 
-* `%\_topdir/RPMS/noarch/vodafoneoem-1.1-1.el9.noarch.rpm`
+* `%_topdir/RPMS/noarch/vodafoneoem-1.1-1.el9.noarch.rpm`
 
 Where 1.1 is the version and 1 is the release.
 
@@ -130,6 +130,46 @@ To remove the currently installed package version:
 
 <pre class=console><code># <b>dnf -y remove vodafoneoem</b>
 </code></pre>
+
+## Releases and Versions
+
+In the `.spec` file can be found the _version_ and _release_:
+
+```console
+Version:    1.1
+Release:    1
+```
+
+A _version_ of software may change should new programs be added, functionality enhanced, APIs changed or any such enhancement or modification of its behaviour occur.
+
+A _release_ would change (incremented) when there is a change in the way the product is
+packaged or delivered (for example, post installation scripts) or its
+dependencies change. The release would be reset to 1 when a new _version_ of
+the software is built. It is, in effect, the number of times this version of the software was released. 
+
+
+### Version Changes
+
+When you wish to freeze a version of the software and commit the changes, do
+the following:
+
+#### Change the .spec File 
+
+Change the Version to that which is desired, for example, to create version
+1.2:
+
+<pre class=console><code>Version:    <b>1.2</b>
+Release:    1
+</code></pre>
+
+#### Change the configure.ac file
+
+The corresponding version must also be changed in the arguments to the
+`AC_INIT()` macro in the `configure.ac` file:
+
+<pre class=console><code>AC_INIT([vodafoneoem],[<b>1.2</b>],[bugs@oracle.com])
+</code></pre>
+
 
 
 ### Build Steps
