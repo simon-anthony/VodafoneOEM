@@ -167,9 +167,24 @@ Release:    1
 The corresponding version must also be changed in the arguments to the
 `AC_INIT()` macro in the `configure.ac` file:
 
-<pre class=console><code>AC_INIT([vodafoneoem],[<b>1.2</b>],[bugs@oracle.com])
+<pre class=console><code>AC_INIT([vodafoneoem],[<b>1.2</b>],[bugs@vodafone.com])
 </code></pre>
 
+##### Ensure that all changes are committed
+
+Check commits:
+<pre class=console><code>$ <b>git status -u</b>
+</code></pre>
+
+If ncessary, commit:
+<pre class=console><code>$ <b>git commit -a -m "Version 1.2 Release 1"</b> 
+</code></pre>
+
+<pre class=console><code>$ <b>git push -u origin main"</b> 
+</code></pre>
+
+#### Tag the commit with the Version and Rlease
+<pre class=console><code>$ <b>git tag 1.2-1"</b> 
 
 
 ### Build Steps
