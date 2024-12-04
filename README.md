@@ -108,7 +108,6 @@ optional arguments:
 
 #### Further examples
 Having set the following:
-
 <pre><code>
 user=sysman
 oms=https://oms.example.com:7803
@@ -119,19 +118,19 @@ We can then performa tasks like:
 
 #### Create a Gold Agent Image
 <pre class=console><code>$ <b>emrun -- create_gold_agent_image -u $user -o $oms -p $password \
-	-s oel.example.com \
-	-v AGENT_RU24 \
+    -s oel.example.com \
+    -v AGENT_RU24 \
     -d "Base Agent Image for RU24" \
     -i DB_MONITORING</b>
 </code></pre>
 
 #### Add a Number of Hosts
 <pre class=console><code>$ <b>emrun -- submit_add_host -u $user -o $oms -p $password \
-	-d example.com \
+-d example.com \
     -i DB_MONITORING \
-	-c 'NC-ORACLE' \
-	-w \
-	oim rhl mon</b>
+    -c 'NC-ORACLE' \
+    -w \
+    oim rhl mon</b>
 </code></pre>
 
 ## Developing
@@ -149,17 +148,21 @@ From Linux these can be installe with yum/dnf:
 * libtool
 
 ## Building RPMS from the Source Tree
-Set `%_topdir` in the file `$HOME/.rpmmacros`
+Set `%\_topdir` in the file `$HOME/.rpmmacros`. For example:
 
-<pre><code>topdir=`eval echo \`sed -n '
-    /^%_topdir/ {
-        s;%_topdir[     ]*;;
-        s;%{getenv:HOME};$HOME;
-        p
-    }' ~/.rpmmacros\``
-
-echo topdir is $topdir
+<pre><code>
+%\_topdir %{getenv:HOME}/.rpm
 </code></pre>
+
+Next run the build script:
+
+* `./build.sh`
+
+The RPM file will be created at:
+
+* `%\_topdir/RPMS/noarch/vodafoneoem-1.1-1.el9.noarch.rpm`
+
+Which will complete the following steps for you:
 
 Create the build directories:
 
@@ -193,6 +196,10 @@ And we also need a copy the spec file to the `SPECS` directory:
 Finally, build the package:
 
 * `rpmbuild -bb $topdir/SPECS/vodafoneoem.spec`
+
+The RPM file will be created at:
+
+* `%\_topdir/RPMS/noarch/vodafoneoem-1.1-1.el9.noarch.rpm`
 
 
 ## Authors
