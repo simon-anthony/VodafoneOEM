@@ -7,12 +7,11 @@ Summary:	Utilities for OEM Management
 
 Group:		Productivity/Database/Tools
 License:	GPL
-URL:		www.oracle.com
+URL:		www.vodafone.com
 Vendor:		SA
 Packager:	Simon Anthony
 Source0:	%{name}-%{version}.tar.gz
 
-#Requires: jq, libnotify, bash, bind-utils
 Requires: bash, python3
 BuildRequires: bash, python3, autoconf, automake
 
