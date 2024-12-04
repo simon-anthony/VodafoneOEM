@@ -107,9 +107,9 @@ From Linux these can be installe with yum/dnf:
 * libtool
 
 ## Building RPMS from the Source Tree
-Set `%\_topdir` in the file `$HOME/.rpmmacros`. For example:
+Set `%_topdir` in the file `$HOME/.rpmmacros`. For example:
 
-<pre><code>%\_topdir %{getenv:HOME}/.rpm
+<pre><code>%__topdir %{getenv:HOME}/.rpm
 </code></pre>
 
 Next run the build script:
