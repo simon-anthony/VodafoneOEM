@@ -1,5 +1,6 @@
 import sys
 import argparse
+import re 
 
 parser = argparse.ArgumentParser(
     prog='promote_discovered_targets',
@@ -14,15 +15,22 @@ parser.add_argument('-m', '--monitor_pw', help='monitor password')
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
-group.add_argument('-t', '--targets', action='store_true', help='<target1:target2:...] Add only targets listed')
+group.add_argument('-t', '--target', nargs='+', help='Add only targets listed')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
 
-print('Connecting to: ' + args.oms)
+if args.target:
+    # extract the target names and create a ';' separated string from the list
+    targetparms = ';'.join(i + ':oracle_database' for i in args.target)
+elif args.all:
+    targetparms = "oracle_database"
+else:
+    print 'Missing required arguments (-target or -all)'
+    parser.print_help()
+    sys.exit(2)
 
-alltargets=False
-targetparms=0
+print('Connecting to: ' + args.oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', args.oms)
@@ -31,32 +39,30 @@ login(username=args.username, password=args.password)
 
 cred_str = "UserName:dbsnmp;password:" + args.monitor_pw + ";Role:Normal"
 
-if args.targets:
-    targetparms = targetparms.replace(":",":oracle_database;") + ":oracle_database"
-    target_array = get_targets(unmanaged=True, properties=True, targets=targetparms).out()['data']
-elif args.all:
-    target_array = get_targets(targets="oracle_database", unmanaged=True,properties=True ).out()['data']
-else:
-    print 'Missing required arguments (-targets or -all)'
-    parser.print_help()
-    sys.exit()
+# get_targets() returns:
+# [{'Host Info': 'host:oel.example.com;timezone_region:Europe/London', 'Target Type': 'oracle_database', 'Properties': 'Protocol:TCP;SID:FREE;MachineName:oel.example.com;OracleHome:/opt/oracle/product/23ai/dbhomeFree;Port:1521', 'Associations': '', 'Target Name': 'FREE'}]
 
-if len(target_array) > 0:
-    for target in target_array:
-        print 'Adding target ' + target['Target Name'] + '...',
+target_array = get_targets(unmanaged=True, properties=True, targets=targetparms).out()['data']
 
-        for host in str.split(target['Host Info'],";"):
-            if host.split(":")[0] == "host":
-                print host.split(":")[1]
-        try:
-            #res1 = add_target(type='oracle_database', name=target['Target Name'], host=host.split(":")[1], credentials=cred_str, properties=target['Properties'])
-            #host=host.split(":")[1]
-            #properties=target['Properties']
-            print target['Target Name'] + " " + host.split(":")[1] + " " + target['Properties']
-            print 'Succeeded'
-        except VerbExecutionError, e:
-            print 'Failed'
-            print e.error()
-            print 'Exit code:'+str(e.exit_code())
-else:
+if len(target_array) == 0:
     print 'INFO: There are no targets to be promoted. Please verify the targets in Enterprise Manager webpages.'
+    sys.exit(1)
+
+for target in target_array:
+    # The target['Host Info'] looks like host:oel.example.com;timezone_region:Europe/London
+    m = re.match(r"host:(?P<host>\S+);.*", target['Host Info'])
+    if m:
+        host = m.group('host')
+    else:
+        print 'Cannot extract hostname from Host Info'
+        sys.exit(1)
+
+    try:
+        print 'Adding target ' + target['Target Name'] + ' on ' + host
+        #res1 = add_target(type='oracle_database', name=target['Target Name'], host=host, credentials=cred_str, properties=target['Properties'])
+        print target['Target Name'] + " " + host + " " + target['Properties']
+        print 'Succeeded'
+    except VerbExecutionError, e:
+        print 'Failed'
+        print e.error()
+        sys.exit(e.exit_code())

@@ -1,96 +1,104 @@
 from emcli.exception import VerbExecutionError
 import sys
-from vf import *
+#from vf import *
 import datetime as dt
+import re 
+import argparse
+import csv
+
+parser = argparse.ArgumentParser(
+    prog='promote_cluster',
+    description='Promote cluster',
+    epilog='Text at the bottom of help')
+
+# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
+parser.add_argument('-o', '--oms', help='URL')
+parser.add_argument('-u', '--username', default='SYSMAN', help='sysman user')
+parser.add_argument('-p', '--password', required=True, help='sysman password')
+parser.add_argument('-m', '--monitor_pw', help='monitor password')
+parser.add_argument('-r', '--region', required=True, choices=['milan', 'dublin', 'rating'])
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
+group.add_argument('-t', '--target', nargs='+', help='Add only targets (hostnames) listed')
+
+# Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
+args = parser.parse_args(sys.argv)
+
+if args.target:
+    # extract the target names and create a ';' separated string from the list
+    targetparms = ';'.join(i + ':oracle_database' for i in args.target)
+elif args.all:
+    targetparms="cluster"
+else:
+    print 'Missing required arguments (-targets or -all)'
+    parser.print_help()
+    sys.exit(2)
+
+print('Connecting to: ' + args.oms)
+
+# Set Connection properties and logon
+set_client_property('EMCLI_OMS_URL', args.oms)
+set_client_property('EMCLI_TRUSTALL', 'true')
+login(username=args.username, password=args.password)
  
-alltargets=False
-targetparms=0
 today=dt.datetime.now().strftime("%Y%m%d")
  
-def helpUsage():
-   print 'Usage: promote_discovered_dbs.py [-help]'
-   print '[-all] Add all discovered Single Instance DBs'
-   print '[-targets <target1:target2:...] Add only targets listed'
-   sys.exit()
-regions=['dublin', 'milan', 'rating']
-oem_urls= { 'dublin': 'https://vg00071de.snc5003.ie1ds014001oci1.oraclevcn.com:7799/em', 'milan': 'https://vg00011de.snc5003.it1ds014001oci1.oraclevcn.com:7799/em', 'rating' : 'https://vg00041de.snc5003.de1ds014001oci1.oraclevcn.com:7803/em'}
+oem_urls = { 'dublin': 'https://vg00071de.snc5003.ie1ds014001oci1.oraclevcn.com:7799/em', 'milan': 'https://vg00011de.snc5003.it1ds014001oci1.oraclevcn.com:7799/em', 'rating' : 'https://vg00041de.snc5003.de1ds014001oci1.oraclevcn.com:7803/em'}
  
- 
- 
-for i in range(len(sys.argv)):
-   if sys.argv[i] in ("-help"):
-      helpUsage()
-   elif sys.argv[i] in ("-targets"):
-      if i+1 < len(sys.argv):
-         targetparms = sys.argv[i+1]
-      else:
-         print 'Usage: promote_discovered_dbs.py [-help]'
-         print '[-all] Add all discovered Single Instance DBs'
-         print '[-targets <target1:target2:...] Add only targets listed'
-         sys.exit()
-   elif sys.argv[i] in ("-reg"):
-      if i+1 < len(sys.argv):
-         region = sys.argv[i+1]
-   elif sys.argv[i] in ("-all"):
-           alltargets = True
-regiondir="/opt/oracle/report/"  + region + "/"
-cluster_file=regiondir + region + "_hosts_by_cluster_" + today +".csv"
 print("Info: adding clusters")
-# Make sure user did not specify target list and all targets.
-if alltargets<>0 and targetparms <>0:
-    print 'Cannot specify target list and all switch'
-    print 'Usage: promote_discovered_dbs.py -reg <region> -username <username> -password <password> -monitor_pw <password>'
-    print '[-all] Add all discovered SI Databses'
-    print '[-targets <target1:target2:...] Add only list targets'
-    print '[-help]'
-    sys.exit()
  
 #Setup EMCLI environment
-set_url(region)
+#set_url(region)
  
 #Connect as dba_build
-conn_vf_dba_build()
- 
-if targetparms <> 0:
-   targetparms = targetparms.replace(":",":oracle_database;")+":oracle_database"
-   target_array = get_targets(unmanaged=True,properties=True,targets=targetparms).out()['data']
-elif alltargets:
-   target_array = get_targets(targets="cluster",unmanaged=True,properties=True ).out()['data']
-else:
-   print 'Missing required arguments (-targets or -all)'
-   helpUsage()
- 
-if len(target_array) > 0:
-   for target in target_array:
-      print 'name=' + target['Target Name']
-      properties=target['Properties']
-      for host in str.split(target['Host Info'],";"):
-         if host.split(":")[0] == "host":
-            print 'Host=' + host.split(":")[1]
-            myhost=host.split(":")[1]
-      print 'Properties=' + properties,
-      print 'name=' + target['Target Name'] + ',host=' + host.split(":")[1] + ',properties=' + target['Properties']
-      with open(cluster_file) as fh:
-         for line in fh:
-            if myhost in line:
-               my_list=line.split(",")
-               while ("" in my_list):
-                  my_list.remove("")
-               s=':host;'
-               myinstances=s.join(my_list).strip().rstrip(';')
-               #print 'instances=' + myinstances[:-1]
-               #print 'instances=' + myinstances.rstrip(';')
-               print 'instances=' + myinstances
- 
-      try:
-         #res1 = add_target(type='cluster',name=target['Target Name'],host=host.split(":")[1],properties=target['Properties'])
-         res1 = add_target(name=target['Target Name'],type='cluster',host=myhost,monitor_mode='1',properties=target['Properties'],instances=myinstances)
-         print 'Succeeded'
-      except VerbExecutionError, e:
-         print 'Failed'
-         print e.error()
-         print 'Exit code:'+str(e.exit_code())
-else:
-   print 'INFO: There are no targets to be promoted. Please verify the targets in Enterprise Manager webpages.'
+#conn_vf_dba_build()
 
+cluster_file = '/tmp/cluster.csv'
 
+def get_assocs(file, region, target):
+    """Retrieve associations from given a region and target"""
+    assocs = []
+    with open(file) as csvfile:
+        reader = csv.DictReader(csvfile, dialect='excel')
+        for row in reader:
+            if row['REGION'] == region and row['TARGET_NAME'] == target:
+                assocs.append(row['ASSOC_TARGET_NAME'])
+    return assocs
+
+target_array = get_targets(unmanaged=True, properties=True, targets=targetparms).out()['data']
+
+if len(target_array) == 0:
+    print 'INFO: There are no targets to be promoted. Please verify the targets in Enterprise Manager webpages.'
+    exit(1)
+
+for target in target_array:
+    cluster = target['Target Name']
+
+    # The target['Host Info'] looks like host:oel.example.com;timezone_region:Europe/London
+    m = re.match(r"host:(?P<host>\S+);.*", target['Host Info'])
+    if m:
+        host = m.group('host')
+    else:
+        print 'Cannot extract hostname from Host Info'
+        sys.exit(1)
+
+    properties = target['Properties']
+
+    # Create ';' seprated string of instances
+    instances = ';'.join(get_assocs(cluster_file, args.region, cluster))
+
+    try:
+        print 'Adding target cluster ' + cluster + ' for ' + host
+        res = add_target(
+            name=cluster,
+            type='cluster',
+            host=host,
+            monitor_mode='1',
+            properties=properties,
+            instances=instances)
+        print 'Succeeded'
+    except VerbExecutionError, e:
+        print 'Failed'
+        print e.error()
+        sys.exit(e.exit_code())

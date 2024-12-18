@@ -32,7 +32,7 @@ except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-# extract the target names and create a ';' separated string from the list
+# extract the target names and create a ',' separated string from the list
 target_names = ','.join([i['Target Name'] for i in members if i['Target Type'] == 'oracle_emd'])
 
 try:

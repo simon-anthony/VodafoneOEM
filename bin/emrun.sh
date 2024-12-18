@@ -22,7 +22,7 @@ usage() {
     exit 2
 }
 
-TEMP=`getopt -o ls:vh --long sid,verbose,help \
+TEMP=`getopt -o ls:vh --long list,sid,verbose,help \
      -n "$prog" -- "$@"`
 
 [ $? != 0 ] && { usage; exit 1; }

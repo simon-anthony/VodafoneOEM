@@ -24,3 +24,4 @@ ltversion.m4
 m4
 py-compile
 *.sav
+__pycache__
