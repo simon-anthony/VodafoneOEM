@@ -18,9 +18,11 @@ SUFFIXES = .sh
 	@chmod +x $@
 
 bin_SCRIPTS = \
-	emrun
+	emrun \
+	unlock-keyring
 
 CLEANFILES = $(bin_SCRIPTS)
 
 EXTRA_DIST = \
-	emrun.sh
+	emrun.sh \
+	unlock-keyring.sh 

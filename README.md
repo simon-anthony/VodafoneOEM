@@ -1,6 +1,7 @@
 # OEM Deployment Tools 
 
 Tools to support OEM activities.
+python3-keyring
 
 
 ## Overview
@@ -105,6 +106,7 @@ From Linux these can be installe with yum/dnf:
 * autoconf
 * automake
 * libtool
+* rpm-build
 
 ## Building RPMS from the Source Tree
 Set `%_topdir` in the file `$HOME/.rpmmacros`. For example:

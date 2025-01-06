@@ -2,6 +2,7 @@
 
 PATH=/usr/bin:BINDIR export PATH
 prog=`basename $0 .sh`
+export PROG=$prog
 
 export PYTHONPATH=LIBEXECDIR/PACKAGE
 # EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to
@@ -16,20 +17,23 @@ usage() {
 		OPTION:
 		  -l, --list                 List modules
 		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
+		  -k, --keyring              Create keyring
+		  -f, --force                Force overwite of existing keyring
+		  -i, --initialise           Initialise for use
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 	!
     exit 2
 }
 
-TEMP=`getopt -o ls:vh --long list,sid,verbose,help \
+TEMP=`getopt -o ls:kifvh --long list,sid,keyring,initialise,force,verbose,help \
      -n "$prog" -- "$@"`
 
 [ $? != 0 ] && { usage; exit 1; }
 
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
-typeset lflg= sflg= hflg= vflg= errflg=  
+typeset lflg= sflg= kflg= fflg= iflg= vflg= hflg= errflg=  
 
 while true
 do
@@ -41,6 +45,17 @@ do
 		sflg=y
 		sid=$2
 		shift 2 ;;
+	-k|--keyring)
+		kflg=y
+		[ $iflg ] && errflg
+		shift ;;
+	-f|--force)
+		fflg=y
+		shift ;;
+	-i|--initialise)
+		iflg=y
+		[ $kflg ] && errflg
+		shift ;;
     -v|--verbose)
         vflg=y
         shift ;;
@@ -66,9 +81,76 @@ then
 	exit
 fi
 
-[ $# -eq 0 ] && errflg=y
+[ $# -eq 0 -a -z "$kflg" ] && errflg=y
+[ "$fflg" -a -z "$kflg" ] && errflg=y	# -f requires -k
+
+#[ $errflg ] && usage
+
+# Check keyring and passwords
+
+if [ $kflg ]
+then
+	[ $fflg ] && rm -rf $HOME/.local/share/keyrings
+	[ -r $HOME/.local/share/keyrings/login.keyring ] && {
+		echo "$prog: login keyring exists, re-run with -f to overwrite" >&2
+		exit 1
+	}
+	if [ $DBUS_SESSION_BUS_ADDRESS ]
+	then 
+		exec BINDIR/unlock-keyring
+	else
+		exec dbus-run-session -- BINDIR/unlock-keyring
+	fi
+fi
+
+if ! [ -r $HOME/.local/share/keyrings/login.keyring ]
+then
+	echo "$prog: login keyring does not exist, re-run with -k" >&2
+	exit 1
+fi
+
+keyfile=$HOME/.config/emcli/username.key 
+mkdir -p `dirname $keyfile`
+
+if [ ! -r $keyfile ]	# Create a key
+then
+	if [ $iflg ]
+	then
+		echo "$prog: creating key" >&2
+		key=`python <<-!
+			import secrets
+
+			secret = secrets.token_hex(nbytes=16)
+			print(secret)
+		!`
+		echo -n "$key" > $keyfile 
+		exit
+	else
+		echo "$prog: re-run with -i to initialise for use" >&2
+		exit 1
+	fi
+fi
+export EMCLI_USERNAME_KEY=`cat $keyfile`
 
 [ $errflg ] && usage
+exit
+
+# get.py
+function get_credentials {
+	python <<-!
+		import keyring
+		import os
+
+		EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
+		service_id = 'emcli'
+
+		username = keyring.get_password(service_id, EMCLI_USERNAME_KEY)
+		password = keyring.get_password(service_id, username)
+
+		print('Username: ' + username)
+		print('Password: ' + password)
+	!
+}
 
 file=`basename $1 .py`
 shift

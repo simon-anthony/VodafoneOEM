@@ -11,4 +11,6 @@
 # pkgpyexec_PYTHON = # =>  /usr/local/lib64/python3.9/site-packages/vodafoneoem
 
 pkgpyexec_PYTHON = \
-	password_handler.py
+	creds.py \
+	core.py \
+	__init__.py
