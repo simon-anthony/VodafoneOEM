@@ -4,10 +4,11 @@ PATH=/usr/bin:BINDIR export PATH
 prog=`basename $0 .sh`
 export PROG=$prog
 
-export PYTHONPATH=LIBEXECDIR/PACKAGE
+export MODULEDIR=LIBEXECDIR/PACKAGE
+export PYTHONPATH=LIBDIR/pythonPYTHON_VERSION
 # EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to
 # work...
-export EMCLI_PYTHONPATH=LIBDIR/pythonPYTHON_VERSION/site-packages/PACKAGE:$EMCLI_PYTHONPATH
+export EMCLI_PYTHONPATH=LIBDIR/pythonPYTHON_VERSION
 
 prog=`basename $0 .sh`
 
@@ -133,24 +134,6 @@ fi
 export EMCLI_USERNAME_KEY=`cat $keyfile`
 
 [ $errflg ] && usage
-exit
-
-# get.py
-function get_credentials {
-	python <<-!
-		import keyring
-		import os
-
-		EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
-		service_id = 'emcli'
-
-		username = keyring.get_password(service_id, EMCLI_USERNAME_KEY)
-		password = keyring.get_password(service_id, username)
-
-		print('Username: ' + username)
-		print('Password: ' + password)
-	!
-}
 
 file=`basename $1 .py`
 shift
@@ -181,12 +164,11 @@ then
 	exit 1
 	# $ORACLE_HOME/bin/emcliext/__pycache__ for compiled stuff
 fi
-EMCLI_PYTHONPATH=$ORACLE_HOME/bin/emcliext:$EMCLI_PYTHONPATH
 
-if [ ! -r $PYTHONPATH/$file.py ] 
+if [ ! -r $MODULEDIR/$file.py ] 
 then
 	echo "$prog: cannot find module '$file'" >&2
 	exit 1
 fi
 
-emcli @$PYTHONPATH/$file.py $*
+emcli @$MODULEDIR/$file.py $*

@@ -1,15 +1,17 @@
 import sys
 import argparse
+import vodafoneoem
+import os
 
 parser = argparse.ArgumentParser(
     prog='get_targets',
-    description='Retrieve targets od specified type',
+    description='Retrieve targets of specified type',
     epilog='Text at the bottom of help')
 
 # nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
 parser.add_argument('-o', '--oms', help='URL')
-parser.add_argument('-u', '--username', default='SYSMAN', help='sysman user')
-parser.add_argument('-p', '--password', required=True, help='sysman password')
+# parser.add_argument('-u', '--username', default='SYSMAN', help='sysman user')
+# parser.add_argument('-p', '--password', required=True, help='sysman password')
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('--host', action='store_true', help='Show agent target types (default)')
@@ -26,7 +28,14 @@ platform=226    # default, probably no other platforms than Linux
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', args.oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
-login(username=args.username, password=args.password)
+
+EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
+
+mycreds = vodafoneoem.CredsHandler(EMCLI_USERNAME_KEY)
+username = mycreds.userName()
+password = mycreds.getPassword(username)
+
+login(username=username, password=password)
 
 # target_type can be oracle_emd, host, oracle_database etc....
 target_type = 'host'

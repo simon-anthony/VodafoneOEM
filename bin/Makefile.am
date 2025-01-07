@@ -19,10 +19,12 @@ SUFFIXES = .sh
 
 bin_SCRIPTS = \
 	emrun \
-	unlock-keyring
+	unlock-keyring \
+	getcreds
 
 CLEANFILES = $(bin_SCRIPTS)
 
 EXTRA_DIST = \
 	emrun.sh \
-	unlock-keyring.sh 
+	unlock-keyring.sh \
+	getcreds.sh
