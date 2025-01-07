@@ -126,7 +126,7 @@ We can then performa tasks like:
 
 #### Add a Number of Hosts
 <pre class=console><code>$ <b>emrun -- submit_add_host -o $oms \
--d example.com \
+    -d example.com \
     -i DB_MONITORING \
     -c 'NC-ORACLE' \
     -w \
