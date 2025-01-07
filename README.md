@@ -137,7 +137,9 @@ We can then performa tasks like:
 
 Additional modules using EMCLI Jython routines can be added to the package:
 
-The basic structure is:
+### Writing a Module
+Suppose we create `mymodule.py` in the `libexec` subdirectory. This modules
+has the basic structure as follows.
 
 #### Import the Modules/Packages we will use
 ```Python
@@ -178,7 +180,7 @@ login(username=creds['username'], password=creds['password'])
 ```
 
 #### Invoke the EMCLI verb
-Here we perform an additional processing required before or after inocation of
+Here we perform any additional processing required before or after invocation of
 the EMCLI verb. For example, for the verb *get_targets()*:
 
 ```Python
@@ -199,6 +201,9 @@ except emcli.exception.VerbExecutionError, e:
 for target in targets.out()['data']:
     print target['Target Name']
 ```
+
+### Add to Payload
+We then add `mymodule.py` to the *dist_tools_DATA* variable in `Makefile.am`.
 
 ### Prerequisites
 
