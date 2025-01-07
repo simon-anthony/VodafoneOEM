@@ -170,9 +170,9 @@ set_client_property('EMCLI_OMS_URL', args.oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 ```
 
-#### Retrieve the credential dict and login
+#### Retrieve the credentials and login
 ```Python
-creds = getcreds_legacy()
+creds = getcreds_legacy() # returns a dictionary object
 
 login(username=creds['username'], password=creds['password'])
 ```
