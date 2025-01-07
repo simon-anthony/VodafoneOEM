@@ -2,7 +2,7 @@
 
 # This script is not intended to be run directly by the user
 
-[ $DBUS_SESSION_BUS_ADDRESS ] || { echo "DBUS_SESSION_BUS_ADDRESS not set" >&2; exit 1; }
+[ $DBUS_SESSION_BUS_ADDRESS ] || { echo "$PROG: DBUS_SESSION_BUS_ADDRESS not set" >&2; exit 1; }
 
 read -rsp "Enter login password:" password
 echo

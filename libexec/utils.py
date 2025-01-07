@@ -1,6 +1,8 @@
 import subprocess
 import re 
 
+class CredentialRetrieval(Exception): pass
+
 def getcreds():
     """Return username and password in a dict"""
     """ creds = getcreds() """
@@ -15,7 +17,8 @@ def getcreds():
         return { 'username': m.group('username'), 'password': m.group('password') }
     else:
         print('Cannot extract username/password from output')
-        sys.exit(1)
+        raise CredentialRetrieval()
+        #sys.exit(1)
 
 # for old pythons...
 def getcreds_legacy():
@@ -27,4 +30,5 @@ def getcreds_legacy():
         return { 'username': m.group('username'), 'password': m.group('password') }
     else:
         print('Cannot extract username/password from output')
-        sys.exit(1)
+        raise CredentialRetrieval()
+        #sys.exit(1)

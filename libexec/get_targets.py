@@ -1,5 +1,6 @@
 import sys
 import argparse
+from utils import getcreds_legacy
 
 parser = argparse.ArgumentParser(
     prog='get_targets',
@@ -25,11 +26,7 @@ platform=226    # default, probably no other platforms than Linux
 set_client_property('EMCLI_OMS_URL', args.oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 
-try:
-    creds = getcreds_legacy()
-except e:
-    print e.error()
-    sys.exit(1)
+creds = getcreds_legacy()
 
 login(username=creds['username'], password=creds['password'])
 

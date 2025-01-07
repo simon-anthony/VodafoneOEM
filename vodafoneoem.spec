@@ -12,7 +12,7 @@ Vendor:		SA
 Packager:	Simon Anthony
 Source0:	%{name}-%{version}.tar.gz
 
-Requires: bash, python3
+Requires: bash, python3, python3-keyring, gnome-keyring, gnome-keyring-pam
 BuildRequires: bash, python3, autoconf, automake
 
 BuildArch: noarch

@@ -14,20 +14,25 @@ prog=`basename $0 .sh`
 
 usage() {
     cat >&2 <<-!
-		usage: $prog [OPTION] -- <module> [-h|--help] [<args>]
+		usage: $prog [OPTION] 
 		OPTION:
-		  -l, --list                 List modules
-		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
+		  -l, --list                 List <module>s
 		  -k, --keyring              Create keyring
 		  -f, --force                Force overwite of existing keyring
-		  -i, --initialise           Initialise for use
+		  -i, --initialise           Initialise for use by creating key token
+		  -u, --username=NAME        Set username (and enter password) for OMS
+		  -v, --verbose              Verbose 
+		  -?, --help                 Give this help list
+		usage: $prog [OPTION] -- <module> [-h|--help] [<args>]
+		OPTION:
+		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 	!
     exit 2
 }
 
-TEMP=`getopt -o ls:kifvh --long list,sid,keyring,initialise,force,verbose,help \
+TEMP=`getopt -o ls:kiu:fvh --long list,sid,keyring,initialise,username,force,verbose,help \
      -n "$prog" -- "$@"`
 
 [ $? != 0 ] && { usage; exit 1; }
@@ -48,15 +53,20 @@ do
 		shift 2 ;;
 	-k|--keyring)
 		kflg=y
-		[ $iflg ] && errflg
+		[ "$iflg" -o "$uflg"] && errflg
 		shift ;;
 	-f|--force)
 		fflg=y
 		shift ;;
 	-i|--initialise)
 		iflg=y
-		[ $kflg ] && errflg
+		[ "$kflg" -o "$uflg" ] && errflg
 		shift ;;
+	-u|--username)
+		uflg=y
+		[ "$kflg" -o "$iflg" ] && errflg
+		username=$2
+		shift 2 ;;
     -v|--verbose)
         vflg=y
         shift ;;
@@ -82,7 +92,8 @@ then
 	exit
 fi
 
-[ $# -eq 0 -a -z "$kflg" ] && errflg=y
+#[ $# -eq 0 -a -z "$kflg" ] && errflg=y
+[ $# -eq 0 -a \( -z "$kflg" -a -z "$uflg" -a -z "$iflg" \) ] && errflg=y
 [ "$fflg" -a -z "$kflg" ] && errflg=y	# -f requires -k
 
 #[ $errflg ] && usage
@@ -106,6 +117,7 @@ fi
 
 if ! [ -r $HOME/.local/share/keyrings/login.keyring ]
 then
+	# Keys are in $HOME/.local/share/keyrings/user.keystore 
 	echo "$prog: login keyring does not exist, re-run with -k" >&2
 	exit 1
 fi
@@ -135,6 +147,39 @@ export EMCLI_USERNAME_KEY=`cat $keyfile`
 
 [ $errflg ] && usage
 
+if [ $uflg ]
+then
+	[ $DBUS_SESSION_BUS_ADDRESS ] || { echo "$PROG: DBUS_SESSION_BUS_ADDRESS not set" >&2; exit 1; }
+
+	if python <<-!
+		import keyring
+		import os
+		import getpass
+		import sys
+
+		username = '$username'
+		password =  getpass.getpass(prompt='Enter password for ' + username + ': ')
+
+		EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
+
+		service_id = 'emcli'
+		try:
+		    keyring.set_password(service_id, username, password)
+		    keyring.set_password(service_id, EMCLI_USERNAME_KEY, username)
+		except:
+		    sys.exit(1)
+
+		sys.exit(0)
+	!
+	then
+		echo "$prog: username/password set"
+		exit
+	else
+		echo "$prog: failed to set username/password, check keyring"
+		exit 1
+	fi
+fi
+
 file=`basename $1 .py`
 shift
 
@@ -162,7 +207,6 @@ if [ ! -d $ORACLE_HOME/bin/emcliext ]
 then
 	echo "$prog: directory $ORACLE_HOME/bin/emcliext does not exist" >&2
 	exit 1
-	# $ORACLE_HOME/bin/emcliext/__pycache__ for compiled stuff
 fi
 
 if [ ! -r $MODULEDIR/$file.py ] 

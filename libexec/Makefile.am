@@ -10,4 +10,5 @@ dist_tools_DATA = \
 	promote_discovered_targets.py \
 	promote_gold_agent_image.py \
 	submit_add_host.py \
-	update_group_of_agents.py
+	update_group_of_agents.py \
+	utils.py
