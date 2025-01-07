@@ -8,10 +8,14 @@ Tools to support OEM activities.
 This package aims to simplify deployment, execution and developement of Python modules and
 libraries for use in adminsterting Oracle Enterprise Manager activities.
 
+The package provides a general purpose harness, *emrun*, to invoke programs from our catalogue. It also sets up an execution environment that includes password-less login to emcli by exploting the gnome-keyring.
+
 ### Passwordless Login
 
 Use is made of the gnome-keyring to afford the saving of credentials used for
 OMS login and subsequent password-less invocation.
+
+#### Setup
 
 When not in a desktop environment (for example ssh) use of the keyring requires the following in
 the PAM configuration:
@@ -39,6 +43,8 @@ session    include      password-auth
 session    include      postlogin
 </code></pre>
 
+#### Creating the Keyring
+
 If the login keyring does not exist it can be created:
 
 <pre class=console><code>$ <b>emrun -k</b>
@@ -47,11 +53,31 @@ Re-enter login password: <b>*******</b>
 </code></pre>
 
 The password entered must match that used to login when initialising the
-keyring for the first time (no check is made).
+keyring for the first time (no check is made). Password changes will
+subsequently be synchronised through PAM.
+
+#### Initialising a Key Token 
+
+We store our username/password combination against a token in the keystore. To
+initialise this token and save it we
+
+<pre class=console><code>$ <b>emrun -i</b>
+emrun: creating key
+</code></pre>
+
+#### Saving a Username and Password
+
+Finally, we are ready to save the username and password to be used to login to
+OMS. This step can be repeated at any time should this combination change.
+
+<pre class=console><code>$ <b>emrun -u </b><i>username</i>
+Enter password for <i>username</i>: <b>********</b>
+</code></pre>
+
 
 ### Example Use
 
-We use a wrapper, *emrun*, to invoke programs from our catalogue. To list the modules
+The program, *emrun*, to invoke programs from our catalogue. To list the modules
 installed:
 
 #### List all installed modules

@@ -129,7 +129,7 @@ if [ ! -r $keyfile ]	# Create a key
 then
 	if [ $iflg ]
 	then
-		echo "$prog: creating key" >&2
+		echo "$prog: creating key" 
 		key=`python <<-!
 			import secrets
 
