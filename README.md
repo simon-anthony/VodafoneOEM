@@ -1,7 +1,6 @@
 # OEM Deployment Tools 
 
 Tools to support OEM activities.
-python3-keyring
 
 
 ## Overview
@@ -9,7 +8,48 @@ python3-keyring
 This package aims to simplify deployment, execution and developement of Python modules and
 libraries for use in adminsterting Oracle Enterprise Manager activities.
 
-### Examples
+### Passwordless Login
+
+Use is made of the gnome-keyring to afford the saving of credentials used for
+OMS login and subsequent password-less invocation.
+
+When not in a desktop environment (for example ssh) use of the keyring requires the following in
+the PAM configuration:
+
+<pre class=console><code>$ <b>cat /etc/pam.d/sshd</b>
+#%PAM-1.0
+auth       substack     password-auth
+<b>auth       optional     pam_gnome_keyring.so</b>
+auth       include      postlogin
+account    required     pam_sepermit.so
+account    required     pam_nologin.so
+account    include      password-auth
+password   include      password-auth
+<b>password   optional     pam_gnome_keyring.so use_authtok</b>
+# pam_selinux.so close should be the first session rule
+session    required     pam_selinux.so close
+session    required     pam_loginuid.so
+# pam_selinux.so open should only be followed by sessions to be executed in the user context
+session    required     pam_selinux.so open env_params
+session    required     pam_namespace.so
+session    optional     pam_keyinit.so force revoke
+session    optional     pam_motd.so
+session    include      password-auth
+<b>session    optional     pam_gnome_keyring.so auto_start</b>
+session    include      postlogin
+</code></pre>
+
+If the login keyring does not exist it can be created:
+
+<pre class=console><code>$ <b>emrun -k</b>
+Enter login password: <b>*******</b>
+Re-enter login password: <b>*******</b>
+</code></pre>
+
+The password entered must match that used to login when initialising the
+keyring for the first time (no check is made).
+
+### Example Use
 
 We use a wrapper, *emrun*, to invoke programs from our catalogue. To list the modules
 installed:
@@ -38,10 +78,6 @@ Update a group of agents
 optional arguments:
   -h, --help            show this help message and exit
   -o OMS, --oms OMS     URL
-  -u USERNAME, --username USERNAME
-                        sysman user
-  -p PASSWORD, --password PASSWORD
-                        sysman password
   -g GROUP, --group GROUP
                         group
   -i IMAGE, --image IMAGE
@@ -59,7 +95,7 @@ password=Naxy7839
 We can then performa tasks like:
 
 #### Create a Gold Agent Image
-<pre class=console><code>$ <b>emrun -- create_gold_agent_image -u $user -o $oms -p $password \
+<pre class=console><code>$ <b>emrun -- create_gold_agent_image -o $oms \
     -s oel.example.com \
     -v AGENT_RU24 \
     -d "Base Agent Image for RU24" \
@@ -67,7 +103,7 @@ We can then performa tasks like:
 </code></pre>
 
 #### Add a Number of Hosts
-<pre class=console><code>$ <b>emrun -- submit_add_host -u $user -o $oms -p $password \
+<pre class=console><code>$ <b>emrun -- submit_add_host -o $oms \
 -d example.com \
     -i DB_MONITORING \
     -c 'NC-ORACLE' \
