@@ -1,7 +1,7 @@
 import subprocess
 import re 
 
-def getcreds(username, password):
+def getcreds1(username, password):
     result = subprocess.run(['/usr/local/bin/getcreds'], stdout=subprocess.PIPE)
 
     m = re.match(r"username:(?P<username>\S+) password:(?P<password>\S+)", result.stdout.decode('utf-8'))
@@ -32,8 +32,24 @@ def getcreds2():
         print('Cannot extract username/password from output')
         sys.exit(1)
 
-creds = getcreds2()
+creds2 = getcreds2()
 
-print('Username: ' + creds['username'])
-print('Password: ' + creds['password'])
+print('Username: ' + creds2['username'])
+print('Password: ' + creds2['password'])
 
+# for old pythons...
+def getcreds3():
+    result = subprocess.Popen(['/usr/local/bin/getcreds'], stdout=subprocess.PIPE).communicate()[0]
+
+    m = re.match(r"username:(?P<username>\S+) password:(?P<password>\S+)", result.decode('utf-8'))
+
+    if m:
+        return { 'username': m.group('username'), 'password': m.group('password') }
+    else:
+        print('Cannot extract username/password from output')
+        sys.exit(1)
+
+creds3 = getcreds3()
+
+print('Username: ' + creds3['username'])
+print('Password: ' + creds3['password'])
