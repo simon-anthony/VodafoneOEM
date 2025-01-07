@@ -2,7 +2,6 @@
 
 Tools to support OEM activities.
 
-
 ## Overview
 
 This package aims to simplify deployment, execution and developement of Python modules and
@@ -74,7 +73,6 @@ OMS. This step can be repeated at any time should this combination change.
 Enter password for <i>username</i>: <b>********</b>
 </code></pre>
 
-
 ### Example Use
 
 The program, *emrun*, to invoke programs from our catalogue. To list the modules
@@ -112,10 +110,8 @@ optional arguments:
 </code></pre>
 
 #### Further examples
-Having set the following:
-<pre><code>user=sysman
-oms=https://oms.example.com:7803
-password=Naxy7839 
+Assuming the following:
+<pre><code>oms=https://oms.example.com:7803
 </code></pre>
 
 We can then performa tasks like:
@@ -137,6 +133,49 @@ We can then performa tasks like:
     oim rhl mon</b>
 </code></pre>
 
+## Adding Modules
+
+Additional modules using EMCLI Jython routines can be added to the package:
+
+The basic structure is:
+
+#### Import the Modules/Packages we will use
+```Python
+import sys
+import argparse
+from utils import getcreds_legacy
+```
+
+#### Parse the argument list in the standard way
+```Python
+parser = argparse.ArgumentParser(
+    prog='get_targets',
+    description='Retrieve targets of specified type',
+    epilog='Text at the bottom of help')
+
+parser.add_argument('-o', '--oms', required=True, help='URL')
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument('--host', action='store_true', help='Show agent target types (default)')
+group.add_argument('--agent', action='store_true', help='Show host target types')
+group.add_argument('--database', action='store_true', help='Show oracle database target types')
+
+# Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
+args = parser.parse_args(sys.argv)
+```
+
+#### Set up the OMS properties
+```Python
+set_client_property('EMCLI_OMS_URL', args.oms)
+set_client_property('EMCLI_TRUSTALL', 'true')
+```
+
+#### Retrieve the credential dict and login
+```Python
+creds = getcreds_legacy()
+
+login(username=creds['username'], password=creds['password'])
+```
 
 ### Prerequisites
 
