@@ -177,6 +177,29 @@ creds = getcreds_legacy() # returns a dictionary object
 login(username=creds['username'], password=creds['password'])
 ```
 
+#### Invoke the EMCLI verb
+Here we perform an additional processing required before or after inocation of
+the EMCLI verb. For example, for the verb *get_targets()*:
+
+```Python
+# target_type can be oracle_emd, host, oracle_database etc....
+target_type = 'host'
+if args.agent:
+    target_type = 'oracle_emd'
+elif args.database:
+    target_type = 'oracle_database'
+
+try:
+    targets = get_targets(targets='%:'+target_type)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+    
+for target in targets.out()['data']:
+    print target['Target Name']
+```
+
 ### Prerequisites
 
 #### Linux Packages
