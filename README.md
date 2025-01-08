@@ -126,7 +126,7 @@ We can then performa tasks like:
 
 #### Add a Number of Hosts
 <pre class=console><code>$ <b>emrun -- submit_add_host -o $oms \
-    -d example.com \
+    d example.com \
     -i DB_MONITORING \
     -c 'NC-ORACLE' \
     -w \
@@ -327,7 +327,7 @@ Check commits:
 <pre class=console><code>$ <b>git status -u</b>
 </code></pre>
 
-If ncessary, commit:
+If necessary, commit:
 <pre class=console><code>$ <b>git commit -a -m "Version 1.2 Release 1"</b> 
 </code></pre>
 

@@ -125,7 +125,7 @@ When we login:
 </code></pre>
 
 You will see a a `gnome-keyring-daemon` login session has been started by the systemd session associated with this account:
-<pre class=console><code>$ <b>ps -wwwfp <i>13615</i></b>
+<pre class=console><code>$ <b>ps -wwwfp </b><i>13615</i>
 UID          PID    PPID  C STIME TTY          TIME CMD
 oracle     <i>13615</i>       1  0 22:05 ?        00:00:00 /usr/bin/gnome-keyring-daemon --daemonize --login
 </code></pre>
@@ -146,13 +146,13 @@ pgrep -flu oracle
 13624 bash
 13714 dbus-broker-lau
 13715 dbus-broker
-<b>13718</b> gnome-keyring-d
+<i>13718</i> gnome-keyring-d
 </code></pre>
 
 And that the open keyring is now initialised (started) for use:
-<pre class=console><code>$ <b>ps -wwwfp <b>13718</b></b>
+<pre class=console><code>$ <b>ps -wwwfp </b><i>13718</i>
 UID          PID    PPID  C STIME TTY          TIME CMD
-oracle     <b>13718</b>   13580  0 22:06 ?        00:00:00 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+oracle     <i>13718</i>   13580  0 22:06 ?        00:00:00 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
 </code></pre>
 
 NB to allow graphical interaction:
