@@ -91,7 +91,7 @@ Password: Nadi7932
 ### SSH
 In the sshd configuration file for PAM ensure that the entries for pam_gnome_keyring.so are present for the auth,  password and session service types as follows:
 
-<pre class=console>p{color:red;}<code>$ <b>cat /etc/pam.d/sshd</b>
+<pre style="background-color: #cfc ;" class=console><code>$ <b>cat /etc/pam.d/sshd</b>
 #%PAM-1.0
 auth       substack     password-auth
 <b>auth       optional     pam_gnome_keyring.so</b>
@@ -124,7 +124,7 @@ When we login:
 13624 bash
 </code></pre>
 
-You will see a a gnome-keyring-daemon login session has been started  by the systemd session associated with this account:
+You will see a a `gnome-keyring-daemon` login session has been started by the systemd session associated with this account:
 <pre class=console><code>$ <b>ps -wwwfp 13615</b>
 UID          PID    PPID  C STIME TTY          TIME CMD
 oracle     13615       1  0 22:05 ?        00:00:00 /usr/bin/gnome-keyring-daemon --daemonize --login
@@ -136,7 +136,7 @@ Username: sysman
 Password: Nadi7932
 </code></pre>
 
-After running the keyring operation we can see an extra gnome-keyring-daemon:
+After running the keyring operation we can see an extra `gnome-keyring-daemon`:
 <pre class=console><code>$ <b>pgrep -flu oracle</b>
 pgrep -flu oracle
 13580 systemd
