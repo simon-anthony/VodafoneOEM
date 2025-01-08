@@ -60,7 +60,7 @@ print('Password: ' + password)
 ```
 
 ## Headless Sessions
-The opening of the keyring is automatic from the Gnome desktop. However, we should be able to do this via an sshd login.
+The opening of the $${\color{red}keyring}$$ is automatic from the Gnome desktop. However, we should be able to do this via an sshd login.
 
 ### Ordinary Login
 First we show a standalone example assuming a login session not from desktop; we shall only have the (current) shell running:
