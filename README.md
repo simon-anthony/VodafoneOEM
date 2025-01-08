@@ -145,7 +145,7 @@ has the basic structure as follows.
 ```Python
 import sys
 import argparse
-from utils import getcreds_legacy
+from utils import getcreds
 ```
 
 #### Parse the argument list in the standard way
@@ -174,7 +174,7 @@ set_client_property('EMCLI_TRUSTALL', 'true')
 
 #### Retrieve the credentials and login
 ```Python
-creds = getcreds_legacy() # returns a dictionary object
+creds = getcreds() # returns a dictionary object
 
 login(username=creds['username'], password=creds['password'])
 ```
