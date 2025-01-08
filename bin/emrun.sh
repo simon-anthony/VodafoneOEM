@@ -13,17 +13,15 @@ prog=`basename $0 .sh`
 
 usage() {
     cat >&2 <<-!
-		usage: $prog [OPTION] 
+		usage: $prog {-l|-k[-f]|-i|-u <username>} [-v]
+		usage: $prog -s <sid> -e [-v]
+		usage: $prog [-s <sid>] [-v] -- <module> [-h|--help] [<args>]
 		OPTION:
 		  -l, --list                 List <module>s
 		  -k, --keyring              Create keyring
 		  -f, --force                Force overwite of existing keyring, requires -k
 		  -i, --initialise           Initialise keystore for use by creating key token
 		  -u, --username=NAME        Set username (and enter password) for OMS in keystore
-		  -v, --verbose              Verbose 
-		  -?, --help                 Give this help list
-		usage: $prog [OPTION] -- <module> [-h|--help] [<args>]
-		OPTION:
 		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
 		  -e, --emcliext             Link extension modules in ORACLE_HOME, requires -s
 		  -v, --verbose              Verbose 
