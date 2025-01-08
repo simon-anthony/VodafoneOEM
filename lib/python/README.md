@@ -91,8 +91,8 @@ Password: Nadi7932
 ### SSH
 `rgb(9, 105, 218)`In the sshd configuration file for PAM ensure that the entries for pam_gnome_keyring.so are present for the auth,  password and session service types as follows:
 
-<style>p{color:red;}</style>
 <pre class=console><code>$ <b>cat /etc/pam.d/sshd</b>
+<style>p{color:red;}</style>
 #%PAM-1.0
 auth       substack     password-auth
 ${\color{red}auth       optional     pam_gnome_keyring.so}$
