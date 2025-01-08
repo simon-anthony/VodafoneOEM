@@ -91,7 +91,7 @@ Password: Nadi7932
 ### SSH
 In the sshd configuration file for PAM ensure that the entries for pam_gnome_keyring.so are present for the auth,  password and session service types as follows:
 
-<pre class=console><code>$ <b>cat /etc/pam.d/sshd</b>
+<pre class=console>$ <b>cat /etc/pam.d/sshd</b>
 #%PAM-1.0
 auth       substack     password-auth
 <b>auth       optional     pam_gnome_keyring.so</b>
@@ -113,7 +113,7 @@ session    optional     pam_motd.so
 session    include      password-auth
 <b>session    optional     pam_gnome_keyring.so auto_start</b>
 session    include      postlogin
-</code></pre>
+</pre>
 
 When we login:
 
