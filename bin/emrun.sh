@@ -88,7 +88,7 @@ then
 			emcli @$i -h | sed -n '1,/^$/ p'
 		done
 	else 
-		ls $PYTHONPATH/*.py | xargs basename -s .py
+		ls $MODULEDIR/*.py | xargs basename -s .py
 	fi
 	exit
 fi
