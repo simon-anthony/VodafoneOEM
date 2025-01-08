@@ -1,9 +1,71 @@
 # Python Packages
 
 ## creds
+This is an interface to the gnome-keyring. It is implemented in the following
+way:
 
-This is an interface to the gnome-keyring.
+### Implementation
+```Python
+import keyring
 
+class CredsHandler:
+    """Retrieve username password from gnome keyring"""
+
+    # EMCLI_USERNAME_KEY is usually the key
+
+    def __init__(self, key):  # Initialize when created
+        self.key = key                  # self is the new object
+        self.service_id = 'emcli'
+
+    def userName(self):
+        return keyring.get_password(self.service_id, self.key)
+
+    def getPassword(self, username):
+        return keyring.get_password(self.service_id, username)
+```
+
+### Use
+In Python programs its use is simply to create an instance of the
+credentials class from which can be accessed the username and password:
+
+```Python
+import vodafoneoem
+import os
+
+EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
+
+mycreds = vodafoneoem.CredsHandler(EMCLI_USERNAME_KEY)
+
+username = mycreds.userName()
+password = mycreds.getPassword(username)
+
+print('username:' + username + ' password:' + password)
+
+```
+
+### Use in EMCLI Jython
+EMCLI Jython is not able to import third-party packages correctly
+(python3-keyring). As a result we must call the credentials handler with an
+external invocation of Python and pass the result back to EMCLI via a wrapper.
+
+The standlone Python program is identical to the example shown[above](#use).
+
+This file is then called as a subprocess and the output parsed:
+
+```Python
+def getcreds():
+    result = subprocess.Popen(['/usr/local/bin/getcreds'], stdout=subprocess.PIPE).communicate()[0]
+
+    m = re.match(r"username:(?P<username>\S+) password:(?P<password>\S+)", result.decode('utf-8'))
+
+    if m:
+        return { 'username': m.group('username'), 'password': m.group('password') }
+    else:
+        print('Cannot extract username/password from output')
+        raise CredentialRetrieval()
+```
+
+### Notes
 The `gnome-keyring-daemon` is a service that stores your passwords and secrets. It is normally started automatically when a user logs into a desktop session.
 
 The `gnome-keyring-daemon` implements the DBus Secret Service API, and you can use tools like seahorse or secret-tool to interact with it.
@@ -25,7 +87,7 @@ keyring.backends.libsecret.Keyring (priority: 4.8)
 </code></pre>
 
 
-### Examples
+#### Examples
 Create a password for a user:
 
 ```Python
@@ -59,10 +121,11 @@ print('Username: ' + username)
 print('Password: ' + password)
 ```
 
-## Headless Sessions
+
+#### Headless Sessions
 The opening of the keyring is automatic from the Gnome desktop. However, we should be able to do this via an sshd login.
 
-### Ordinary Login
+##### Ordinary Login
 First we show a standalone example assuming a login session not from desktop; we shall only have the (current) shell running:
 
 <pre class=console><code>$ <b>pgrep -flu oracle -t `expr \`tty\` : '/dev/\(.*\)'`</b>
@@ -87,7 +150,7 @@ Username: sysman
 Password: Nadi7932
 </code></pre>
 
-### SSH
+##### SSH
 In the sshd configuration file for PAM ensure that the entries for pam_gnome_keyring.so are present for the auth,  password and session service types as follows:
 
 <pre class=console><code>$ <b>cat /etc/pam.d/sshd</b>
