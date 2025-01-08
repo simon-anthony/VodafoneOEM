@@ -5,9 +5,8 @@ prog=`basename $0 .sh`
 export PROG=$prog
 
 export MODULEDIR=LIBEXECDIR/PACKAGE
-export PYTHONPATH=LIBDIR/pythonPYTHON_VERSION
-# EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to
-# work...
+export PYTHONPATH=LIBDIR/pythonPYTHON_VERSION # not actually used by EMCLI Jython
+# EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to work...
 export EMCLI_PYTHONPATH=LIBDIR/pythonPYTHON_VERSION
 
 prog=`basename $0 .sh`
@@ -18,28 +17,29 @@ usage() {
 		OPTION:
 		  -l, --list                 List <module>s
 		  -k, --keyring              Create keyring
-		  -f, --force                Force overwite of existing keyring
-		  -i, --initialise           Initialise for use by creating key token
-		  -u, --username=NAME        Set username (and enter password) for OMS
+		  -f, --force                Force overwite of existing keyring, requires -k
+		  -i, --initialise           Initialise keystore for use by creating key token
+		  -u, --username=NAME        Set username (and enter password) for OMS in keystore
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 		usage: $prog [OPTION] -- <module> [-h|--help] [<args>]
 		OPTION:
 		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
+		  -e, --emcliext             Link extension modules in ORACLE_HOME, requires -s
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 	!
     exit 2
 }
 
-TEMP=`getopt -o ls:kiu:fvh --long list,sid,keyring,initialise,username,force,verbose,help \
+TEMP=`getopt -o ls:ekiu:fvh --long list,sid,emcliext,keyring,initialise,username,force,verbose,help \
      -n "$prog" -- "$@"`
 
 [ $? != 0 ] && { usage; exit 1; }
 
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
-typeset lflg= sflg= kflg= fflg= iflg= vflg= hflg= errflg=  
+typeset lflg= sflg= eflg= kflg= fflg= iflg= vflg= hflg= errflg=  
 
 while true
 do
@@ -51,6 +51,9 @@ do
 		sflg=y
 		sid=$2
 		shift 2 ;;
+	-e|--emcliext)
+		eflg=y
+		shift ;;
 	-k|--keyring)
 		kflg=y
 		[ "$iflg" -o "$uflg"] && errflg
@@ -92,11 +95,9 @@ then
 	exit
 fi
 
-#[ $# -eq 0 -a -z "$kflg" ] && errflg=y
-[ $# -eq 0 -a \( -z "$kflg" -a -z "$uflg" -a -z "$iflg" \) ] && errflg=y
+[ $# -eq 0 -a \( -z "$kflg" -a -z "$uflg" -a -z "$iflg" -a -z "$eflg" \) ] && errflg=y
 [ "$fflg" -a -z "$kflg" ] && errflg=y	# -f requires -k
-
-#[ $errflg ] && usage
+[ "$eflg" -a -z "$sflg" ] && errflg=y	# -e requires -s
 
 # Check keyring and passwords
 
@@ -121,6 +122,8 @@ then
 	echo "$prog: login keyring does not exist, re-run with -k" >&2
 	exit 1
 fi
+
+# Check keyfile
 
 keyfile=$HOME/.config/emcli/username.key 
 mkdir -p `dirname $keyfile`
@@ -179,6 +182,31 @@ then
 		exit 1
 	fi
 fi
+
+if [ $eflg ]
+then
+	if [ ! -x $ORACLE_HOME/bin/emcli ]
+	then
+		echo "$prog: $ORACLE_HOME/bin/emcli does not exist" >&2
+		exit 1
+	fi
+	if [ ! -d $ORACLE_HOME/bin/emcliext ]
+	then
+		mkdir $ORACLE_HOME/bin/emcliext || exit
+	fi
+	typeset -i count=0
+	for module in `grep -l '^# emcliext' $MODULEDIR/*.py`
+	do
+		[ $count -eq 0 ] && echo -n "$prog: installing extension module: "
+		echo -n "`basename $module .py` "
+		ln -fs $module $ORACLE_HOME/bin/emcliext/`basename $module` 
+		(( count += 1 ))
+	done
+	echo
+	exit 
+fi
+
+# Now run module
 
 file=`basename $1 .py`
 shift

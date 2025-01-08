@@ -25,3 +25,4 @@ m4
 py-compile
 *.sav
 __pycache__
+*.swp
