@@ -95,7 +95,7 @@ In the sshd configuration file for PAM ensure that the entries for pam_gnome_key
 /etc/pam.d/sshd
 #%PAM-1.0
 auth       substack     password-auth
-auth       optional     pam_gnome_keyring.so
+<strong>auth       optional     pam_gnome_keyring.so</strong>
 auth       include      postlogin
 account    required     pam_sepermit.so
 account    required     pam_nologin.so
