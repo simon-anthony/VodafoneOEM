@@ -71,7 +71,7 @@ First we show a standalone example assuming a login session not from desktop; we
 
 We shall need to start a dbus session:
 <pre class=console><code>$ <b>export EMCLI_USERNAME_KEY=`cat /export/home/oracle/.config/emcli/username.key`</b>
-$ <b>dbus-run-session -- sh<\b>
+$ <b>dbus-run-session -- sh</b>
 </code></pre>
 
  Unlock the keyring directly:
@@ -79,6 +79,8 @@ $ <b>dbus-run-session -- sh<\b>
 GNOME_KEYRING_CONTROL=/export/home/oracle/.cache/keyring-X5IJY2
 SSH_AUTH_SOCK=/export/home/oracle/.cache/keyring-X5IJY2/ssh
 </code></pre>
+
+Note that we do not want a traling newline from `echo`.
 
 We can then retrieve the username and password
 <pre class=console><code>$ <b>python -m get</b>
