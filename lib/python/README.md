@@ -48,9 +48,9 @@ EMCLI Jython is not able to import third-party packages correctly
 (python3-keyring). As a result we must call the credentials handler with an
 external invocation of Python and pass the result back to EMCLI via a wrapper.
 
-The standlone Python program is identical to the example shown[above](#use).
+The standlone Python program is identical to the example shown [above](#use).
 
-This file is then called as a subprocess and the output parsed:
+This file `/usr/local/bin/getcreds` is then called as a subprocess and the output parsed:
 
 ```Python
 def getcreds():
