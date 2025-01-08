@@ -100,7 +100,7 @@ account    required     pam_sepermit.so
 account    required     pam_nologin.so
 account    include      password-auth
 password   include      password-auth
-password   optional     pam_gnome_keyring.so use_authtok
+`rgb(9, 105, 218)`password   optional     pam_gnome_keyring.so use_authtok
 # pam_selinux.so close should be the first session rule
 session    required     pam_selinux.so close
 session    required     pam_loginuid.so
