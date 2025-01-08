@@ -74,13 +74,12 @@ We shall need to start a dbus session:
 $ <b>dbus-run-session -- sh</b>
 </code></pre>
 
- Unlock the keyring directly:
+ Unlock the keyring directly (note that we do not want a trailing newline from `echo`):
 <pre class=console><code>$ <b>echo -n 'mylogin-password' | gnome-keyring-daemon --unlock</b>
 GNOME_KEYRING_CONTROL=/export/home/oracle/.cache/keyring-X5IJY2
 SSH_AUTH_SOCK=/export/home/oracle/.cache/keyring-X5IJY2/ssh
 </code></pre>
 
-Note that we do not want a traling newline from `echo`.
 
 We can then retrieve the username and password
 <pre class=console><code>$ <b>python -m get</b>
