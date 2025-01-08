@@ -29,14 +29,14 @@ cp -f $pkg.spec $topdir/SPECS
 
 rpmbuild -bb $topdir/SPECS/$pkg.spec
 
-# When creating a new tag, don't forget to push it.
+# When creating a new tag, don't forget to push it:
 # git log --oneline
 # git tag
 # git tag 1.4-1
 # git push --tags
 #
 # Cleanup:
-# sudo dnf -y -C remove --noautoremove efmdemo
-# sudo rpm -e --nodeps --noscripts efmdemo
+# sudo dnf -y -C remove --noautoremove vodafoneoem
+# sudo rpm -e --nodeps --noscripts vodafoneoem
 # Install without cache:
-# sudo dnf install -C -y -v /mnt/hgfs/Public/Software/efmdemo-2.2-3.el8.noarch.rpm
+# sudo dnf install -C -y -v ~/.rpm/RPMS/noarch/vodafoneoem-1.2-1.el9.noarch.rpm
