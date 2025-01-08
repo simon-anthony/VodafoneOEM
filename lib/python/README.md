@@ -94,13 +94,13 @@ In the sshd configuration file for PAM ensure that the entries for pam_gnome_key
 <pre class=console>p{color:red;}<code>$ <b>cat /etc/pam.d/sshd</b>
 #%PAM-1.0
 auth       substack     password-auth
-${\color{red}auth       optional     pam_gnome_keyring.so}$
+<b>auth       optional     pam_gnome_keyring.so</b>
 auth       include      postlogin
 account    required     pam_sepermit.so
 account    required     pam_nologin.so
 account    include      password-auth
 password   include      password-auth
-password   optional     pam_gnome_keyring.so use_authtok
+<b>password   optional     pam_gnome_keyring.so use_authtok</b>
 # pam_selinux.so close should be the first session rule
 session    required     pam_selinux.so close
 session    required     pam_loginuid.so
@@ -110,7 +110,7 @@ session    required     pam_namespace.so
 session    optional     pam_keyinit.so force revoke
 session    optional     pam_motd.so
 session    include      password-auth
-session    optional     pam_gnome_keyring.so auto_start
+<b>session    optional     pam_gnome_keyring.so auto_start</b>
 session    include      postlogin
 </code></pre>
 
