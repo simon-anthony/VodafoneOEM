@@ -97,8 +97,8 @@ auth       substack     password-auth
 <b>auth       optional     pam_gnome_keyring.so</b>
 auth       include      postlogin
 account    required     pam_sepermit.so
-<div style="background-color: #cfc ;">
-account    required     pam_nologin.so</div>
+<p style="background-color: #FF0000;">This is a red paragraph.</p>
+account    required     pam_nologin.so
 account    include      password-auth
 password   include      password-auth
 <b>password   optional     pam_gnome_keyring.so use_authtok</b>
