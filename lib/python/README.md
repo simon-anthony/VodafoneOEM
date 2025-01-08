@@ -119,15 +119,15 @@ When we login:
 <pre class=console><code>$ <b>pgrep -flu oracle</b>
 13580 systemd
 13585 (sd-pam)
-13615 gnome-keyring-d
+<i>13615</i> gnome-keyring-d
 13619 sshd
 13624 bash
 </code></pre>
 
 You will see a a `gnome-keyring-daemon` login session has been started by the systemd session associated with this account:
-<pre class=console><code>$ <b>ps -wwwfp 13615</b>
+<pre class=console><code>$ <b>ps -wwwfp <i>13615</i></b>
 UID          PID    PPID  C STIME TTY          TIME CMD
-oracle     13615       1  0 22:05 ?        00:00:00 /usr/bin/gnome-keyring-daemon --daemonize --login
+oracle     <i>13615</i>       1  0 22:05 ?        00:00:00 /usr/bin/gnome-keyring-daemon --daemonize --login
 </code></pre>
 
 We can then retrieve our password:
@@ -146,13 +146,13 @@ pgrep -flu oracle
 13624 bash
 13714 dbus-broker-lau
 13715 dbus-broker
-13718 gnome-keyring-d
+<b>13718</b> gnome-keyring-d
 </code></pre>
 
 And that the open keyring is now initialised (started) for use:
-<pre class=console><code>$ <b>ps -wwwfp 13718</b>
+<pre class=console><code>$ <b>ps -wwwfp <b>13718</b></b>
 UID          PID    PPID  C STIME TTY          TIME CMD
-oracle     13718   13580  0 22:06 ?        00:00:00 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
+oracle     <b>13718</b>   13580  0 22:06 ?        00:00:00 /usr/bin/gnome-keyring-daemon --start --foreground --components=secrets
 </code></pre>
 
 NB to allow graphical interaction:
