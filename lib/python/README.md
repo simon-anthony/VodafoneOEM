@@ -60,7 +60,7 @@ print('Password: ' + password)
 ```
 
 ## Headless Sessions
-The opening of the ${\color{red}keyring}$ is automatic from the Gnome desktop. However, we should be able to do this via an sshd login.
+The opening of the keyring is automatic from the Gnome desktop. However, we should be able to do this via an sshd login.
 
 ### Ordinary Login
 First we show a standalone example assuming a login session not from desktop; we shall only have the (current) shell running:
@@ -92,12 +92,17 @@ Password: Nadi7932
 In the sshd configuration file for PAM ensure that the entries for pam_gnome_keyring.so are present for the auth,  password and session service types as follows:
 
 <pre>$ <b>cat /etc/pam.d/sshd</b>
+  <style>
+    p.red-paragraph {
+      background-color: #FF0000;
+    }
+  </style>
 #%PAM-1.0
 auth       substack     password-auth
 <b>auth       optional     pam_gnome_keyring.so</b>
 auth       include      postlogin
 account    required     pam_sepermit.so
-<p style="background-color: #FF0000;">This is a red paragraph.</p>
+<p class="red-paragraph">This is a red paragraph.</p>
 account    required     pam_nologin.so
 account    include      password-auth
 password   include      password-auth
