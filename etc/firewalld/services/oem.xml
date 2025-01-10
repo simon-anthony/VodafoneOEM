@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>Oracle OEM OMS and Agent</short>
+  <description>Oracle Enterprise Manager OMS and Agent</description>
+  <port protocol="tcp" port="4889"/> <!-- Enterprise Manager Upload Http Port               4889-4898 oem-upload -->
+  <port protocol="tcp" port="9851"/> <!-- OHS Http SSL Port                                 9899,9851-9900 oem-ohs-ssl -->
+  <port protocol="tcp" port="7203"/> <!-- Managed Server Http Port                          7201-7300 oem-managed-server -->
+  <port protocol="tcp" port="3872"/> <!-- Oracle Management Agent Port                      3872,1830-1849 oem-agent -->
+  <port protocol="tcp" port="7788"/> <!-- Enterprise Manage Central Console Http Port       7788-7798 oem-console -->
+  <port protocol="tcp" port="7403"/> <!-- Node Manager Http SSL Port                        7401-7500 oem-nodemgr-ssl -->
+  <port protocol="tcp" port="9788"/> <!-- OHS Http Port                                     9788,9751-9800 oem-ohs -->
+  <port protocol="tcp" port="7102"/> <!-- Admin Server Http SSL Port                        7101-7200 oem-admin-ssl -->
+  <port protocol="tcp" port="7301"/> <!-- Managed Server Http SSL Port                      7301-7400 oem-managed-server-ssl -->
+  <port protocol="tcp" port="4903"/> <!-- Enterprise Manager Upload Http SSL Port           1159,4899,4908 oem-upload-ssl -->
+  <port protocol="tcp" port="7803"/> <!-- Enterprise Manager Central Console Http SSL Port  7799-7809 oem-console-ssl -->
+</service>
+

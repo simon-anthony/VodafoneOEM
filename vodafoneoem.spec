@@ -59,7 +59,8 @@ make DESTDIR=%buildroot install
 %files
 %{_bindir}/*
 %{_libdir}/*
-%{_sysconfdir}/*
+%{_sysconfdir}/profile.d/*
+%{_sysconfdir}/firewalld/services/*
 %{_libexecdir}/*
 
 

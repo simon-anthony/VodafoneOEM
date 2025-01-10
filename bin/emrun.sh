@@ -1,13 +1,13 @@
 #!/usr/bin/sh
 
-PATH=/usr/bin:BINDIR export PATH
+PATH=/usr/bin:@BINDIR@ export PATH
 prog=`basename $0 .sh`
 export PROG=$prog
 
-export MODULEDIR=LIBEXECDIR/PACKAGE
-export PYTHONPATH=LIBDIR/pythonPYTHON_VERSION # not actually used by EMCLI Jython
+export MODULEDIR=@LIBEXECDIR@/@PACKAGE@
+export PYTHONPATH=@LIBDIR@/python@PYTHON_VERSION@ # not actually used by EMCLI Jython
 # EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to work...
-export EMCLI_PYTHONPATH=LIBDIR/pythonPYTHON_VERSION
+export EMCLI_PYTHONPATH=@LIBDIR@/python@PYTHON_VERSION@
 
 prog=`basename $0 .sh`
 
@@ -108,9 +108,9 @@ then
 	}
 	if [ $DBUS_SESSION_BUS_ADDRESS ]
 	then 
-		exec BINDIR/unlock-keyring
+		exec @BINDIR@/unlock-keyring
 	else
-		exec dbus-run-session -- BINDIR/unlock-keyring
+		exec dbus-run-session -- @BINDIR@/unlock-keyring
 	fi
 fi
 
@@ -221,7 +221,7 @@ fi
 file=`basename $1 .py`
 shift
 
-[ -r SYSCONFDIR/profile.d/setoraenv.sh ] && . SYSCONFDIR/profile.d/setoraenv.sh
+[ -r @SYSCONFDIR@/profile.d/setoraenv.sh ] && . @SYSCONFDIR@/profile.d/setoraenv.sh
 
 if [ $sflg ] # set ORACLE_HOME
 then
