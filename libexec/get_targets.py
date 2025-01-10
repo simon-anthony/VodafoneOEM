@@ -1,7 +1,7 @@
 import sys
 import argparse
 # 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
-# One would the refer to config[args.region]['url'] instead of config.get(args.region, 'url')
+# In the latter case config[args.region]['url'] would be used instead of config.get(args.region, 'url')
 import ConfigParser
 from utils import getcreds
 

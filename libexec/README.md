@@ -1,6 +1,6 @@
-# Local Modules called by EMCLI
+# Local Modules Called by EMCLI
 
-Note that the following can be used as substitution variables trhought the
+Note that the following can be used as substitution variables in the
 scripts:
 
 ```m4
