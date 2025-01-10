@@ -20,7 +20,6 @@ group_tgt.add_argument('--database', action='store_true', help='Show oracle data
 
 # OMS options
 config = ConfigParser.ConfigParser()
-#config.read('/usr/local/share/vodafoneoem/oms.ini')
 config.read('@PKGDATADIR@/oms.ini')
 
 group_oms = parser.add_mutually_exclusive_group()

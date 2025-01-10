@@ -52,6 +52,10 @@ make DESTDIR=%buildroot install
 
 
 %post
+if [ ! -f %{_datadir}/%{_package}/oms.ini ]
+then
+	cp %{_datadir}/%{_package}/oms.ini.example %{_datadir}/%{_package}/oms.ini
+fi
 
 %preun
 

@@ -1,4 +1,4 @@
 dist_pkgdata_DATA = \
-	oms.ini
+	oms.ini.example
 
 
