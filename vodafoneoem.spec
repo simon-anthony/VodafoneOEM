@@ -62,6 +62,7 @@ make DESTDIR=%buildroot install
 %{_sysconfdir}/profile.d/*
 %{_sysconfdir}/firewalld/services/*
 %{_libexecdir}/*
+%{_datadir}/*
 
 
 %changelog

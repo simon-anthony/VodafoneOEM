@@ -1,5 +1,8 @@
 import sys
 import argparse
+# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
+# One would the refer to config[args.region]['url'] instead of config.get(args.region, 'url')
+import ConfigParser
 from utils import getcreds
 
 parser = argparse.ArgumentParser(
@@ -8,22 +11,36 @@ parser = argparse.ArgumentParser(
     epilog='Text at the bottom of help')
 
 # nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
-parser.add_argument('-o', '--oms', required=True, help='URL')
 
-group = parser.add_mutually_exclusive_group()
-group.add_argument('--host', action='store_true', help='Show agent target types (default)')
-group.add_argument('--agent', action='store_true', help='Show host target types')
-group.add_argument('--database', action='store_true', help='Show oracle database target types')
+# target options
+group_tgt = parser.add_mutually_exclusive_group()
+group_tgt.add_argument('--host', action='store_true', help='Show agent target types (default)')
+group_tgt.add_argument('--agent', action='store_true', help='Show host target types')
+group_tgt.add_argument('--database', action='store_true', help='Show oracle database target types')
+
+# OMS options
+config = ConfigParser.ConfigParser()
+#config.read('/usr/local/share/vodafoneoem/oms.ini')
+config.read('@PKGDATADIR@/oms.ini')
+
+group_oms = parser.add_mutually_exclusive_group()
+group_oms.add_argument('-o', '--oms', help='URL')
+group_oms.add_argument('-r', '--region', choices=config.sections())
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
 
-print('Connecting to: ' + args.oms)
+if args.region:
+    oms = config.get(args.region, 'url')
+else:
+    oms = args.oms
+
+print('Connecting to: ' + oms)
 
 platform=226    # default, probably no other platforms than Linux
  
 # Set Connection properties and logon
-set_client_property('EMCLI_OMS_URL', args.oms)
+set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 
 creds = getcreds()

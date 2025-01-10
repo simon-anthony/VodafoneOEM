@@ -14,13 +14,13 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-m', '--monitor_pw', help='monitor password')
 
-group = parser.add_mutually_exclusive_group()
-group.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
-group.add_argument('-t', '--target', nargs='+', help='Add only targets (hostnames) listed')
+group_target = parser.add_mutually_exclusive_group()
+group_target.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
+group_target.add_argument('-t', '--target', nargs='+', help='Add only targets (hostnames) listed')
 
-group2 = parser.add_mutually_exclusive_group()
-group2.add_argument('-o', '--oms', help='URL')
-group2.add_argument('-r', '--region', choices=['milan', 'dublin', 'rating', 'local'])
+group_oms = parser.add_mutually_exclusive_group()
+group_oms.add_argument('-o', '--oms', help='URL')
+group_oms.add_argument('-r', '--region', choices=['milan', 'dublin', 'rating', 'local'])
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)

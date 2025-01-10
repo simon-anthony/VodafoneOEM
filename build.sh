@@ -27,7 +27,7 @@ mv $pkg-$vers.tar.gz $topdir/SOURCES
 
 cp -f $pkg.spec $topdir/SPECS
 
-rpmbuild -bb $topdir/SPECS/$pkg.spec
+rpmbuild -D "_package $pkg" -bb $topdir/SPECS/$pkg.spec
 
 # When creating a new tag, don't forget to push it:
 # git log --oneline

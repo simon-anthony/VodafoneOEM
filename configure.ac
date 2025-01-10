@@ -15,5 +15,6 @@ etc/Makefile
 lib/Makefile
 lib/python/Makefile
 libexec/Makefile
+share/Makefile
 ])
 AC_OUTPUT
