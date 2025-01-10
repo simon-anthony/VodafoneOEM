@@ -39,9 +39,6 @@ login(username=args.username, password=args.password)
 
 cred_str = "UserName:dbsnmp;password:" + args.monitor_pw + ";Role:Normal"
 
-# get_targets() returns:
-# [{'Host Info': 'host:oel.example.com;timezone_region:Europe/London', 'Target Type': 'oracle_database', 'Properties': 'Protocol:TCP;SID:FREE;MachineName:oel.example.com;OracleHome:/opt/oracle/product/23ai/dbhomeFree;Port:1521', 'Associations': '', 'Target Name': 'FREE'}]
-
 target_array = get_targets(unmanaged=True, properties=True, targets=targetparms).out()['data']
 
 if len(target_array) == 0:

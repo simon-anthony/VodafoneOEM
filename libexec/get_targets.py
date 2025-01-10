@@ -27,7 +27,6 @@ set_client_property('EMCLI_OMS_URL', args.oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 
 creds = getcreds()
-
 login(username=creds['username'], password=creds['password'])
 
 # target_type can be oracle_emd, host, oracle_database etc....
@@ -37,6 +36,13 @@ if args.agent:
 elif args.database:
     target_type = 'oracle_database'
 
+# get_targets() returns:
+#
+# [ {'Host Info': 'host:oel.example.com;timezone_region:Europe/London',
+#    'Target Type': 'oracle_database',
+#    'Properties': 'Protocol:TCP;SID:FREE;MachineName:oel.example.com;OracleHome:/opt/oracle/product/dbhome;Port:1521',
+#    'Associations': '',
+#    'Target Name': 'FREE' }]
 try:
     targets = get_targets(targets='%:'+target_type)
 

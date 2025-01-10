@@ -5,22 +5,22 @@ import datetime as dt
 import re 
 import argparse
 import csv
+from utils import getcreds
 
 parser = argparse.ArgumentParser(
     prog='promote_cluster',
     description='Promote cluster',
     epilog='Text at the bottom of help')
 
-# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
-parser.add_argument('-o', '--oms', help='URL')
-parser.add_argument('-u', '--username', default='SYSMAN', help='sysman user')
-parser.add_argument('-p', '--password', required=True, help='sysman password')
 parser.add_argument('-m', '--monitor_pw', help='monitor password')
-parser.add_argument('-r', '--region', required=True, choices=['milan', 'dublin', 'rating'])
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
 group.add_argument('-t', '--target', nargs='+', help='Add only targets (hostnames) listed')
+
+group2 = parser.add_mutually_exclusive_group()
+group2.add_argument('-o', '--oms', help='URL')
+group2.add_argument('-r', '--region', choices=['milan', 'dublin', 'rating', 'local'])
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -35,25 +35,25 @@ else:
     parser.print_help()
     sys.exit(2)
 
-print('Connecting to: ' + args.oms)
+if args.region:
+    oms_urls = { 'dublin': 'https://vg00071de.snc5003.ie1ds014001oci1.oraclevcn.com:7799/em', 'milan': 'https://vg00011de.snc5003.it1ds014001oci1.oraclevcn.com:7799/em', 'rating' : 'https://vg00041de.snc5003.de1ds014001oci1.oraclevcn.com:7803/em', 'local': 'https://oms.example.com:7803' }
+    oms = oms_urls[args.region]
+else:
+    oms = args.oms
+
+print('Connecting to: ' + oms)
 
 # Set Connection properties and logon
-set_client_property('EMCLI_OMS_URL', args.oms)
+set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
-login(username=args.username, password=args.password)
- 
-today=dt.datetime.now().strftime("%Y%m%d")
- 
-oem_urls = { 'dublin': 'https://vg00071de.snc5003.ie1ds014001oci1.oraclevcn.com:7799/em', 'milan': 'https://vg00011de.snc5003.it1ds014001oci1.oraclevcn.com:7799/em', 'rating' : 'https://vg00041de.snc5003.de1ds014001oci1.oraclevcn.com:7803/em'}
- 
-print("Info: adding clusters")
- 
-#Setup EMCLI environment
-#set_url(region)
- 
-#Connect as dba_build
-#conn_vf_dba_build()
 
+creds = getcreds()
+login(username=creds['username'], password=creds['password'])
+ 
+today = dt.datetime.now().strftime("%Y%m%d")
+ 
+print("INFO: adding clusters")
+ 
 cluster_file = '/tmp/cluster.csv'
 
 def get_assocs(file, region, target):

@@ -206,9 +206,9 @@ fi
 
 if [ "$SSH_TTY" ]
 then
-	n=`egrep -c -e '^[[:blank:]]+auth[[:blank:]]+optional[[:blank:]]+pam_gnome_keyring.so' \
-			-e '^[[:blank:]]+password[[:blank:]]+optional[[:blank:]]+pam_gnome_keyring.so[[:blank:]]+use_authtok' \
-			-e '^[[:blank:]]+session[[:blank:]]+optional[[:blank:]]+pam_gnome_keyring.so[[:blank:]]+auto_start' /etc/pam.d/sshd`
+	n=`egrep -c -e '^[[:blank:]]*auth[[:blank:]]+optional[[:blank:]]+pam_gnome_keyring.so' \
+			-e '^[[:blank:]]*password[[:blank:]]+optional[[:blank:]]+pam_gnome_keyring.so[[:blank:]]+use_authtok' \
+			-e '^[[:blank:]]*session[[:blank:]]+optional[[:blank:]]+pam_gnome_keyring.so[[:blank:]]+auto_start' /etc/pam.d/sshd`
 	if [ $n -ne 3 ]
 	then
 		echo "$prog: pam_gnome_keyring.so entries missing or incomplete for sshd" >&2
