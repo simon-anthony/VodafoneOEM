@@ -5,6 +5,7 @@ import datetime as dt
 import re 
 import argparse
 import csv
+import ConfigParser
 from utils import getcreds
 
 parser = argparse.ArgumentParser(
@@ -14,13 +15,18 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-m', '--monitor_pw', help='monitor password')
 
-group_target = parser.add_mutually_exclusive_group()
-group_target.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
-group_target.add_argument('-t', '--target', nargs='+', help='Add only targets (hostnames) listed')
+# target options
+group_tgt = parser.add_mutually_exclusive_group()
+group_tgt.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
+group_tgt.add_argument('-t', '--target', nargs='+', help='Add only targets (hostnames) listed')
+
+# OMS options
+config = ConfigParser.ConfigParser()
+config.read('@PKGDATADIR@/oms.ini')
 
 group_oms = parser.add_mutually_exclusive_group()
 group_oms.add_argument('-o', '--oms', help='URL')
-group_oms.add_argument('-r', '--region', choices=['milan', 'dublin', 'rating', 'local'])
+group_oms.add_argument('-r', '--region', choices=config.sections())
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -30,14 +36,9 @@ if args.target:
     targetparms = ';'.join(i + ':oracle_database' for i in args.target)
 elif args.all:
     targetparms="cluster"
-else:
-    print 'Missing required arguments (-targets or -all)'
-    parser.print_help()
-    sys.exit(2)
 
 if args.region:
-    oms_urls = { 'dublin': 'https://vg00071de.snc5003.ie1ds014001oci1.oraclevcn.com:7799/em', 'milan': 'https://vg00011de.snc5003.it1ds014001oci1.oraclevcn.com:7799/em', 'rating' : 'https://vg00041de.snc5003.de1ds014001oci1.oraclevcn.com:7803/em', 'local': 'https://oms.example.com:7803' }
-    oms = oms_urls[args.region]
+    oms = config.get(args.region, 'url')
 else:
     oms = args.oms
 
@@ -54,7 +55,7 @@ today = dt.datetime.now().strftime("%Y%m%d")
  
 print("INFO: adding clusters")
  
-cluster_file = '/tmp/cluster.csv'
+cluster_file = '@PKGDATADIR@/cluster.csv'
 
 def get_assocs(file, region, target):
     """Retrieve associations from given a region and target"""
@@ -80,7 +81,7 @@ for target in target_array:
     if m:
         host = m.group('host')
     else:
-        print 'Cannot extract hostname from Host Info'
+        print 'ERROR: Cannot extract hostname from Host Info'
         sys.exit(1)
 
     properties = target['Properties']
@@ -89,7 +90,7 @@ for target in target_array:
     instances = ';'.join(get_assocs(cluster_file, args.region, cluster))
 
     try:
-        print 'Adding target cluster ' + cluster + ' for ' + host
+        print 'INFO: Adding target cluster ' + cluster + ' for ' + host
         res = add_target(
             name=cluster,
             type='cluster',

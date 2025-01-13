@@ -1,17 +1,31 @@
 import sys
 import argparse
 import re 
+import ConfigParser
+from utils import getcreds
 
 parser = argparse.ArgumentParser(
     prog='promote_discovered_targets',
     description='Promote discovered targets',
     epilog='Text at the bottom of help')
 
-# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
-parser.add_argument('-o', '--oms', help='URL')
-parser.add_argument('-u', '--username', default='SYSMAN', help='sysman user')
-parser.add_argument('-p', '--password', required=True, help='sysman password')
 parser.add_argument('-m', '--monitor_pw', help='monitor password')
+
+# target options
+group_tgt = parser.add_mutually_exclusive_group()
+group_tgt.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
+group_tgt.add_argument('-t', '--target', nargs='+', help='Add only targets listed')
+
+# OMS options
+config = ConfigParser.ConfigParser()
+config.read('@PKGDATADIR@/oms.ini')
+
+group_oms = parser.add_mutually_exclusive_group()
+group_oms.add_argument('-o', '--oms', help='URL')
+group_oms.add_argument('-r', '--region', choices=config.sections())
+
+# Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
+args = parser.parse_args(sys.argv)
 
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
@@ -25,17 +39,20 @@ if args.target:
     targetparms = ';'.join(i + ':oracle_database' for i in args.target)
 elif args.all:
     targetparms = "oracle_database"
-else:
-    print 'Missing required arguments (-target or -all)'
-    parser.print_help()
-    sys.exit(2)
 
-print('Connecting to: ' + args.oms)
+if args.region:
+    oms = config.get(args.region, 'url')
+else:
+    oms = args.oms
+
+print('Connecting to: ' + oms)
 
 # Set Connection properties and logon
-set_client_property('EMCLI_OMS_URL', args.oms)
+set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
-login(username=args.username, password=args.password)
+
+creds = getcreds()
+login(username=creds['username'], password=creds['password'])
 
 cred_str = "UserName:dbsnmp;password:" + args.monitor_pw + ";Role:Normal"
 
