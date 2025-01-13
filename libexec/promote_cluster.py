@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser(
     epilog='Text at the bottom of help')
 
 parser.add_argument('-m', '--monitor_pw', help='monitor password')
+parser.add_argument('-c', '--csv', help='CSV file containing targets')
 
 # target options
 group_tgt = parser.add_mutually_exclusive_group()
@@ -55,7 +56,10 @@ today = dt.datetime.now().strftime("%Y%m%d")
  
 print("INFO: adding clusters")
  
-cluster_file = '@PKGDATADIR@/cluster.csv'
+if args,csv:
+    cluster_file = args.csv
+else:
+    cluster_file = '@PKGDATADIR@/cluster.csv'
 
 def get_assocs(file, region, target):
     """Retrieve associations from given a region and target"""

@@ -230,7 +230,7 @@ GNU Autotools are required for development.
 The [GNU Autotools](https://en.wikipedia.org/wiki/GNU_Autotools) are required
 to build and deploy the source packages. 
 
-From Linux these can be installe with yum/dnf:
+From Linux these can be installed with yum/dnf:
 
 * autoconf
 * automake
