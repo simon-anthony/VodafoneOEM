@@ -1,5 +1,6 @@
-#!/usr/bin/sh
+#!/usr/bin/sh -
 
+emcli=`which emcli 2>&-`
 PATH=/usr/bin:@BINDIR@ export PATH
 prog=`basename $0 .sh`
 export PROG=$prog
@@ -14,7 +15,7 @@ prog=`basename $0 .sh`
 usage() {
     cat >&2 <<-!
 		usage: $prog {-l|-k[-f]|-i|-u <username>} [-v]
-		usage: $prog -s <sid> -e [-v]
+		usage: $prog [-s <sid>] -e [-v]
 		usage: $prog [-s <sid>] [-v] -- <module> [-h|--help] [<args>]
 		OPTION:
 		  -l, --list                 List <module>s
@@ -48,13 +49,15 @@ do
 	-s|--sid)
 		sflg=y
 		sid=$2
+		[ -r @SYSCONFDIR@/profile.d/setoraenv.sh ] && \
+			. @SYSCONFDIR@/profile.d/setoraenv.sh
 		shift 2 ;;
 	-e|--emcliext)
 		eflg=y
 		shift ;;
 	-k|--keyring)
 		kflg=y
-		[ "$iflg" -o "$uflg"] && errflg
+		[ "$iflg" -o "$uflg" ] && errflg
 		shift ;;
 	-f|--force)
 		fflg=y
@@ -95,7 +98,6 @@ fi
 
 [ $# -eq 0 -a \( -z "$kflg" -a -z "$uflg" -a -z "$iflg" -a -z "$eflg" \) ] && errflg=y
 [ "$fflg" -a -z "$kflg" ] && errflg=y	# -f requires -k
-[ "$eflg" -a -z "$sflg" ] && errflg=y	# -e requires -s
 
 # Check keyring and passwords
 
@@ -181,23 +183,49 @@ then
 	fi
 fi
 
-if [ $eflg ]
+if [ $sflg ] # set ORACLE_HOME
 then
-	if [ ! -x $ORACLE_HOME/bin/emcli ]
+	setoraenv -s $sid || exit
+fi
+
+if [ "X$emcli" = "X" -a -z "$ORACLE_HOME" ]
+then
+	echo "$prog: cannot find emcli, try -s" >&2
+	exit 1
+fi
+
+if [ "X$emcli" = "X" ]
+then
+	if [ -x $ORACLE_HOME/bin/emcli ]
 	then
-		echo "$prog: $ORACLE_HOME/bin/emcli does not exist" >&2
+		emcli=$ORACLE_HOME/bin/emcli
+	elif [ -x $ORACLE_HOME/emcli ]
+	then
+		emcli=$ORACLE_HOME/emcli
+		echo "$prog: emcli not in PATH or ORACLE_HOME" >&2
 		exit 1
 	fi
-	if [ ! -d $ORACLE_HOME/bin/emcliext ]
+fi
+export EMCLI_DIR=`dirname $emcli`
+PATH=$PATH:$EMCLI_DIR
+
+if [ $eflg ]
+then
+	if [ ! -x $EMCLI_DIR/emcli ]
 	then
-		mkdir $ORACLE_HOME/bin/emcliext || exit
+		echo "$prog: $EMCLI_DIR/emcli does not exist" >&2
+		exit 1
+	fi
+	if [ ! -d $EMCLI_DIR/emcliext ]
+	then
+		mkdir $EMCLI_DIR/emcliext || exit
 	fi
 	typeset -i count=0
 	for module in `grep -l '^# emcliext' $MODULEDIR/*.py`
 	do
 		[ $count -eq 0 ] && echo -n "$prog: installing extension module: "
 		echo -n "`basename $module .py` "
-		ln -fs $module $ORACLE_HOME/bin/emcliext/`basename $module` 
+		ln -fs $module $EMCLI_DIR/emcliext/`basename $module` 
 		(( count += 1 ))
 	done
 	echo
@@ -221,29 +249,9 @@ fi
 file=`basename $1 .py`
 shift
 
-[ -r @SYSCONFDIR@/profile.d/setoraenv.sh ] && . @SYSCONFDIR@/profile.d/setoraenv.sh
-
-if [ $sflg ] # set ORACLE_HOME
+if [ ! -d $EMCLI_DIR/emcliext ]
 then
-	setoraenv -s $sid || exit
-else # pick up from env
-	if [ "X$ORACLE_HOME" = "X" ]
-	then
-		echo "$prog: ORACLE_HOME not set" >&2
-		exit 1
-	fi
-	PATH=$PATH:$ORACLE_HOME/bin
-fi
-
-if ! which emcli >/dev/null 2>&1
-then
-	echo "$prog: emcli not in PATH" >&2
-	exit 1
-fi
-
-if [ ! -d $ORACLE_HOME/bin/emcliext ]
-then
-	echo "$prog: directory $ORACLE_HOME/bin/emcliext does not exist" >&2
+	echo "$prog: directory $EMCLI_DIR/emcliext does not exist" >&2
 	exit 1
 fi
 
