@@ -128,7 +128,7 @@ fi
 keyfile=$HOME/.config/emcli/username.key 
 mkdir -p `dirname $keyfile`
 
-if [ ! -r $keyfile ]	# Create a key
+if [ ! -r $keyfile -o -n "$iflg" ]	# Create a key
 then
 	if [ $iflg ]
 	then
@@ -145,14 +145,13 @@ then
 		echo "$prog: re-run with -i to initialise for use" >&2
 		exit 1
 	fi
-fi
-export EMCLI_USERNAME_KEY=`cat $keyfile`
-
-if [ $iflg ]
+elif [ $iflg ]
 then
 	echo "$prog: already initialised for use" >&2
 	exit 1
 fi
+export EMCLI_USERNAME_KEY=`cat $keyfile`
+
 
 
 [ $errflg ] && usage
