@@ -2,6 +2,7 @@
 
 import vodafoneoem
 import os
+import sys
 
 EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
 
