@@ -1,6 +1,8 @@
 import keyring
 
 class EmptyKey(Exception): pass
+class NullUserName(Exception): pass
+class NullPassword(Exception): pass
 
 class CredsHandler:
     """Retrieve username password from gnome keyring"""
