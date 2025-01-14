@@ -148,6 +148,13 @@ then
 fi
 export EMCLI_USERNAME_KEY=`cat $keyfile`
 
+if [ $iflg ]
+then
+	echo "$prog: already initialised for use" >&2
+	exit 1
+fi
+
+
 [ $errflg ] && usage
 
 if [ $uflg ]
@@ -202,10 +209,14 @@ then
 	elif [ -x $ORACLE_HOME/emcli ]
 	then
 		emcli=$ORACLE_HOME/emcli
-		echo "$prog: emcli not in PATH or ORACLE_HOME" >&2
-		exit 1
 	fi
 fi
+if [ "X$emcli" = "X" ]
+then
+	echo "$prog: emcli not in PATH or ORACLE_HOME or try setting -s with an ORACLE_HOME containing emcli" >&2
+	exit 1
+fi
+
 export EMCLI_DIR=`dirname $emcli`
 PATH=$PATH:$EMCLI_DIR
 

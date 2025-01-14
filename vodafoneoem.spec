@@ -58,6 +58,14 @@ then
 fi
 
 %preun
+cp -p %{_bindir}/oraenv %{_bindir}/oraenv.bak
+cp -p %{_bindir}/coraenv %{_bindir}/coraenv.bak
+cp -p %{_bindir}/dbhome %{_bindir}/dbhome.bak
+
+%postun
+mv %{_bindir}/oraenv.bak %{_bindir}/oraenv
+mv %{_bindir}/coraenv.bak %{_bindir}/coraenv
+mv %{_bindir}/dbhome.bak %{_bindir}/dbhome
 
 
 %files
