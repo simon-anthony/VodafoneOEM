@@ -13,11 +13,10 @@ if username:
     password = mycreds.getPassword(username)
 
     if password:
-        print('Username: ' + username)
-        print('Password: ' + password)
+        print('username:' + username + ' password:' + password)
     else:
-        raise NullPassword
+        print('ERROR: failed to retrieve password for "' + username + '"')
+        sys.exit(1)
 else:
-    raise NullUserName
-
-print('username:' + username + ' password:' + password)
+    print('ERROR: failed to retrieve username')
+    sys.exit(1)
