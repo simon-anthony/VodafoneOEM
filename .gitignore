@@ -26,3 +26,5 @@ py-compile
 *.sav
 __pycache__
 *.swp
+.deps
+depcomp

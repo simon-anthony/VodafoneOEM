@@ -15,7 +15,6 @@ Source0:	%{name}-%{version}.tar.gz
 Requires: bash, python3, python3-keyring, gnome-keyring, gnome-keyring-pam
 BuildRequires: bash, python3, autoconf, automake
 
-BuildArch: noarch
 
 %global debug_package %{nil}
 
@@ -57,10 +56,12 @@ then
 	cp %{_datadir}/%{_package}/oms.ini.example %{_datadir}/%{_package}/oms.ini
 fi
 
+
 %preun
 cp -p %{_bindir}/oraenv %{_bindir}/oraenv.bak
 cp -p %{_bindir}/coraenv %{_bindir}/coraenv.bak
 cp -p %{_bindir}/dbhome %{_bindir}/dbhome.bak
+
 
 %postun
 mv %{_bindir}/oraenv.bak %{_bindir}/oraenv
@@ -70,11 +71,13 @@ mv %{_bindir}/dbhome.bak %{_bindir}/dbhome
 
 %files
 %{_bindir}/*
+%attr(4750,oracle,oinstall)      %{_bindir}/oratab
 %{_libdir}/*
 %{_sysconfdir}/profile.d/*
 %{_sysconfdir}/firewalld/services/*
 %{_libexecdir}/*
 %{_datadir}/*
+%{_mandir}/man?/*
 
 
 %changelog
