@@ -1,6 +1,6 @@
 SUBDIRS = man 
 
 dist_pkgdata_DATA = \
-	oms.ini.example
-
-
+	node.ini.example \
+	properties.ini.example \
+	region.ini.example

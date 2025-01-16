@@ -1,0 +1,116 @@
+import sys
+import argparse
+# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
+# In the latter case config[args.region]['url'] would be used instead of config.get(args.region, 'url')
+# https://docs.python.org/2.7/library/configparser.html
+import ConfigParser
+from utils import getcreds
+
+parser = argparse.ArgumentParser(
+    prog='deploy_agent',
+    description='Add agent to hosts with specified proprties',
+    epilog='Like submit_add_host() but with properties')
+
+# region
+config_region = ConfigParser.ConfigParser()
+config_region.read('@PKGDATADIR@/region.ini')
+group_oms = parser.add_mutually_exclusive_group()
+group_oms.add_argument('-o', '--oms', help='URL')
+group_oms.add_argument('-r', '--region', choices=config_region.sections())
+
+# node
+config_node = ConfigParser.ConfigParser()
+config_node.read('@PKGDATADIR@/node.ini')
+parser.add_argument('-n', '--node', required=True, choices=config_node.sections())
+
+# make gold image optional
+parser.add_argument('-i', '--image', default='agent_gold_image', help='agent gold image name')
+parser.add_argument('-b', '--base', default='/opt/oracle/product/13c/agent', help='installation base directory')
+
+parser.add_argument('-c', '--credential', default='NC-ORACLE', help='credential name to login to host(s)')
+parser.add_argument('-d', '--domain', help='default domain name if missing from host')
+parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
+parser.add_argument('host', nargs='+', help='list of host(s)')
+# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
+parser.add_argument('host', nargs='+', help='list of host(s)')
+
+# Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
+args = parser.parse_args(sys.argv)
+
+if args.region:
+    oms = config.get(args.region, 'url')
+else:
+    oms = args.oms
+
+credential_owner = config_node.get(args.node, 'credential_owner')
+
+for lval in ['credential_name', 'credential_owner', 'installation_base_directory', 'instance_directory']:
+    eval lval = config_node,get(args.node, lval)
+
+print('Connecting to: ' + oms)
+
+platform = 226    # default, probably no other platforms than Linux
+ 
+# Set Connection properties and logon
+set_client_property('EMCLI_OMS_URL', oms)
+set_client_property('EMCLI_TRUSTALL', 'true')
+
+creds = getcreds()
+login(username=creds['username'], password=creds['password'])
+
+# canonicalize host names if default domain available
+if args.domain:
+    host_names = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
+else:
+    host_names = args.host
+
+# host names format for emcli
+host_names = ';'.join(host_names)
+
+sys,exit()
+try:
+    resp = submit_add_host(
+        host_names = host_names,
+        platform = str(platform),
+        installation_base_directory = 
+        installation_base_directory = args.base, 
+        credential_name = args.credential,
+        wait_for_completion = args.wait,
+        image_name = args.image)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+print resp
+#emcli submit_add_host
+#        -host_names="List of host names."
+#        -platform="Platform id"
+#        -installation_base_directory="Installation base directory."
+#        -credential_name="Credential Name"
+#        [-credential_owner="Credential Owner"]
+#        [-instance_directory="Instance directory"]
+#        [-port="Agent port"]
+#        [-version_name="Gold Image Version Name"]
+#        [-image_name="Gold Image Name"]
+#        [-session_name="Deployment session name"]
+#        [-deployment_type=FRESH|SHARED|CLONE]
+#        [-privilege_delegation_setting="Privilege delegation setting"]
+#        [-additional_parameters="parameter1 parameter2 ..."]
+#        [-source_agent="Source agent"]
+#        [-master_agent="Master agent"]
+#        [-input_file=properties_file:"Properties file"]
+#        [-predeploy_script="Predeploy script"]
+#        [-predeploy_script_on_oms]
+#        [-predeploy_script_run_as_root]
+#        [-preinstallation_script="Preinstallation script"]
+#        [-preinstallation_script_on_oms]
+#        [-preinstallation_script_run_as_root]
+#        [-postinstallation_script="Postinstallation script"]
+#        [-postinstallation_script_on_oms]
+#        [-postinstallation_script_run_as_root]
+#        [-configure_hybrid_cloud_agent]
+#        [-hybrid_cloud_gateway_agent="Hybrid Cloud Gateway Agent"]
+#        [-hybrid_cloud_gateway_proxy_port="Hybrid Cloud Gateway Proxy Port"]
+#        [-wait_for_completion]
+#

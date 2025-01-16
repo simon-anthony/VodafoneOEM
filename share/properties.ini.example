@@ -1,0 +1,41 @@
+# Property names are case-sensitive.
+
+# The property name cannot be the same as the following Oracle-provided target property names (in English):
+[DEFAULT]
+Comment
+Deployment Type
+Line of Business
+Location
+Contact
+Lifecycle Status
+
+[Lifecycle Status]
+Development
+MissionCritical
+Production
+Stage
+# Vodafone does not use the default 'Test' but 'nonprod'
+# Test
+nonprod
+
+[Cost Center]
+Vodafone Albania
+Vodafone Czech Republic
+Vodafone Germany
+Vodafone Group
+Vodafone Group Service Gmbh
+Vodafone Group Technology Security
+Vodafone Ireland
+Vodafone Roaming Services
+Vodafone United Kingdom
+
+[Department]
+VC DCOPS Compute Linux OPS-INFRA SVR
+VC DCOPS Compute Linux-TSSI OPS-INFRA SVR
+VC DCOPS Database Oracle North OPS-INFRA DB
+VC DCOPS Database Oracle North-TSSC OPS-INFRA DB
+VC DCOPS Database Oracle South-TSSC OPS-INFRA DB
+
+# Vodfone has dozens of these - match not enforceable
+[Line of Business]
+

@@ -51,10 +51,13 @@ make DESTDIR=%buildroot install
 
 
 %post
-if [ ! -f %{_datadir}/%{_package}/oms.ini ]
-then
-	cp %{_datadir}/%{_package}/oms.ini.example %{_datadir}/%{_package}/oms.ini
-fi
+for file in region node properties
+do
+	if [ ! -f %{_datadir}/%{_package}/$file.ini ]
+	then
+		cp %{_datadir}/%{_package}/$file.ini.example %{_datadir}/%{_package}/$file.ini
+	fi
+done
 
 
 %preun

@@ -21,7 +21,7 @@ group_tgt.add_argument('--database', action='store_true', help='Show oracle data
 
 # OMS options
 config = ConfigParser.ConfigParser()
-config.read('@PKGDATADIR@/oms.ini')
+config.read('@PKGDATADIR@/region.ini')
 
 group_oms = parser.add_mutually_exclusive_group()
 group_oms.add_argument('-o', '--oms', help='URL')

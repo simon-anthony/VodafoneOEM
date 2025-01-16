@@ -24,7 +24,7 @@ args = parser.parse_args(sys.argv)
 
 print('Connecting to: ' + args.oms)
 
-platform=226    # default, probably no other platforms than Linux
+platform = 226    # default, probably no other platforms than Linux
  
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', args.oms)
