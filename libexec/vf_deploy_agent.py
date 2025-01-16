@@ -13,14 +13,14 @@ parser = argparse.ArgumentParser(
 
 # region
 config_region = ConfigParser.ConfigParser()
-config_region.read('@PKGDATADIR@/region.ini')
+config_region.read('/usr/local/share/vodafoneoem/region.ini')
 group_oms = parser.add_mutually_exclusive_group()
 group_oms.add_argument('-o', '--oms', help='URL')
 group_oms.add_argument('-r', '--region', choices=config_region.sections())
 
 # node
 config_node = ConfigParser.ConfigParser()
-config_node.read('@PKGDATADIR@/node.ini')
+config_node.read('/usr/local/share/vodafoneoem/node.ini')
 parser.add_argument('-n', '--node', required=True, choices=config_node.sections())
 
 # make gold image optional
@@ -30,7 +30,6 @@ parser.add_argument('-b', '--base', default='/opt/oracle/product/13c/agent', hel
 parser.add_argument('-c', '--credential', default='NC-ORACLE', help='credential name to login to host(s)')
 parser.add_argument('-d', '--domain', help='default domain name if missing from host')
 parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
-parser.add_argument('host', nargs='+', help='list of host(s)')
 # nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
 parser.add_argument('host', nargs='+', help='list of host(s)')
 
@@ -38,14 +37,23 @@ parser.add_argument('host', nargs='+', help='list of host(s)')
 args = parser.parse_args(sys.argv)
 
 if args.region:
-    oms = config.get(args.region, 'url')
+    oms = config_region.get(args.region, 'url')
 else:
     oms = args.oms
 
 credential_owner = config_node.get(args.node, 'credential_owner')
 
-for lval in ['credential_name', 'credential_owner', 'installation_base_directory', 'instance_directory']:
-    eval lval = config_node,get(args.node, lval)
+error = False
+for lval in ['credential_name', 'foo', 'credential_owner', 'installation_base_directory', 'instance_directory']:
+    try:
+        str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
+        print("INFO: " + str)
+        exec(str)
+    except ConfigParser.NoOptionError, e:
+        print('ERROR: no value for \'' + lval + '\' in section: \'' + args.node + '\'')
+        error = True
+if error:
+    sys.exit(1)
 
 print('Connecting to: ' + oms)
 
@@ -67,14 +75,15 @@ else:
 # host names format for emcli
 host_names = ';'.join(host_names)
 
-sys,exit()
+sys.exit()
 try:
     resp = submit_add_host(
         host_names = host_names,
         platform = str(platform),
-        installation_base_directory = 
-        installation_base_directory = args.base, 
-        credential_name = args.credential,
+        installation_base_directory = installation_base_directory,
+        credential_name = credential_name,
+        credential_owner = credential_owner,
+        instance_directory = instance_directory,
         wait_for_completion = args.wait,
         image_name = args.image)
 
