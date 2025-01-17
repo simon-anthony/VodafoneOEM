@@ -6,6 +6,7 @@ prog=`basename $0 .sh`
 export PROG=$prog
 
 export MODULEDIR=@LIBEXECDIR@/@PACKAGE@
+export LIBDIR=@LIBDIR@/python@PYTHON_VERSION@/site-packages/@PACKAGE@
 export PYTHONPATH=@LIBDIR@/python@PYTHON_VERSION@ # not actually used by EMCLI Jython
 # EMCLI_PYTHONPATH is for modules (i.e. libraries) but does not appear to work...
 export EMCLI_PYTHONPATH=@LIBDIR@/python@PYTHON_VERSION@
@@ -236,6 +237,15 @@ then
 		[ $count -eq 0 ] && echo -n "$prog: installing extension module: "
 		echo -n "`basename $module .py` "
 		ln -fs $module $EMCLI_DIR/emcliext/`basename $module` 
+		(( count += 1 ))
+	done
+	echo
+	count=0
+	for lib in `grep -l '^# emcliext' $LIBDIR/*.py`
+	do
+		[ $count -eq 0 ] && echo -n "$prog: installing extension library: "
+		echo -n "`basename $lib .py` "
+		ln -fs $lib $EMCLI_DIR/emcliext/`basename $lib` 
 		(( count += 1 ))
 	done
 	echo

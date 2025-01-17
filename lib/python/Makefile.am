@@ -13,4 +13,5 @@
 pkgpyexec_PYTHON = \
 	creds.py \
 	core.py \
+	targets.py \
 	__init__.py

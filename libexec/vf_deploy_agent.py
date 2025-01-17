@@ -5,6 +5,7 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+import targets
 
 parser = argparse.ArgumentParser(
     prog='deploy_agent',
@@ -30,7 +31,7 @@ parser.add_argument('-b', '--base', default='/opt/oracle/product/13c/agent', hel
 parser.add_argument('-c', '--credential', default='NC-ORACLE', help='credential name to login to host(s)')
 parser.add_argument('-d', '--domain', help='default domain name if missing from host')
 parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
-# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
+# nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
 parser.add_argument('host', nargs='+', help='list of host(s)')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
@@ -44,7 +45,7 @@ else:
 credential_owner = config_node.get(args.node, 'credential_owner')
 
 error = False
-for lval in ['credential_name', 'foo', 'credential_owner', 'installation_base_directory', 'instance_directory']:
+for lval in ['credential_name', 'credential_owner', 'installation_base_directory', 'instance_directory']:
     try:
         str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
         print("INFO: " + str)
@@ -71,6 +72,14 @@ if args.domain:
     host_names = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
 else:
     host_names = args.host
+
+existing_targets = targets.TargetsList('host')   # list of host targets already in OEM
+
+existing_hosts = existing_targets.filterTargets(host_names)
+
+if (existing_hosts):
+    print('ERROR: the following hosts are already in OEM: ' + existing_hosts)
+    sys.exit(1)
 
 # host names format for emcli
 host_names = ';'.join(host_names)

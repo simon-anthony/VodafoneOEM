@@ -24,4 +24,3 @@ def getcreds(hasrun = None):
     else:
         print('Cannot extract username/password from output')
         raise CredentialRetrieval()
-
