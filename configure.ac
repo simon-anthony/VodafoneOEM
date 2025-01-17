@@ -1,4 +1,4 @@
-AC_INIT([vodafoneoem],[2.1],[bugs@vodafone.com])
+AC_INIT([vodafoneoem],[2.2],[bugs@vodafone.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_PROG_AWK([gawk] nawk awk)
