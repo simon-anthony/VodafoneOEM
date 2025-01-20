@@ -1,13 +1,12 @@
 # Property names are case-sensitive.
 
-# The property name cannot be the same as the following Oracle-provided target property names (in English):
-[DEFAULT]
-Comment
-Deployment Type
-Line of Business
-Location
-Contact
-Lifecycle Status
+# New property names cannot be the same as the following Oracle-provided target property names (in English):
+# Comment
+# Deployment Type
+# Line of Business
+# Location
+# Contact
+# Lifecycle Status
 
 [Lifecycle Status]
 Development
