@@ -34,6 +34,7 @@ parser.add_argument('-w', '--wait', default=False, action='store_true', help='wa
 
 # OEM properties
 config_props = ConfigParser.ConfigParser(allow_no_value=True)
+config_props.optionxform = str # these values are to be case sensitive
 config_props.read('@PKGDATADIR@/properties.ini')
 parser.add_argument('-l', '--lifecycle_status', required=True, choices=config_props.options('Lifecycle Status'), metavar='STATUS', help='STATUS: %(choices)s')
 parser.add_argument('-c', '--cost_center', required=True, choices=config_props.options('Cost Center'), metavar='CENTER', help='CENTER: %(choices)s')
