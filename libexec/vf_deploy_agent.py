@@ -17,12 +17,14 @@ config_region = ConfigParser.ConfigParser()
 config_region.read('@PKGDATADIR@/region.ini')
 group_oms = parser.add_mutually_exclusive_group()
 group_oms.add_argument('-o', '--oms', help='URL for Enterprise Manager Console')
-group_oms.add_argument('-r', '--region', choices=config_region.sections(), metavar='REGION', help='REGION: %(choices)s')
+group_oms.add_argument('-r', '--region',
+    choices=config_region.sections(), metavar='REGION', help='REGION: %(choices)s')
 
 # node
 config_node = ConfigParser.ConfigParser()
 config_node.read('@PKGDATADIR@/node.ini')
-parser.add_argument('-n', '--node', required=True, choices=config_node.sections(), metavar='NODE', help='NODE: ' + ', '.join(config_node.sections()))
+parser.add_argument('-n', '--node', required=True,
+    choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 
 # make gold image optional
 parser.add_argument('-i', '--image', default='agent_gold_image', help='agent gold image name')
@@ -36,8 +38,12 @@ parser.add_argument('-w', '--wait', default=False, action='store_true', help='wa
 config_props = ConfigParser.ConfigParser(allow_no_value=True)
 config_props.optionxform = str # these values are to be case sensitive
 config_props.read('@PKGDATADIR@/properties.ini')
-parser.add_argument('-l', '--lifecycle_status', required=True, choices=config_props.options('Lifecycle Status'), metavar='STATUS', help='STATUS: %(choices)s')
-parser.add_argument('-c', '--cost_center', required=True, choices=config_props.options('Cost Center'), metavar='CENTER', help='CENTER: %(choices)s')
+
+parser.add_argument('-l', '--lifecycle_status', required=True,
+    choices=config_props.options('Lifecycle Status'), metavar='STATUS', help='STATUS: %(choices)s')
+
+parser.add_argument('-c', '--cost_center', required=True,
+    choices=config_props.options('Cost Center'), metavar='CENTER', help='CENTER: %(choices)s')
 
 # nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
 parser.add_argument('host', nargs='+', metavar='HOST', help='list of host(s)')
