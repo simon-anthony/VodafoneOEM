@@ -1,7 +1,7 @@
 toolsdir = $(libexecdir)/$(PACKAGE)
 
 dist_tools_DATA = \
-	create_gold_agent_image.py \
+	vf_create_gold_agent_image.py \
 	create_group.py \
 	get_add_host_status.py \
 	get_targets.py \

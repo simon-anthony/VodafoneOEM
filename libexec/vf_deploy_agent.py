@@ -59,30 +59,28 @@ if args.region:
 else:
     oms = args.oms
 
-credential_owner = config_node.get(args.node, 'credential_owner')
-
 error = False
 for lval in ['credential_name', 'credential_owner', 'installation_base_directory', 'instance_directory']:
     try:
         str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
-        print("INFO: " + str)
+        print("Info: " + str)
         exec(str)
     except ConfigParser.NoOptionError, e:
-        print('ERROR: no value for \'' + lval + '\' in section: \'' + args.node + '\'')
+        print('Error: no value for \'' + lval + '\' in section: \'' + args.node + '\'')
         error = True
 if error:
     sys.exit(1)
 
-print('INFO: connecting to ' + oms)
+print('Info: connecting to ' + oms)
 
-platform = 226    # default, probably no other platforms than Linux
- 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 
 creds = getcreds()
 login(username=creds['username'], password=creds['password'])
+
+platform = 226    # default, probably no other platforms than Linux
 
 # canonicalize host names if default domain available
 if args.domain:
@@ -95,12 +93,12 @@ existing_targets = targets.TargetsList('host')   # list of host targets already 
 existing_hosts = existing_targets.filterTargets(host_list)
 
 if (existing_hosts):
-    print('ERROR: the following hosts are already in OEM: ' + existing_hosts)
+    print('Error: the following hosts are already in OEM: ' + existing_hosts)
     sys.exit(1)
 
 # host names format for emcli
 host_names = ';'.join(host_list)
-print('INFO adding ' + host_names)
+print('Info: adding ' + host_names)
 
 #try:
 #    resp = submit_add_host(
