@@ -10,7 +10,7 @@ import targets
 parser = argparse.ArgumentParser(
     prog='deploy_agent',
     description='Add agent to hosts with specified proprties',
-    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini) amd STATUS, CENTER, DEPT (properties.ini). Values for STATUS, CENTER and DEPT must be quoted')
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini) amd STATUS, CENTER, DEPT (properties.ini). Values for STATUS, CENTER and DEPT must be quoted if they contain spaces')
 
 # region
 config_region = ConfigParser.ConfigParser()
@@ -27,7 +27,7 @@ parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 
 # make gold image optional
-parser.add_argument('-i', '--image', default='agent_gold_image', help='agent gold image name')
+parser.add_argument('-i', '--image', default='agent_gold_image', help='agent gold image name, default \'%(default)s\'')
 parser.add_argument('-b', '--base', default='/opt/oracle/product/13c/agent', help='installation base directory')
 
 #parser.add_argument('-c', '--credential', default='NC-ORACLE', help='credential name to login to host(s)')
@@ -73,7 +73,7 @@ for lval in ['credential_name', 'credential_owner', 'installation_base_directory
 if error:
     sys.exit(1)
 
-print('Connecting to: ' + oms)
+print('INFO: connecting to ' + oms)
 
 platform = 226    # default, probably no other platforms than Linux
  
@@ -86,39 +86,62 @@ login(username=creds['username'], password=creds['password'])
 
 # canonicalize host names if default domain available
 if args.domain:
-    host_names = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
+    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
 else:
-    host_names = args.host
+    host_list = args.host
 
 existing_targets = targets.TargetsList('host')   # list of host targets already in OEM
 
-existing_hosts = existing_targets.filterTargets(host_names)
+existing_hosts = existing_targets.filterTargets(host_list)
 
 if (existing_hosts):
     print('ERROR: the following hosts are already in OEM: ' + existing_hosts)
     sys.exit(1)
 
 # host names format for emcli
-host_names = ';'.join(host_names)
-print('Adding ' + host_names)
+host_names = ';'.join(host_list)
+print('INFO adding ' + host_names)
 
-sys.exit()
+#try:
+#    resp = submit_add_host(
+#        host_names = host_names,
+#        platform = str(platform),
+#        installation_base_directory = installation_base_directory,
+#        credential_name = credential_name,
+#        credential_owner = credential_owner,
+#        instance_directory = instance_directory,
+#        wait_for_completion = args.wait,
+#        image_name = args.image)
+#
+#except emcli.exception.VerbExecutionError, e:
+#    print e.error()
+#    exit(1)
+#
+#print resp
+
+if not args.wait:
+    sys.exit(0)
+
+# build up the property records: 
+#    target_name:target_type:property_name:property_value[;target_name:target_type:property_name:property_value]...
+property_records = []
+
+for host in host_list:
+    property_records.append(host + ':host:' + 'Lifecycle Status:' + args.lifecycle_status)
+    property_records.append(host + ':host:' + 'Cost Center:' + args.cost_center)
+    property_records.append(host + ':host:' + 'Department:' + args.department)
+property_records = ';'.join(property_records)
+print('PROPS: ' + property_records)
+
+exit(0)
 try:
-    resp = submit_add_host(
-        host_names = host_names,
-        platform = str(platform),
-        installation_base_directory = installation_base_directory,
-        credential_name = credential_name,
-        credential_owner = credential_owner,
-        instance_directory = instance_directory,
-        wait_for_completion = args.wait,
-        image_name = args.image)
 
+    resp = set_target_property_value(
+        property_records = property_records)
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-print resp
 #emcli submit_add_host
 #        -host_names="List of host names."
 #        -platform="Platform id"
