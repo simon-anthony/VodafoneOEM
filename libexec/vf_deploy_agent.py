@@ -10,7 +10,7 @@ import targets
 parser = argparse.ArgumentParser(
     prog='deploy_agent',
     description='Add agent to hosts with specified proprties',
-    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), STATUS, CENTER (properties.ini) and REGION (region.ini)')
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini) amd STATUS, CENTER, DEPT (properties.ini). Values for STATUS, CENTER and DEPT must be quoted')
 
 # region
 config_region = ConfigParser.ConfigParser()
@@ -31,7 +31,7 @@ parser.add_argument('-i', '--image', default='agent_gold_image', help='agent gol
 parser.add_argument('-b', '--base', default='/opt/oracle/product/13c/agent', help='installation base directory')
 
 #parser.add_argument('-c', '--credential', default='NC-ORACLE', help='credential name to login to host(s)')
-parser.add_argument('-d', '--domain', help='default domain name if missing from host')
+parser.add_argument('-x', '--domain', help='default domain name if missing from host')
 parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
 
 # OEM properties
@@ -44,6 +44,9 @@ parser.add_argument('-l', '--lifecycle_status', required=True,
 
 parser.add_argument('-c', '--cost_center', required=True,
     choices=config_props.options('Cost Center'), metavar='CENTER', help='CENTER: %(choices)s')
+
+parser.add_argument('-d', '--department', required=True,
+    choices=config_props.options('Department'), metavar='DEPT', help='DEPT: %(choices)s')
 
 # nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
 parser.add_argument('host', nargs='+', metavar='HOST', help='list of host(s)')

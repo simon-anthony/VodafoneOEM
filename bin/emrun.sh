@@ -281,4 +281,4 @@ then
 	exit 1
 fi
 
-emcli @$MODULEDIR/$file.py $*
+emcli @$MODULEDIR/$file.py "$@"
