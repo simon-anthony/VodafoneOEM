@@ -3,14 +3,29 @@
 import vodafoneoem
 import os
 import sys
+import argparse
 
-EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
+parser = argparse.ArgumentParser(
+    prog='getcreds',
+    description='Retrieve given credentials for username or default EMCLI_USERNAME_KEY')
 
-mycreds = vodafoneoem.CredsHandler(EMCLI_USERNAME_KEY)
+parser.add_argument('username', help='username otherwise get from env')
 
-username = mycreds.userName()
+args = parser.parse_args()
+
+# if username is not provided lookup the default from EMCLI_USERNAME_KEY
+
+if args.username:
+    username = args.username
+else:
+    EMCLI_USERNAME_KEY = os.getenv('EMCLI_USERNAME_KEY')
+
+    mycreds = vodafoneoem.CredsHandler(EMCLI_USERNAME_KEY)
+
+    username = mycreds.userName()
 
 if username:
+    mycreds = vodafoneoem.CredsHandler(username)
     password = mycreds.getPassword(username)
 
     if password:

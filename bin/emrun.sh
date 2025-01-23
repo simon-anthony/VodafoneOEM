@@ -129,7 +129,7 @@ fi
 keyfile=$HOME/.config/emcli/username.key 
 mkdir -p `dirname $keyfile`
 
-if [ ! -r $keyfile -o -n "$iflg" ]	# Create a key
+if [ ! -r $keyfile -a -n "$iflg" ]	# Create a key
 then
 	if [ $iflg ]
 	then

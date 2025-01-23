@@ -4,17 +4,22 @@ import re
 
 class CredentialRetrieval(Exception): pass
 
-def getcreds(hasrun = None):
+def getcreds(hasrun = None, username = None):
     """Return username and password in a dict"""
     """ creds = getcreds() """
     """ print('Username: ' + creds['username']) """
     """ print('Password: ' + creds['password']) """
 
+    if username:
+        cmd = ['/usr/local/bin/getcreds', username]
+    else
+        cmd = ['/usr/local/bin/getcreds']
+
     if hasrun:
-        result = subprocess.run(['/usr/local/bin/getcreds'], stdout=subprocess.PIPE)
+        result = subprocess.run(cmd, stdout=subprocess.PIPE)
         string = result.stdout.decode('utf-8')
     else: # for old pythons...
-        result = subprocess.Popen(['/usr/local/bin/getcreds'], stdout=subprocess.PIPE).communicate()[0]
+        result = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
         string = result.decode('utf-8')
 
     m = re.match(r"username:(?P<username>\S+) password:(?P<password>\S+)", string)
