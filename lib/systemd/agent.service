@@ -2,7 +2,9 @@
 # It's not recommended to modify this file in-place, because it will be
 # overwritten during package upgrades.  If you want to customize, the
 # best way is to create an override file.
-# If the command cannot be run check SELinux and try:
+# If the command cannot be run check SELinux, e.g:
+# sudo semanage fcontext -a -t bin_t <ExecStart command>
+# and try:
 # sudo restorecon -F <ExecStart command>
 
 [Unit]

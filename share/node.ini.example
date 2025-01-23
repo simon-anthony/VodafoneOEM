@@ -1,9 +1,14 @@
+# Note that ConfigParser in Jython (Python 2.7) only supports basic
+# interpolation (within the same section) and not the extended interpolation
+# (available between sections) available in configparser in Python 3:
+#   basic interpolation: %(option)s 
+#   extended interpolation: ${[section:]option}
 [db]
 username: vf_dba_build
 credential_name: ORACLE_OPC
 credential_owner: SYSMAN
 installation_base_directory: /u01/app/oracle/emagent
-instance_directory: /u01/app/oracle/emagent/agent_inst
+instance_directory: %(installation_base_directory)s/agent_inst
 custom_credential_loc: /home/oracle/.vf_dba_build
 
 [compute]
@@ -11,5 +16,5 @@ username: vf_unix_build
 credential_name: LINUX_OPC_OEM
 credential_owner: VF_UNIX_BUILD
 installation_base_directory: /opt/emagent
-instance_directory: /opt/emagent/agent_inst
+instance_directory: %(installation_base_directory)s/agent_inst
 custom_credential_loc: /home/oracle/.vf_unix_build
