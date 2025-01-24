@@ -25,6 +25,7 @@ config_node = ConfigParser.ConfigParser()
 config_node.read('@PKGDATADIR@/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
+parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 
 # Make gold image optional
 parser.add_argument('-i', '--image_name', default='agent_gold_image', help='agent gold image name, default \'%(default)s\'')
@@ -84,12 +85,19 @@ print('Info: connecting to ' + oms)
 set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 
-creds = getcreds()
+if args.username:
+    username = args.username
+else:
+    username = config_node.get(args.node, 'username')
+# otherwise will atempt to obtain default username from getcreds()
+
+creds = getcreds(username)
+
 login(username=creds['username'], password=creds['password'])
 
 platform = '226'    # default, probably no other platforms than Linux
 
-# canonicalize host names if default domain available
+# Canonicalize host names if default domain available
 if args.domain:
     host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
 else:
@@ -103,7 +111,7 @@ if (existing_hosts):
     print('Error: the following hosts are already in OEM: ' + existing_hosts)
     sys.exit(1)
 
-# host names format for emcli
+# Host names format for emcli
 host_names = ';'.join(host_list)
 print('Info: adding ' + host_names)
 

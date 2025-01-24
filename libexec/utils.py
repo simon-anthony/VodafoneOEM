@@ -4,15 +4,15 @@ import re
 
 class CredentialRetrieval(Exception): pass
 
-def getcreds(hasrun = None, username = None):
+def getcreds(username = None, hasrun = False):
     """Return username and password in a dict"""
     """ creds = getcreds() """
     """ print('Username: ' + creds['username']) """
     """ print('Password: ' + creds['password']) """
 
     if username:
-        cmd = ['/usr/local/bin/getcreds', username]
-    else
+        cmd = ['/usr/local/bin/getcreds', '-u', username]
+    else:
         cmd = ['/usr/local/bin/getcreds']
 
     if hasrun:
