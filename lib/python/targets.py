@@ -45,17 +45,18 @@ class TargetsList:
         return target not in self.targets_list
 
     """Which target or list of targets is already in OEM?"""
-    """Return a list"""
-    def filterTargets(self, target):
+    """Take a list as input. Return a list"""
+    def filterTargets(self, target_list):
         found_list = []
 
-        if type(target) is str:
-            if target in self.targets_list:
-                found_list[0] = target
-        elif type(target) is list:
-            for item in target:
-                if item in self.targets_list:
-                    found_list.append(item)
+        for item in target_list:
+            if item in self.targets_list:
+                found_list.append(item)
 
         return found_list
                     
+    """Return list of all targets"""
+    def allTargets(self):
+
+        return self.targets_list
+

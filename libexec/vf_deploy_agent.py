@@ -91,9 +91,19 @@ else:
     username = config_node.get(args.node, 'username')
 # otherwise will atempt to obtain default username from getcreds()
 
-creds = getcreds(username)
+if username:
+    creds = getcreds(username)
+else:
+    creds = getcreds()
+    username=creds['username']  # default username
 
-login(username=creds['username'], password=creds['password'])
+if not username:
+    print('Error: unable to determine username to use')
+    sys.exit(1)
+
+print('Info: username = ' + username)
+
+login(username=username, password=creds['password'])
 
 platform = '226'    # default, probably no other platforms than Linux
 
@@ -108,7 +118,9 @@ existing_targets = targets.TargetsList('host')   # list of host targets already 
 existing_hosts = existing_targets.filterTargets(host_list)
 
 if (existing_hosts):
-    print('Error: the following hosts are already in OEM: ' + existing_hosts)
+    print('Error: the following hosts are already in OEM: ')
+    for host in existing_hosts:
+        print(host)
     sys.exit(1)
 
 # Host names format for emcli
