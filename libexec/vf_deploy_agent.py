@@ -30,9 +30,12 @@ parser.add_argument('-u', '--username', help='OMS user, overides that found in @
 # Make gold image optional
 parser.add_argument('-i', '--image_name', default='agent_gold_image', help='agent gold image name, default \'%(default)s\'')
 parser.add_argument('-B', '--installation_base_directory', help='installation base directory')
+parser.add_argument('-I', '--instance_directory', help='instance directory')
 parser.add_argument('-C', '--credential_name', help='credential name to login to host(s)')
+parser.add_argument('-O', '--credential_owner', help='owner credential name to login to host(s)')
 parser.add_argument('-D', '--domain', help='default domain name if missing from host')
 parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
+parser.add_argument('-x', '--exists_check', default=False, action='store_true', help='check if targets are already registered in OEM and quit if found')
 
 # OEM properties
 config_props = ConfigParser.ConfigParser(allow_no_value=True)
@@ -64,8 +67,31 @@ if args.region:
 else:
     oms = args.oms
 
+# Override or retrieve default values for the following settings:
+settings_list = []
+
+if args.credential_name:
+    credential_name = args.credential_name
+else:
+    settings_list.append('credential_name')
+
+if args.credential_owner:
+    credential_owner = args.credential_owner
+else:
+    settings_list.append('credential_owner')
+
+if args.installation_base_directory:
+    installation_base_directory = args.installation_base_directory
+else:
+    settings_list.append('installation_base_directory')
+
+if args.instance_directory:
+    instance_directory = args.instance_directory
+else:
+    settings_list.append('instance_directory')
+    
 error = False
-for lval in ['credential_name', 'credential_owner', 'installation_base_directory', 'instance_directory']:
+for lval in settings_list:
     try:
         str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
         print("Info: " + str)
@@ -75,9 +101,6 @@ for lval in ['credential_name', 'credential_owner', 'installation_base_directory
         error = True
 if error:
     sys.exit(1)
-
-if args.installation_base_directory:
-    installation_base_directory = args.installation_base_directory
 
 print('Info: connecting to ' + oms)
 
@@ -113,15 +136,17 @@ if args.domain:
 else:
     host_list = args.host
 
-existing_targets = targets.TargetsList('host')   # list of host targets already in OEM
+if args.exists_check:
+    existing_targets = targets.TargetsList('host')   # list of host targets already in OEM
 
-existing_hosts = existing_targets.filterTargets(host_list)
+    existing_hosts = existing_targets.filterTargets(host_list)
 
-if (existing_hosts):
-    print('Error: the following hosts are already in OEM: ')
-    for host in existing_hosts:
-        print(host)
-    sys.exit(1)
+    if (existing_hosts):
+        print('Error: the following hosts are already in OEM: ')
+        for host in existing_hosts:
+            print(host)
+        sys.exit(1)
+
 
 # Host names format for emcli
 host_names = ';'.join(host_list)

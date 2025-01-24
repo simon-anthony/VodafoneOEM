@@ -34,6 +34,10 @@ rpmbuild -D "_package $pkg" -bb $topdir/SPECS/$pkg.spec
 # git tag
 # git tag 1.4-1
 # git push --tags
+rel=`sed -n '/Release:/ s;.*:[[:space:]]*\([0-9]*\).*;\1;p' *.spec`
+echo "# To create a new release of this package run:"
+echo "git tag $vers-$rel"
+echo "git push --tags"
 #
 # Cleanup:
 # sudo dnf -y -C remove --noautoremove vodafoneoem
