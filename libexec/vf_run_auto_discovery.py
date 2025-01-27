@@ -5,11 +5,12 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+import targets
 
 parser = argparse.ArgumentParser(
-    prog='promote_gold_agent_image',
-    description='Promote gold image from',
-    epilog='Text at the bottom of help')
+    prog='run_auto_discovery',
+    description='Run auto discovery on specified hosts',
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini) and REGION (region.ini)')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -26,10 +27,11 @@ parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 
-# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
-parser.add_argument('-v', '--version', required=True, help='gold image version name')
-parser.add_argument('-m', '--maturity', choices=['Current', 'Restricted', 'Draft'], default='Current',
-    help='set maturity, default: %(default)s')
+parser.add_argument('-D', '--domain', help='default domain name if missing from host')
+parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
+
+# nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
+parser.add_argument('host', nargs='+', metavar='HOST', help='list of host(s)')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -65,13 +67,24 @@ print('Info: username = ' + username)
 
 login(username=username, password=creds['password'])
 
+platform = '226'    # default, probably no other platforms than Linux
+
+# Canonicalize host names if default domain available
+if args.domain:
+    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
+else:
+    host_list = args.host
+
+# Host names format for emcli
+host_names = ';'.join(host_list)
+print('Info: auto discovery: ' + host_names)
+
 try:
-    resp = promote_gold_agent_image(
-        version_name=args.version,
-        maturity=args.maturity)
+    resp = run_auto_discovery(
+        host = host_names)
 
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
-    
+
 print resp

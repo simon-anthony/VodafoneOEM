@@ -118,7 +118,7 @@ if username:
     creds = getcreds(username)
 else:
     creds = getcreds()
-    username=creds['username']  # default username
+    username = creds['username']  # default username
 
 if not username:
     print('Error: unable to determine username to use')

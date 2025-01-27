@@ -91,6 +91,8 @@ for target in target_array:
     properties = target['Properties']
 
     # Create ';' seprated string of instances
+    # Name-value pair list of RAC database instances that the RAC database target has.
+    # Database instance targets must be added before trying to add the cluster database.
     instances = ';'.join(get_assocs(cluster_file, args.region, cluster))
 
     try:
