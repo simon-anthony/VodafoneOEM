@@ -74,18 +74,18 @@ The following shows the use of JSON
 import json
 
 try:
-    targets = get_targets(targets='%:'+target_type)
+    resp = get_targets(targets='%:'+target_type)
 
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-if targets.isJson():
+if resp.isJson():
     print('Repsonse is JSON')
     print(json.dumps(targets.out(), indent=4))
 
 # refer to elements directly
-for target in targets.out()['data']:
+for target in resp.out()['data']:
     print target['Target Name']
 ```
 Output:
