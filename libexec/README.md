@@ -106,7 +106,7 @@ except emcli.exception.VerbExecutionError, e:
 
 if resp.isJson():
     print('Repsonse is JSON')
-    print(json.dumps(targets.out(), indent=4))
+    print(json.dumps(resp.out(), indent=4))
 
 # refer to elements directly
 for target in resp.out()['data']:
