@@ -55,6 +55,55 @@ else:
 print('Info: status is : ' + status)
 ```
 
+The following shows the use of JSON
+
+```python
+import json
+
+try:
+    targets = get_targets(targets='%:'+target_type)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+if targets.isJson():
+    print('Repsonse is JSON')
+    print(json.dumps(targets.out(), indent=4))
+
+# refer to elements directly
+for target in targets.out()['data']:
+    print target['Target Name']
+```
+
+```
+Repsonse is JSON
+{
+    "data": [
+        {
+            "Status": "Up",
+            "Warning": "1",
+            "Status ID": "1",
+            "Target Type": "host",
+            "Critical": "0",
+            "Target Name": "vdf1.example.com"
+        },
+        {
+            "Status": "Up",
+            "Warning": "1",
+            "Status ID": "1",
+            "Target Type": "host",
+            "Critical": "0",
+            "Target Name": "vdf2.example.com"
+        },
+		...
+    ]	
+}
+vdf1.example.com
+vdf2.example.com
+...
+```
+
 
 # Local Modules Called by EMCLI
 
