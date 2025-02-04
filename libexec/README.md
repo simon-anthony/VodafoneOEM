@@ -1,4 +1,29 @@
-# Response returned by verbs
+# Additional Modules - libexec
+
+## Local Modules Called by EMCLI
+
+Note that the following can be used as substitution variables in the
+scripts:
+
+```m4
+@BASEDIR@
+@SBINDIR@
+@BINDIR@
+@LIBDIR@
+@DATADIR@
+@PKGDATADIR@
+@LIBEXECDIR@
+@DATADIR@
+@SYSCONFDIR@
+@LOCALSTATEDIR@
+@PACKAGE@
+@PREFIX@
+@PYTHON_VERSION@
+```
+
+## Programming Notes
+
+### Response Returned by Verbs
 Every EM CLI verb invocation returns a Response object. The Response object is part of EM
 CLI, and has the functions listed in the table below:
 
@@ -9,7 +34,7 @@ CLI, and has the functions listed in the table below:
 | `exit_code()` | Provides the exit code of the verb execution. The exit code is zero for a successful execution and non-zero otherwise. Refer to the section "Error and Exception Handling" for more details. |
 | `isJson()`    | Provides details about the type of output. It returns True if response.out() can be parsed into a JSON object. |
 
-### JSON Processing
+#### JSON Processing
 If a verb response is JSON, it can be interactively iterated and accessed. You can use
 `response.isJson()` to check whether the verb output is JSON. If the verb output is JSON,
 `response.out()['data']` provides the object in the Jython object model.
@@ -67,7 +92,7 @@ Repsonse is NOT JSON
 Info: status is : Agent Deployment Succeeded
 ```
 
-The following shows the use of JSON
+The following shows the use of JSON:
 
 ```python
 import json
@@ -115,26 +140,4 @@ Repsonse is JSON
 vdf1.example.com
 vdf2.example.com
 ...
-```
-
-
-# Local Modules Called by EMCLI
-
-Note that the following can be used as substitution variables in the
-scripts:
-
-```m4
-@BASEDIR@
-@SBINDIR@
-@BINDIR@
-@LIBDIR@
-@DATADIR@
-@PKGDATADIR@
-@LIBEXECDIR@
-@DATADIR@
-@SYSCONFDIR@
-@LOCALSTATEDIR@
-@PACKAGE@
-@PREFIX@
-@PYTHON_VERSION@
 ```
