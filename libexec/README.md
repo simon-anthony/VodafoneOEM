@@ -17,7 +17,6 @@ If a verb response is JSON, it can be interactively iterated and accessed. You c
 In the examples below, *submit_add_host()* returns text not JSON. However, verbs such as *get_targets()* return JSON. Whilst not necessary in these examples, the tests for JSON are included nevertheless for illustration:
 
 ```python
-import json
 import re
 
 resp = submit_add_host(
