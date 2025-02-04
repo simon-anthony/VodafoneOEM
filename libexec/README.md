@@ -14,10 +14,11 @@ If a verb response is JSON, it can be interactively iterated and accessed. You c
 `response.isJson()` to check whether the verb output is JSON. If the verb output is JSON,
 `response.out()['data']` provides the object in the Jython object model.
 
-In the example below, *submit_add_host()* returns text not JSON. However, verbs such as *get_targets()* return JSON. The tests for JSON are included nevertheless to illustrate the actions possible:
+In the examples below, *submit_add_host()* returns text not JSON. However, verbs such as *get_targets()* return JSON. Whilst not necessary in these examples, the tests for JSON are included nevertheless for illustration:
 
 ```python
 import json
+import re
 
 resp = submit_add_host(
         host_names = host_names,
@@ -26,24 +27,16 @@ resp = submit_add_host(
         credential_name = credential_name,
         credential_owner = credential_owner,
         instance_directory = instance_directory,
-        wait_for_completion = args.wait,
-        image_name = args.image_name)
+        wait_for_completion = True,
+        image_name = image_name)
 
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-print resp
-
-if not args.wait:
-    sys.exit(0)
-
 print(resp.out())
 
-if resp.isJson():
-    print('Repsonse is JSON')
-    print(json.dumps(resp.out(), indent=4))
-else:
+if not resp.isJson():
     print('Repsonse is NOT JSON')
     m = re.search(r"^OverAll Status : (?P<status>.+)$", resp.out(), re.MULTILINE)
     if m:
@@ -53,6 +46,26 @@ else:
         sys.exit(1)
 
 print('Info: status is : ' + status)
+```
+
+Output:
+```console
+Session Name : ADD_HOST_SYSMAN_03-Feb-2025_22:21:56_GMT
+OverAll Status : Agent Deployment Succeeded
+
+Host              Platform Name  Initialization  Remote Prerequisite  Agent Deployment  Error
+vdf1.example.com  Linux x86-64   Succeeded       Succeeded            Succeeded       
+vdf2.example.com  Linux x86-64   Succeeded       Succeeded            Succeeded       
+
+Session Name : ADD_HOST_SYSMAN_03-Feb-2025_22:21:56_GMT
+OverAll Status : Agent Deployment Succeeded
+
+Host              Platform Name  Initialization  Remote Prerequisite  Agent Deployment  Error
+vdf1.example.com  Linux x86-64   Succeeded       Succeeded            Succeeded       
+vdf2.example.com  Linux x86-64   Succeeded       Succeeded            Succeeded      
+
+Repsonse is NOT JSON
+Info: status is : Agent Deployment Succeeded
 ```
 
 The following shows the use of JSON
@@ -75,8 +88,9 @@ if targets.isJson():
 for target in targets.out()['data']:
     print target['Target Name']
 ```
+Output:
 
-```
+```console
 Repsonse is JSON
 {
     "data": [
