@@ -59,7 +59,7 @@ optional arguments:
                         TEXT is not constrained at present
 
 The .ini files found in /usr/local/share/vodafoneoem contain values for NODE
-(node.ini), REGION (region.ini) amd STATUS, CENTER, DEPT (properties.ini).
+(node.ini), REGION (region.ini) and STATUS, CENTER, DEPT (properties.ini).
 Values for STATUS, CENTER and DEPT must be quoted if they contain spaces
 ```
 

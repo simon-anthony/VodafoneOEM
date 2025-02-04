@@ -11,7 +11,7 @@ import re
 parser = argparse.ArgumentParser(
     prog='deploy_agent',
     description='Add agent to hosts with specified proprties',
-    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini) amd STATUS, CENTER, DEPT (properties.ini). Values for STATUS, CENTER and DEPT must be quoted if they contain spaces')
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini) and STATUS, CENTER, DEPT (properties.ini). Values for STATUS, CENTER and DEPT must be quoted if they contain spaces')
 
 # Region
 config_region = ConfigParser.ConfigParser()
