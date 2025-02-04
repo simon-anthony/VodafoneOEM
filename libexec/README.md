@@ -1,4 +1,76 @@
-# Additional Modules - libexec
+# Modules - libexec
+
+## vf_deploy_agent
+
+### Usage
+```console
+usage: deploy_agent [-h] [-o OMS | -r REGION] -n NODE [-u USERNAME]
+                    [-i IMAGE_NAME] [-B INSTALLATION_BASE_DIRECTORY]
+                    [-I INSTANCE_DIRECTORY] [-C CREDENTIAL_NAME]
+                    [-O CREDENTIAL_OWNER] [-D DOMAIN] [-w] [-x] -l STATUS -c
+                    CENTER -d DEPT -b TEXT
+                    HOST [HOST ...]
+
+Add agent to hosts with specified proprties
+
+positional arguments:
+  HOST                  list of host(s)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OMS, --oms OMS     URL for Enterprise Manager Console
+  -r REGION, --region REGION
+                        REGION: dublin, milan, rating, local
+  -n NODE, --node NODE  NODE: db, compute, local
+  -u USERNAME, --username USERNAME
+                        OMS user, overides that found in
+                        /usr/local/share/vodafoneoem/node.ini
+  -i IMAGE_NAME, --image_name IMAGE_NAME
+                        agent gold image name, default 'agent_gold_image'
+  -B INSTALLATION_BASE_DIRECTORY, --installation_base_directory INSTALLATION_BASE_DIRECTORY
+                        installation base directory
+  -I INSTANCE_DIRECTORY, --instance_directory INSTANCE_DIRECTORY
+                        instance directory
+  -C CREDENTIAL_NAME, --credential_name CREDENTIAL_NAME
+                        credential name to login to host(s)
+  -O CREDENTIAL_OWNER, --credential_owner CREDENTIAL_OWNER
+                        owner credential name to login to host(s)
+  -D DOMAIN, --domain DOMAIN
+                        default domain name if missing from host
+  -w, --wait            wait for completion
+  -x, --exists_check    check if targets are already registered in OEM and
+                        quit if found
+  -l STATUS, --lifecycle_status STATUS
+                        STATUS: Development, MissionCritical, Production,
+                        Stage, nonprod
+  -c CENTER, --cost_center CENTER, --bs_company CENTER
+                        CENTER: Vodafone Albania, Vodafone Czech Republic,
+                        Vodafone Germany, Vodafone Group, Vodafone Group
+                        Service Gmbh, Vodafone Group Technology Security,
+                        Vodafone Ireland, Vodafone Roaming Services, Vodafone
+                        United Kingdom
+  -d DEPT, --department DEPT, --support_group DEPT
+                        DEPT: VC DCOPS Compute Linux OPS-INFRA SVR, VC DCOPS
+                        Compute Linux-TSSI OPS-INFRA SVR, VC DCOPS Database
+                        Oracle North OPS-INFRA DB, VC DCOPS Database Oracle
+                        North-TSSC OPS-INFRA DB, VC DCOPS Database Oracle
+                        South-TSSC OPS-INFRA DB
+  -b TEXT, --line_of_business TEXT, --bs_service TEXT
+                        TEXT is not constrained at present
+
+The .ini files found in /usr/local/share/vodafoneoem contain values for NODE
+(node.ini), REGION (region.ini) amd STATUS, CENTER, DEPT (properties.ini).
+Values for STATUS, CENTER and DEPT must be quoted if they contain spaces
+```
+
+### Example
+```bash
+emrun -s oms -- vf_deploy_agent -x -w -D example.com \
+	-r local -n local -l Development \
+	-c 'Vodafone Germany' \
+	-d 'VC DCOPS Compute Linux OPS-INFRA SVR' \
+	-b 'Simon Test' vdf1 vdf2
+```
 
 ## Local Modules Called by EMCLI
 
