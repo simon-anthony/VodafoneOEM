@@ -6,6 +6,7 @@ import argparse
 import ConfigParser
 from utils import getcreds
 import targets
+import re 
 
 parser = argparse.ArgumentParser(
     prog='deploy_agent',
@@ -15,7 +16,7 @@ parser = argparse.ArgumentParser(
 # Region
 config_region = ConfigParser.ConfigParser()
 config_region.read('@PKGDATADIR@/region.ini')
-group_oms = parser.add_mutually_exclusive_group()
+group_oms = parser.add_mutually_exclusive_group(required=True)
 group_oms.add_argument('-o', '--oms', help='URL for Enterprise Manager Console')
 group_oms.add_argument('-r', '--region',
     choices=config_region.sections(), metavar='REGION', help='REGION: %(choices)s')
@@ -171,6 +172,19 @@ print resp
 
 if not args.wait:
     sys.exit(0)
+
+# submit_add_host does not return JSON
+m = re.search(r"^OverAll Status : (?P<status>.+)$", resp.out(), re.MULTILINE)
+if m:
+    status = m.group('status')
+else:
+    print 'Error: Cannot extract status return'
+    sys.exit(1)
+
+print('Info: status is : ' + status)
+
+if status != 'Agent Deployment Succeeded':
+    sys.exit(1)
 
 # build up the property records: 
 #    target_name:target_type:property_name:property_value[;target_name:target_type:property_name:property_value]...

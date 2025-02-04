@@ -1,3 +1,56 @@
+# Response returned by verbs
+Every EM CLI verb invocation returns a Response object. The Response object is part of EM
+CLI, and has the functions listed in Table
+
+| Function    | Description |
+|-------------|-------------|
+| out()       | Provides the verb execution output. The output can be text, or the JSON.isJson() method on the Response object can be used to determine whether the output is JSON. Refer to the section "JSON Processing" for more details. |
+| error()     | Provides the error text (if any) of the verb execution if there are any errors or exceptions during verb execution. Refer to the section "Error and Exception Handling" for more details. |
+| exit_code() | Provides the exit code of the verb execution. The exit code is zero for a successful execution and non-zero otherwise. Refer to the section "Error and Exception Handling" for more details. |
+| isJson()    | Provides details about the type of output. It returns True if response.out() can be parsed into a JSON object. |
+
+
+```python
+resp = submit_add_host(
+        host_names = host_names,
+        platform = platform,
+        installation_base_directory = installation_base_directory,
+        credential_name = credential_name,
+        credential_owner = credential_owner,
+        instance_directory = instance_directory,
+        wait_for_completion = args.wait,
+        image_name = args.image_name)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+print resp
+
+if not args.wait:
+    sys.exit(0)
+
+
+#print('RESP: ' + resp.out()['data'])
+print(resp.out())
+import json
+#print('RESP: ' + resp.out()['data']['Overall Status'])
+if resp.isJson():
+    print('Repsonse is JSON')
+    print(json.dumps(resp.out(), indent=4))
+else:
+    print('Repsonse is NOT JSON')
+    m = re.search(r"^OverAll Status : (?P<status>.+)$", resp.out(), re.MULTILINE)
+    if m:
+        status = m.group('status')
+    else:
+        print 'Error: Cannot extract status return'
+        sys.exit(1)
+
+print('Info: status is : ' + status)
+```
+
+
 # Local Modules Called by EMCLI
 
 Note that the following can be used as substitution variables in the

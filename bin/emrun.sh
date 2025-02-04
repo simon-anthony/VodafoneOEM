@@ -20,12 +20,12 @@ usage() {
 		usage: $prog [-s <sid>] [-v] -- <module> [-h|--help] [<args>]
 		OPTION:
 		  -l, --list                 List <module>s
-		  -k, --keyring              Create keyring
+		  -k, --keyring              Create keyring (if required)
 		  -f, --force                Force overwite of existing keyring, requires -k
-		  -i, --initialise           Initialise keystore for use by creating key token
-		  -u, --username=NAME        Set username (and enter password) for OMS in keystore
+		  -i, --initialise           Initialise keystore with key token for default username (optional)
+		  -u, --username=NAME        Set default username (and enter password) for OMS in keystore (optional)
 		  -s, --sid=NAME             Set ORACLE_HOME (OMS/Agent) for NAME
-		  -e, --emcliext             Link extension modules in ORACLE_HOME, requires -s
+		  -e, --emcliext             Link extension modules in Agent ORACLE_HOME, requires -s
 		  -v, --verbose              Verbose 
 		  -?, --help                 Give this help list
 	!
@@ -152,7 +152,6 @@ then
 	exit 1
 fi
 export EMCLI_USERNAME_KEY=`cat $keyfile`
-
 
 
 [ $errflg ] && usage

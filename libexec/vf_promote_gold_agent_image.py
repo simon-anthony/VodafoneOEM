@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(
 # Region
 config_region = ConfigParser.ConfigParser()
 config_region.read('@PKGDATADIR@/region.ini')
-group_oms = parser.add_mutually_exclusive_group()
+group_oms = parser.add_mutually_exclusive_group(required=True)
 group_oms.add_argument('-o', '--oms', help='URL for Enterprise Manager Console')
 group_oms.add_argument('-r', '--region',
     choices=config_region.sections(), metavar='REGION', help='REGION: %(choices)s')
