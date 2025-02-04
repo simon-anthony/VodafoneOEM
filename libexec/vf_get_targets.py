@@ -105,7 +105,7 @@ if args.host:
         target_list = [(lambda x:x+':3872'+subsep+args.type)(i) for i in host_list]
     targets = sep.join(target_list)
 else:
-    targets = '%'
+    targets = '%:' + args.type
 
 try:
     resp = get_targets(
@@ -119,8 +119,10 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
    
 if resp.isJson():
-    print(json.dumps(resp.out(), indent=4))
-    for target in resp.out()['data']:
-        print(target['Target Type'] + ':' + target['Target Name'])
+    if args.json:
+        print(json.dumps(resp.out(), indent=4))
+    else:
+        for target in resp.out()['data']:
+            print(target['Target Type'] + ':' + target['Target Name'])
 else:
     print(resp.out())
