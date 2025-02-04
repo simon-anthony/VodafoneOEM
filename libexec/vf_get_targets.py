@@ -28,12 +28,15 @@ parser.add_argument('-n', '--node', required=True,
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 parser.add_argument('-D', '--domain', help='default domain name if missing from host(s) specified')
 parser.add_argument('-U', '--unmanaged', default=False, action='store_true', help='get unmanaged targets (no status or alert information)')
-parser.add_argument('-s', '--script', default=False, action='store_true', help='return output in script rather than JSON format)')
+
+group_output = parser.add_mutually_exclusive_group(required=False)
+group_output.add_argument('-s', '--script', default=False, action='store_true', help='return output in script rather than JSON format)')
+group_output.add_argument('-j', '--json', default=False, action='store_true', help='return complete output in JSON format)')
 
 # target options
-parser.add_argument('-t', '--type', '--target_type', default='%', 
-    choices=['host', 'oracle_emd', 'oracle_database', 'rac_database', 'cluster'], metavar='TARGET_TYPE', 
-    help='TARGET_TYPE: %(choices)s (default is all)')
+parser.add_argument('-t', '--type', '--target_type', default='host', 
+    choices=['host', 'oracle_emd', 'oracle_database', 'oracle_home', 'rac_database', 'cluster'], metavar='TARGET_TYPE', 
+    help='TARGET_TYPE: %(choices)s (default is host)')
 
 # nargs=* gather zero or more args into a list
 parser.add_argument('host', nargs='*', metavar='HOST', help='optional list of target(s)')
@@ -88,18 +91,28 @@ login(username=username, password=creds['password'])
 #    'Target Name': 'FREE' }]
 
 # Host names format for emcli
+# By default, the separator_properties is ";" and the subseparator_properties is ":"
+sep = ';'
+subsep = ':'
 
 if args.host:
     # targets format; targets = "[name1:]type1;[name2:]type2;..."
-    target_list = [(lambda x:x+":"+args.type)(i) for i in host_list]
-    targets = ';'.join(target_list)
+    if args.type == 'host':
+        target_list = [(lambda x:x+subsep+args.type)(i) for i in host_list]
+    elif args.type == 'oracle_home':
+        target_list = [(lambda x:'%_'+x+'_%'+subsep+args.type)(i) for i in host_list]
+    elif args.type == 'oracle_emd':
+        target_list = [(lambda x:x+':3872'+subsep+args.type)(i) for i in host_list]
+    targets = sep.join(target_list)
 else:
     targets = '%'
 
 try:
     resp = get_targets(
         targets = targets,
-        script = args.script)
+        script = args.script,
+        separator_properties = sep,
+        subseparator_properties = subsep)
 
 except emcli.exception.VerbExecutionError, e:
     print e.error()

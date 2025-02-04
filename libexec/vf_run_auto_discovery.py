@@ -28,7 +28,6 @@ parser.add_argument('-n', '--node', required=True,
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 
 parser.add_argument('-D', '--domain', help='default domain name if missing from host')
-parser.add_argument('-w', '--wait', default=False, action='store_true', help='wait for completion')
 
 # nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
 parser.add_argument('host', nargs='+', metavar='HOST', help='list of host(s)')
