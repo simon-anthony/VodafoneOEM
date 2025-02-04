@@ -68,6 +68,12 @@ if args.region:
 else:
     oms = args.oms
 
+# Canonicalize host names if default domain available
+if args.domain:
+    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
+else:
+    host_list = args.host
+
 # Override or retrieve default values for the following settings:
 settings_list = []
 
@@ -130,12 +136,6 @@ print('Info: username = ' + username)
 login(username=username, password=creds['password'])
 
 platform = '226'    # default, probably no other platforms than Linux
-
-# Canonicalize host names if default domain available
-if args.domain:
-    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
-else:
-    host_list = args.host
 
 if args.exists_check:
     existing_targets = targets.TargetsList('host')   # list of host targets already in OEM

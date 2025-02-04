@@ -41,6 +41,12 @@ if args.region:
 else:
     oms = args.oms
 
+# Canonicalize host names if default domain available
+if args.domain:
+    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
+else:
+    host_list = args.host
+
 print('Info: connecting to ' + oms)
 
 # Set Connection properties and logon
@@ -68,12 +74,6 @@ print('Info: username = ' + username)
 login(username=username, password=creds['password'])
 
 platform = '226'    # default, probably no other platforms than Linux
-
-# Canonicalize host names if default domain available
-if args.domain:
-    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
-else:
-    host_list = args.host
 
 # Host names format for emcli
 host_names = ';'.join(host_list)
