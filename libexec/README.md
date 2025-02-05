@@ -1,3 +1,16 @@
+<style type="text/css">
+   /* Indent Formatting */
+   /* Format: 1-a-i-A-1-I */
+   ol {list-style-type: decimal;}
+   ol ol { list-style-type: lower-alpha;}
+   ol ol ol { list-style-type: lower-roman;}
+   ol ol ol ol { list-style-type: upper-alpha;}
+   ol ol ol ol ol { list-style-type: decimal;}
+   ol ol ol ol ol ol { list-style-type: upper-roman;}
+   /* https://www.w3schools.com/cssref/pr_list-style-type.asp */
+   /* https://stackoverflow.com/questions/11445453/css-set-li-indent */
+   /* https://stackoverflow.com/questions/13366820/how-do-you-make-lettered-lists-using-markdown */
+</style>
 # Modules - libexec
 
 ## vf_deploy_agent
@@ -82,14 +95,6 @@ method is used. This is based on notes:
 
 The process (1911671.1) is:
 
-<style type="text/css">
-   ol {list-style-type: decimal;}
-   ol ol { list-style-type: lower-alpha;}
-   ol ol ol { list-style-type: lower-roman;}
-   ol ol ol ol { list-style-type: upper-alpha;}
-   ol ol ol ol ol { list-style-type: decimal;}
-   ol ol ol ol ol ol { list-style-type: upper-roman;}
-</style>
 
 1. Add the Cluster Target (1908635.1)
 
