@@ -101,6 +101,7 @@ The process (1911671.1) is:
   <ol type="a">
   <li>An agent installed on all nodes of the cluster (1360183.1)</li>
   <li>It is also necessary to firstly discover (add) the 'cluster' target.)</li>
+  <p>The steps here are:</p>
   <ol type="i">
   <li>Add the Cluster Target (this will also add the Oracle High Availability Service Target</li>
   <li>Add the Database Instance Targets (first node)</li>
