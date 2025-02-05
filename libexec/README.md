@@ -97,7 +97,7 @@ The process (1911671.1) is:
 
 	1. Add the Cluster Target (this will also add the Oracle High Availability Service Target
 
-		add_target type='cluster'
+		`python add_target type='cluster'`
  
 	2. Add the Database Instance Targets (first node)
 
