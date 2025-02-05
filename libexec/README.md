@@ -111,7 +111,7 @@ The process (1911671.1) is:
 
 	b. It is also necessary to firstly discover (add) the 'cluster' target.
 
-		The steps here are:
+	The steps here are:
 
 	1. Add the Cluster Target (this will also add the Oracle High Availability Service Target
 
