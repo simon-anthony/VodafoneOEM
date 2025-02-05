@@ -124,8 +124,14 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         instance = m.group('host')
-        if instance not in instances_list:
-            instances_list.append(host) 
+        m = re.search(r"Machine:(?P<Machine>[^;]+)", resp.out()['data'][0]['Properties'])
+        if m:
+            Machine = m.group('Machine')
+            if Machine == scanName: # check Machine matches scanName, otherwise ignore
+                if instance not in instances_list:
+                    instances_list.append(host) 
+        else:
+            print 'Error: cannot extract MachineName from Properties'
     else:
         print 'Error: cannot extract hostname from Host Info'
         sys.exit(1)

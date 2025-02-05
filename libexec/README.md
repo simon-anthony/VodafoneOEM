@@ -72,6 +72,78 @@ emrun -s oms -- vf_deploy_agent -x -w -D example.com \
 	-b 'Simon Test' vdf1 vdf2
 ```
 
+## vf_promote_cluster
+Tor promote discovered, unmanaged targets to a cluster database the following
+method is used. This is based on notes 1911671.1 and 1908635.1. Note that the
+API is not able to retrieve information about unmanaged targets.
+
+First we retrieve (JSON) information about the cluster (note that only one
+hosts is ever listed in "Host Info" even though there will be multiple nodes
+in a cluster):
+```python
+get_targets(targets = '<cluster_name>:cluster', unmanaged = True, properties = True)
+```
+
+<pre class=console><code>
+{
+    "data": [
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London",
+            "Target Type": "cluster",
+            "Properties": "OracleHome:/opt/oracle/product/19c/grid;isLongPollConfigured:NO;eonsPort:2016;<b>scanName</b>:vdf-cluster-scan.vdf-cluster.grid.example.com;scanPort:1521",
+            "Associations": "",
+            "Target Name": "vdf-cluster"
+        }
+    ]
+}
+</code></pre>
+
+Note that only one hosts is ever listed in "Host Info" even though there will be multiple nodes in a cluster. The challenge is to find which nodes.
+
+If we retrieve all unamanged targets we can observe that we can piece together
+which nodes are in the cluster from the SCAN information. Subsequently we can
+filter these targets based on the target type and standard naming pattern for
+SCAN listeners (we also check that 'Machine' in the SCAN matches the scanName
+in the cluster properties).
+
+```python
+get_targets(targets = 'LISTENER_SCAN%_<cluster_name>:oracle_listener', unmanaged = True, properties = True)
+```
+
+```console
+{
+    "data": [
+		...
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London",
+            "Target Type": "oracle_listener",
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN1;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
+            "Associations": "",
+            "Target Name": "LISTENER_SCAN1_vdf-cluster"
+        },
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London",
+            "Target Type": "oracle_listener",
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN2;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
+            "Associations": "",
+            "Target Name": "LISTENER_SCAN2_vdf-cluster"
+        },
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London",
+            "Target Type": "oracle_listener",
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN3;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
+            "Associations": "",
+            "Target Name": "LISTENER_SCAN3_vdf-cluster"
+        },
+        ...
+    ]
+}
+```
+
+
+
+
+
 ## Local Modules Called by EMCLI
 
 Note that the following can be used as substitution variables in the
