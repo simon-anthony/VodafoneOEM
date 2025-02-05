@@ -93,8 +93,8 @@ The process (1911671.1) is:
 2) Add the ASM Instance Targets
 3) Add the Cluster ASM
 
-[!NOTE]
-The API is not able to retrieve information about unmanaged targets.
+> [!NOTE]
+> The API is not able to retrieve information about unmanaged targets.
 
 First we retrieve (JSON) information about the cluster (note that only one
 hosts is ever listed in "Host Info" even though there will be multiple nodes
