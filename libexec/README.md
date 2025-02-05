@@ -84,13 +84,12 @@ in a cluster):
 get_targets(targets = '<cluster_name>:cluster', unmanaged = True, properties = True)
 ```
 
-<pre class=console><code>
-{
+<pre class=console><code>{
     "data": [
         {
             "Host Info": "host:vdf2.example.com;timezone_region:Europe/London",
             "Target Type": "cluster",
-            "Properties": "OracleHome:/opt/oracle/product/19c/grid;isLongPollConfigured:NO;eonsPort:2016;<b>scanName</b>:vdf-cluster-scan.vdf-cluster.grid.example.com;scanPort:1521",
+            "Properties": "OracleHome:/opt/oracle/product/19c/grid;isLongPollConfigured:NO;eonsPort:2016;<b>scanName</b>:<i>vdf-cluster-scan.vdf-cluster.grid.example.com</i>;scanPort:1521",
             "Associations": "",
             "Target Name": "vdf-cluster"
         }
