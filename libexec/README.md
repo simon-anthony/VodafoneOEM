@@ -93,15 +93,8 @@ The process (1911671.1) is:
 2) Add the ASM Instance Targets
 3) Add the Cluster ASM
 
-Note that the API is not able to retrieve information about unmanaged targets.
-
-From 1908635.1, in order to discover the cluster database (rac_database) target it is necessary to
-have:
-
-a) An agent on all nodes of the cluster 1360183.1
-
-b) It is also necessary to firstly discover (add) the 'cluster' target.
-
+[!NOTE]
+The API is not able to retrieve information about unmanaged targets.
 
 First we retrieve (JSON) information about the cluster (note that only one
 hosts is ever listed in "Host Info" even though there will be multiple nodes
