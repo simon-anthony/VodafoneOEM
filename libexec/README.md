@@ -66,7 +66,7 @@ Values for STATUS, CENTER and DEPT must be quoted if they contain spaces
 ### Example
 ```bash
 emrun -s oms -- vf_deploy_agent -x -w -D example.com \
-	-r local -n local -l Development \
+	-r dublin -n db -l Development \
 	-c 'Vodafone Germany' \
 	-d 'VC DCOPS Compute Linux OPS-INFRA SVR' \
 	-b 'Simon Test' vdf1 vdf2
