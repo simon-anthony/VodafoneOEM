@@ -148,3 +148,4 @@ print('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor
 
 #
 # Step 2 Add the ASM Instance Targets
+#
