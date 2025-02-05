@@ -120,7 +120,7 @@ multiple nodes in a cluster. The challenge is to find which nodes.
 
 If we retrieve all unamanged targets we can observe that we can piece together
 which nodes are in the cluster from the SCAN information. Subsequently we can
-filter these targets based on the target type and standard naming pattern for
+filter these targets based on the target type (<samp>oracle_listener</samp>) and standard naming pattern for
 SCAN listeners (we also check that 'Machine' in the SCAN matches the scanName
 in the cluster properties).
 
