@@ -86,7 +86,7 @@ The process (1911671.1) is:
   <li>Add the Cluster Target (1908635.1)</li>
   <ol class="lower-alpha">
     <li>An agent installed on all nodes of the cluster (1360183.1)</li>
-    <li>It is also necessary to firstly discover (add) the 'cluster' target.)</li>
+    <li>It is also necessary to firstly discover (add) the 'cluster' target.</li>
     <p>The steps here are:</p>
     <ol>
       <li>Add the Cluster Target (this will also add the Oracle High Availability Service Target</li>
@@ -107,9 +107,9 @@ The process (1911671.1) is:
 
 	In order to discover the cluster database (rac_database) target it is necessary to:
 
-	1. An agent installed on all nodes of the cluster (1360183.1)
+	a. An agent installed on all nodes of the cluster (1360183.1)
 
-	2. It is also necessary to firstly discover (add) the 'cluster' target.
+	b. It is also necessary to firstly discover (add) the 'cluster' target.
 
 		The steps here are:
 
