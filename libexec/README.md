@@ -73,9 +73,29 @@ emrun -s oms -- vf_deploy_agent -x -w -D example.com \
 ```
 
 ## vf_promote_cluster
-Tor promote discovered, unmanaged targets to a cluster database the following
-method is used. This is based on notes 1911671.1 and 1908635.1. Note that the
-API is not able to retrieve information about unmanaged targets.
+To promote discovered, unmanaged cluster database targets the following
+method is used. This is based on notes:
+
+1911671.1	How to add Cluster ASM Target
+1908635.1	How to Discover the Cluster and Cluster Database (RAC) Target
+
+The process (1911671.1) is:
+
+1) Add the Cluster Target (1908635.1)
+a) An agent on all nodes of the cluster 1360183.1
+b) It is also necessary to firstly discover (add) the 'cluster' target.
+2) Add the ASM Instance Targets
+3) Add the Cluster ASM
+
+Note that the API is not able to retrieve information about unmanaged targets.
+
+From 1908635.1, in order to discover the cluster database (rac_database) target it is necessary to
+have:
+
+a) An agent on all nodes of the cluster 1360183.1
+
+b) It is also necessary to firstly discover (add) the 'cluster' target.
+
 
 First we retrieve (JSON) information about the cluster (note that only one
 hosts is ever listed in "Host Info" even though there will be multiple nodes
@@ -96,7 +116,8 @@ get_targets(targets = '<cluster_name>:cluster', unmanaged = True, properties = T
 }
 </code></pre>
 
-Note that only one hosts is ever listed in "Host Info" even though there will be multiple nodes in a cluster. The challenge is to find which nodes.
+Note that only one hosts is ever listed in "Host Info" even though there will be
+multiple nodes in a cluster. The challenge is to find which nodes.
 
 If we retrieve all unamanged targets we can observe that we can piece together
 which nodes are in the cluster from the SCAN information. Subsequently we can
@@ -109,7 +130,7 @@ get_targets(targets = 'LISTENER_SCAN%_<cluster_name>:oracle_listener', unmanaged
 ```
 <pre class=console><code>{
     "data": [
-		...
+        ...
         {
             "Host Info": "host:vdf2.example.com;timezone_region:Europe/London",
             "Target Type": "oracle_listener",
