@@ -98,25 +98,13 @@ else:
     print 'Error: cannot extract hostname from Host Info'
     sys.exit(1)
 
-m = re.search(r"scanName:(?P<scanName>[^;]+)", resp.out()['data'][0]['Properties'])
-if m:
-    scanName = m.group('scanName')
-else:
-    print 'Error: cannot extract scanName from Properties'
-    sys.exit(1)
-
-m = re.search(r"scanPort:(?P<scanPort>\d+)", resp.out()['data'][0]['Properties'])
-if m:
-    scanPort = m.group('scanPort')
-else:
-    print 'Error: cannot extract scanPort from Properties'
-    sys.exit(1)
-
-m = re.search(r"OracleHome:(?P<OracleHome>[^;]+)", resp.out()['data'][0]['Properties'])
+m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", resp.out()['data'][0]['Properties'])
 if m:
     OracleHome = m.group('OracleHome')
+    scanName = m.group('scanName')
+    scanPort = m.group('scanPort')
 else:
-    print 'Error: cannot extract OracleHome from Properties'
+    print 'Error: cannot extract OracleHome/scanName/scanPort from Properties'
     sys.exit(1)
 
 # Retrieve the full list of host members from the SCAN listeners
