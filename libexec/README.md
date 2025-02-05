@@ -134,11 +134,7 @@ get_targets(targets = 'LISTENER_SCAN%_<cluster_name>:oracle_listener', unmanaged
         ...
     ]
 }
-```
-
-
-
-
+</code></pre>
 
 ## Local Modules Called by EMCLI
 
