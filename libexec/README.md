@@ -92,17 +92,17 @@ The process (1911671.1) is:
 
 	The steps here are:
 
-	i) Add the 'Cluster' Target (this will also add the 'Oracle High Availability Service' Target
-		add_target type='cluster'
+		i) Add the 'Cluster' Target (this will also add the 'Oracle High Availability Service' Target
+			add_target type='cluster'
  
-	ii) Add the Database Instance Targets (first node)
-		add_target type='oracle_database'
+		ii) Add the Database Instance Targets (first node)
+			add_target type='oracle_database'
  
-	iii) Add the Database Instance Targets (remaining nodes)
-		add_target type='oracle_database'
+		iii) Add the Database Instance Targets (remaining nodes)
+			add_target type='oracle_database'
 
-	iv) Add the Cluster Database (RAC) Target
-		add_target type='rac_database'
+		iv) Add the Cluster Database (RAC) Target
+			add_target type='rac_database'
 
 2) Add the ASM Instance Targets
 
