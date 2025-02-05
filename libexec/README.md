@@ -82,8 +82,11 @@ method is used. This is based on notes:
 The process (1911671.1) is:
 
 1) Add the Cluster Target (1908635.1)
-a) An agent on all nodes of the cluster 1360183.1
-b) It is also necessary to firstly discover (add) the 'cluster' target.
+
+	a) An agent on all nodes of the cluster 1360183.1
+
+	b) It is also necessary to firstly discover (add) the 'cluster' target.
+
 2) Add the ASM Instance Targets
 3) Add the Cluster ASM
 
