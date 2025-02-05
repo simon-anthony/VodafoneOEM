@@ -78,9 +78,9 @@ method is used. This is based on notes:
 
 <dl>
 <dt>1911671.1</dt>
-<dd>_How to add Cluster ASM Target_</dd>
+<dd><var>How to add Cluster ASM Target</var></dd>
 <dt>1908635.1</dt>
-<dd>_How to Discover the Cluster and Cluster Database (RAC) Target_</dd>
+<dd><var>How to Discover the Cluster and Cluster Database (RAC) Target</var></dd>
 </dl>
 
 The process (1911671.1) is:
