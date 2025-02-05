@@ -83,9 +83,6 @@ method is used. This is based on notes:
 The process (1911671.1) is:
 
 <style type="text/css">
-    ol ol ol { list-style-type: lower-roman; }
-</style>
-<style type="text/css">
    /* Indent Formatting */
    /* Format: 1-a-i-A-1-I */
    ol {list-style-type: decimal;}
