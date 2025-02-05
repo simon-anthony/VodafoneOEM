@@ -76,9 +76,9 @@ emrun -s oms -- vf_deploy_agent -x -w -D example.com \
 To promote discovered, unmanaged cluster database targets the following
 method is used. This is based on notes:
 
-1911671.1	How to add Cluster ASM Target
+1911671.1	_How to add Cluster ASM Target_
 
-1908635.1	How to Discover the Cluster and Cluster Database (RAC) Target
+1908635.1	_How to Discover the Cluster and Cluster Database (RAC) Target_
 
 The process (1911671.1) is:
 
