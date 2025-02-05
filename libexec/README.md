@@ -82,6 +82,10 @@ method is used. This is based on notes:
 
 The process (1911671.1) is:
 
+<style type="text/css">
+    ol ol ol { list-style-type: lower-roman; }
+</style>
+
 1) Add the Cluster Target (1908635.1)
 
 	In order to discover the cluster database (rac_database) target it is necessary to:
@@ -92,19 +96,19 @@ The process (1911671.1) is:
 
 	The steps here are:
 
-		i) Add the Cluster Target (this will also add the Oracle High Availability Service Target
+			i) Add the Cluster Target (this will also add the Oracle High Availability Service Target
 
 			add_target type='cluster'
  
-		ii) Add the Database Instance Targets (first node)
+			ii) Add the Database Instance Targets (first node)
 
 			add_target type='oracle_database'
  
-		iii) Add the Database Instance Targets (remaining nodes)
+			iii) Add the Database Instance Targets (remaining nodes)
 
 			add_target type='oracle_database'
 
-		iv) Add the Cluster Database (RAC) Target
+			iv) Add the Cluster Database (RAC) Target
 
 			add_target type='rac_database'
 
