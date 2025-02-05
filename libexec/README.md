@@ -76,32 +76,14 @@ emrun -s oms -- vf_deploy_agent -x -w -D example.com \
 To promote discovered, unmanaged cluster database targets the following
 method is used. This is based on notes:
 
-1911671.1	_How to add Cluster ASM Target_
-
-1908635.1	_How to Discover the Cluster and Cluster Database (RAC) Target_
+<dl>
+<dt>1911671.1</dt>
+<dd>_How to add Cluster ASM Target_</dd>
+<dt>1908635.1</dt>
+<dd>_How to Discover the Cluster and Cluster Database (RAC) Target_</dd>
+</dl>
 
 The process (1911671.1) is:
-
-<ol type="1">
-  <li>Add the Cluster Target (1908635.1)</li>
-  <ol class="lower-alpha">
-    <li>An agent installed on all nodes of the cluster (1360183.1)</li>
-    <li>It is also necessary to firstly discover (add) the 'cluster' target.</li>
-    <p>The steps here are:</p>
-    <ol>
-      <li>Add the Cluster Target (this will also add the Oracle High Availability Service Target</li>
-      <p>add_target type='cluster'<p>
-      <li>Add the Database Instance Targets (first node)</li>
-      <p>add_target type='oracle_database'<p>
-      <li>Add the Database Instance Targets (remaining nodes)</li>
-      <p>add_target type='oracle_database'<p>
-      <li>Add the Cluster Database (RAC) Target</li>
-      <p>add_target type='rac_database'<p>
-    </ol>
-  </ol>
-  <li>Add the ASM Instance Targets</li>
-  <li>Add the Cluster ASM</li>
-</ol>
 
 1. Add the Cluster Target (1908635.1)
 
