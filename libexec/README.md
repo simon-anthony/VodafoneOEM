@@ -82,13 +82,13 @@ method is used. This is based on notes:
 
 The process (1911671.1) is:
 
-<ol type="1">
+<ol type="1|a|i|I|A">
   <li>Add the Cluster Target (1908635.1)</li>
-  <ol type="I">
+  <ol>
     <li>An agent installed on all nodes of the cluster (1360183.1)</li>
     <li>It is also necessary to firstly discover (add) the 'cluster' target.)</li>
     <p>The steps here are:</p>
-    <ol type="i">
+    <ol>
       <li>Add the Cluster Target (this will also add the Oracle High Availability Service Target</li>
       <p>add_target type='cluster'<p>
       <li>Add the Database Instance Targets (first node)</li>
