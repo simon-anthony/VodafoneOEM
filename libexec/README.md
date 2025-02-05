@@ -1,16 +1,3 @@
-<style type="text/css">
-   /* Indent Formatting */
-   /* Format: 1-a-i-A-1-I */
-   ol {list-style-type: decimal;}
-   ol ol { list-style-type: lower-alpha;}
-   ol ol ol { list-style-type: lower-roman;}
-   ol ol ol ol { list-style-type: upper-alpha;}
-   ol ol ol ol ol { list-style-type: decimal;}
-   ol ol ol ol ol ol { list-style-type: upper-roman;}
-   /* https://www.w3schools.com/cssref/pr_list-style-type.asp */
-   /* https://stackoverflow.com/questions/11445453/css-set-li-indent */
-   /* https://stackoverflow.com/questions/13366820/how-do-you-make-lettered-lists-using-markdown */
-</style>
 # Modules - libexec
 
 ## vf_deploy_agent
@@ -95,6 +82,33 @@ method is used. This is based on notes:
 
 The process (1911671.1) is:
 
+<style type="text/css">
+   /* Indent Formatting */
+   /* Format: 1-a-i-A-1-I */
+   ol {list-style-type: decimal;}
+   ol ol { list-style-type: lower-alpha;}
+   ol ol ol { list-style-type: lower-roman;}
+   ol ol ol ol { list-style-type: upper-alpha;}
+   ol ol ol ol ol { list-style-type: decimal;}
+   ol ol ol ol ol ol { list-style-type: upper-roman;}
+   /* https://www.w3schools.com/cssref/pr_list-style-type.asp */
+   /* https://stackoverflow.com/questions/11445453/css-set-li-indent */
+   /* https://stackoverflow.com/questions/13366820/how-do-you-make-lettered-lists-using-markdown */
+</style>
+
+<ol type="1">
+  <li>Add the Cluster Target (1908635.1)</li>
+  <ol type="a">
+  <li>An agent installed on all nodes of the cluster (1360183.1)</li>
+  <li>It is also necessary to firstly discover (add) the 'cluster' target.)</li>
+  <ol type="i">
+  <li>Add the Cluster Target (this will also add the Oracle High Availability Service Target</li>
+  <li>Add the Database Instance Targets (first node)</li>
+  </ol>
+  </ol>
+  <li>Add the ASM Instance Targets</li>
+  <li>Add the Cluster ASM</li>
+</ol>
 
 1. Add the Cluster Target (1908635.1)
 
