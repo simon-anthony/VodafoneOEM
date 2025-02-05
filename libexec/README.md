@@ -101,7 +101,7 @@ The process (1911671.1) is:
 
 1. Add the Cluster Target (1908635.1)
 
-	In order to discover the cluster database (rac_database) target it is necessary to:
+In order to discover the cluster database (rac_database) target it is necessary to:
 
 	1. An agent installed on all nodes of the cluster (1360183.1)
 
