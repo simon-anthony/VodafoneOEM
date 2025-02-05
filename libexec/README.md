@@ -85,36 +85,49 @@ The process (1911671.1) is:
 <style type="text/css">
     ol ol ol { list-style-type: lower-roman; }
 </style>
+<style type="text/css">
+   /* Indent Formatting */
+   /* Format: 1-a-i-A-1-I */
+   ol {list-style-type: decimal;}
+   ol ol { list-style-type: lower-alpha;}
+   ol ol ol { list-style-type: lower-roman;}
+   ol ol ol ol { list-style-type: upper-alpha;}
+   ol ol ol ol ol { list-style-type: decimal;}
+   ol ol ol ol ol ol { list-style-type: upper-roman;}
+   /* https://www.w3schools.com/cssref/pr_list-style-type.asp */
+   /* https://stackoverflow.com/questions/11445453/css-set-li-indent */
+   /* https://stackoverflow.com/questions/13366820/how-do-you-make-lettered-lists-using-markdown */
+</style>
 
-1) Add the Cluster Target (1908635.1)
+1. Add the Cluster Target (1908635.1)
 
 	In order to discover the cluster database (rac_database) target it is necessary to:
 
-	a) An agent installed on all nodes of the cluster (1360183.1)
+	1. An agent installed on all nodes of the cluster (1360183.1)
 
-	b) It is also necessary to firstly discover (add) the 'cluster' target.
+	2. It is also necessary to firstly discover (add) the 'cluster' target.
 
 	The steps here are:
 
-			i) Add the Cluster Target (this will also add the Oracle High Availability Service Target
+			1. Add the Cluster Target (this will also add the Oracle High Availability Service Target
 
 			add_target type='cluster'
  
-			ii) Add the Database Instance Targets (first node)
+			2. Add the Database Instance Targets (first node)
 
 			add_target type='oracle_database'
  
-			iii) Add the Database Instance Targets (remaining nodes)
+			3. Add the Database Instance Targets (remaining nodes)
 
 			add_target type='oracle_database'
 
-			iv) Add the Cluster Database (RAC) Target
+			4. Add the Cluster Database (RAC) Target
 
 			add_target type='rac_database'
 
-2) Add the ASM Instance Targets
+2. Add the ASM Instance Targets
 
-3) Add the Cluster ASM
+3. Add the Cluster ASM
 
 > [!NOTE]
 > The API is not able to retrieve information about unmanaged targets.
