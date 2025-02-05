@@ -77,6 +77,7 @@ To promote discovered, unmanaged cluster database targets the following
 method is used. This is based on notes:
 
 1911671.1	How to add Cluster ASM Target
+
 1908635.1	How to Discover the Cluster and Cluster Database (RAC) Target
 
 The process (1911671.1) is:
