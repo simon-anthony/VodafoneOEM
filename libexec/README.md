@@ -83,7 +83,6 @@ in a cluster):
 ```python
 get_targets(targets = '<cluster_name>:cluster', unmanaged = True, properties = True)
 ```
-
 <pre class=console><code>{
     "data": [
         {
@@ -108,29 +107,27 @@ in the cluster properties).
 ```python
 get_targets(targets = 'LISTENER_SCAN%_<cluster_name>:oracle_listener', unmanaged = True, properties = True)
 ```
-
-```console
-{
+<pre class=console><code>{
     "data": [
 		...
         {
             "Host Info": "host:vdf2.example.com;timezone_region:Europe/London",
             "Target Type": "oracle_listener",
-            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN1;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN1;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;<b>Machine</b>:<i>vdf-cluster-scan.vdf-cluster.grid.example.com</i>;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
             "Associations": "",
             "Target Name": "LISTENER_SCAN1_vdf-cluster"
         },
         {
             "Host Info": "host:vdf1.example.com;timezone_region:Europe/London",
             "Target Type": "oracle_listener",
-            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN2;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN2;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;<b>Machine</b>:<i>vdf-cluster-scan.vdf-cluster.grid.example.com</i>;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
             "Associations": "",
             "Target Name": "LISTENER_SCAN2_vdf-cluster"
         },
         {
             "Host Info": "host:vdf1.example.com;timezone_region:Europe/London",
             "Target Type": "oracle_listener",
-            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN3;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN3;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;<b>Machine</b>:<i>vdf-cluster-scan.vdf-cluster.grid.example.com</i>;OracleHome:/opt/oracle/product/19c/grid;Port:1521",
             "Associations": "",
             "Target Name": "LISTENER_SCAN3_vdf-cluster"
         },
