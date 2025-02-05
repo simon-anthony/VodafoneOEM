@@ -95,7 +95,7 @@ The process (1911671.1) is:
 
 	The steps here are:
 
-	1. Add the Cluster Target (this will also add the Oracle High Availability Service Target
+	1. Add the Cluster Target (this will also add the Oracle High Availability Service (<samp>has</samp> Target
 
 		`add_target(type='cluster'...)`
  
