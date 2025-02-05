@@ -121,7 +121,7 @@ multiple nodes in a cluster. The challenge is to find which nodes.
 If we retrieve all unamanged targets we can observe that we can piece together
 which nodes are in the cluster from the SCAN information. Subsequently we can
 filter these targets based on the target type (<samp>oracle_listener</samp>) and standard naming pattern for
-SCAN listeners (we also check that <var>Machine</var> in the SCAN properties matches the <var>scanName</var>
+SCAN listeners (we also check that <b><samp>Machine</samp></b> in the SCAN properties matches the <b><samp>scanName</samp></b>
 in the cluster properties).
 
 ```python
