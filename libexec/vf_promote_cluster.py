@@ -86,10 +86,14 @@ except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-#
-# 1) Add the Cluster Target
-#
+################################################################################
+# 1. Add the Cluster Target
+################################################################################
 print(json.dumps(resp.out(), indent=4))
+
+####
+# i. Add the cluster (cluster) target
+####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
 print('Info: cluster = ' + cluster)
@@ -146,6 +150,9 @@ print('Instances: '+ instances)
 
 print('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
 
+####
+# ii. Add the database instance (oracle_database) targets
+####
 
 #
 # 2) Add the ASM Instance Targets

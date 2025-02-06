@@ -1,0 +1,267 @@
+The Oracle base has been changed from /var/opt/oracle/dbhome to oms13c1
+Info: connecting to https://oms.example.com:7803
+Info: username = sysman
+{
+    "data": [
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "cluster", 
+            "Properties": "OracleHome:/opt/oracle/product/19c/grid;isLongPollConfigured:NO;eonsPort:2016;scanName:vdf-cluster-scan.vdf-cluster.grid.example.com;scanPort:1521", 
+            "Associations": "", 
+            "Target Name": "vdf-cluster"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "has", 
+            "Properties": "OracleHome:/opt/oracle/product/19c/grid;isLongPollConfigured:NO", 
+            "Associations": "", 
+            "Target Name": "has_vdf1.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "has", 
+            "Properties": "OracleHome:/opt/oracle/product/19c/grid;isLongPollConfigured:NO", 
+            "Associations": "", 
+            "Target Name": "has_vdf2.example.com"
+        }, 
+        {
+            "Host Info": "host:oel.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_database", 
+            "Properties": "Protocol:TCP;SID:FREE;MachineName:oel.example.com;OracleHome:/opt/oracle/product/23ai/dbhomeFree;Port:1521", 
+            "Associations": "", 
+            "Target Name": "FREE"
+        }, 
+        {
+            "Host Info": "host:oms.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_database", 
+            "Properties": "Protocol:TCP;SID:orcl;MachineName:oms.example.com;OracleHome:/opt/oracle/product/19c/dbhome;Port:1521", 
+            "Associations": "", 
+            "Target Name": "orcl.example.com"
+        }, 
+        {
+            "Host Info": "host:oim.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_database", 
+            "Properties": "Protocol:TCP;SID:orcloim;MachineName:oim.example.com;OracleHome:/opt/oracle/product/19c/dbhome;Port:1521;ServiceName:orcloim.example.com", 
+            "Associations": "", 
+            "Target Name": "orcloim.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_database", 
+            "Properties": "Protocol:TCP;SID:vdf1;MachineName:vdf1.example.com;OracleHome:/opt/oracle/product/19c/dbhome;Port:1521;ServiceName:vdf.example.com", 
+            "Associations": "", 
+            "Target Name": "vdf.example.com_vdf1"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_database", 
+            "Properties": "Protocol:TCP;SID:vdf2;MachineName:vdf2.example.com;OracleHome:/opt/oracle/product/19c/dbhome;Port:1521;ServiceName:vdf.example.com", 
+            "Associations": "", 
+            "Target Name": "vdf.example.com_vdf2"
+        }, 
+        {
+            "Host Info": "host:oim.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/19c/dbhome", 
+            "Associations": "", 
+            "Target Name": "OraDB19Home1_1_oim.example.com_6151"
+        }, 
+        {
+            "Host Info": "host:oms.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/var/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/19c/dbhome", 
+            "Associations": "", 
+            "Target Name": "OraDB19Home1_1_oms.example.com_6151"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/var/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/19c/dbhome", 
+            "Associations": "", 
+            "Target Name": "OraDB19Home1_3_vdf1.example.com_6151"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/var/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/19c/dbhome", 
+            "Associations": "", 
+            "Target Name": "OraDB19Home1_3_vdf2.example.com_6151"
+        }, 
+        {
+            "Host Info": "host:oel.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/23ai/dbhomeFree", 
+            "Associations": "", 
+            "Target Name": "OraDBHome23aiFree_1_oel.example.com_3065"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/var/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/19c/grid", 
+            "Associations": "", 
+            "Target Name": "OraGI19Home1_1_vdf1.example.com_880"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/var/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/19c/grid", 
+            "Associations": "", 
+            "Target Name": "OraGI19Home1_1_vdf2.example.com_880"
+        }, 
+        {
+            "Host Info": "host:oim.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/12c/mw", 
+            "Associations": "", 
+            "Target Name": "OracleHome1_2_oim.example.com_9069"
+        }, 
+        {
+            "Host Info": "host:oms.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_home", 
+            "Properties": "INVENTORY:/var/opt/oracle/oraInventory;HOME_TYPE:O;INSTALL_LOCATION:/opt/oracle/product/13c/cloneOMSHome_13500", 
+            "Associations": "", 
+            "Target Name": "cloneOMSHome_13500_4_oms.example.com_2367"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:ASMNET1LSNR_ASM;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf1.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1525", 
+            "Associations": "", 
+            "Target Name": "ASMNET1LSNR_ASM_vdf1.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:ASMNET1LSNR_ASM;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf2.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1525", 
+            "Associations": "", 
+            "Target Name": "ASMNET1LSNR_ASM_vdf2.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN1;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_SCAN1_vdf-cluster"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN2;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_SCAN2_vdf-cluster"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER_SCAN3;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf-cluster-scan.vdf-cluster.grid.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_SCAN3_vdf-cluster"
+        }, 
+        {
+            "Host Info": "host:oel.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER;ListenerOraDir:/opt/oracle/product/23ai/dbhomeFree/network/admin;Machine:oel.example.com;OracleHome:/opt/oracle/product/23ai/dbhomeFree;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_oel.example.com"
+        }, 
+        {
+            "Host Info": "host:oim.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER;ListenerOraDir:/opt/oracle/product/19c/dbhome/network/admin;Machine:oim.example.com;OracleHome:/opt/oracle/product/19c/dbhome;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_oim.example.com"
+        }, 
+        {
+            "Host Info": "host:oms.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER;ListenerOraDir:/opt/oracle/product/19c/dbhome/network/admin;Machine:oms.example.com;OracleHome:/opt/oracle/product/19c/dbhome;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_oms.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf1.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_vdf1.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_listener", 
+            "Properties": "Protocol:TCP;LsnrName:LISTENER;ListenerOraDir:/opt/oracle/product/19c/grid/network/admin;Machine:vdf2.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521", 
+            "Associations": "", 
+            "Target Name": "LISTENER_vdf2.example.com"
+        }, 
+        {
+            "Host Info": "host:oms.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_pdb", 
+            "Properties": "container_name:orcl.example.com_CDBROOT;ServiceName:orcl.example.com;is_app_pdb:NO;is_app_root:NO;Name:CDB$ROOT;PDBGuid:86B637B62FDF7A65E053F706E80A27CA", 
+            "Associations": "", 
+            "Target Name": "orcl.example.com_CDBROOT"
+        }, 
+        {
+            "Host Info": "host:oms.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_pdb", 
+            "Properties": "container_name:orcl.example.com_CDBROOT;ServiceName:oms.example.com;is_app_pdb:NO;is_app_root:NO;Name:OMS;PDBGuid:2394AE985FAA9B39E063AC65A8C0BA9B", 
+            "Associations": "", 
+            "Target Name": "orcl.example.com_OMS"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_pdb", 
+            "Properties": "container_name:vdf.example.com_CDBROOT;ServiceName:vdf.example.com;is_app_pdb:NO;is_app_root:NO;Name:CDB$ROOT;PDBGuid:86B637B62FDF7A65E053F706E80A27CA", 
+            "Associations": "", 
+            "Target Name": "vdf.example.com_CDBROOT"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "oracle_pdb", 
+            "Properties": "container_name:vdf.example.com_CDBROOT;ServiceName:pdb.example.com;is_app_pdb:NO;is_app_root:NO;Name:PDB;PDBGuid:2D6ED13094EE2E9FE063B665A8C08CF4;PDB_Status:NORMAL", 
+            "Associations": "", 
+            "Target Name": "vdf.example.com_PDB"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "osm_cluster", 
+            "Properties": "ClusterName:vdf-cluster;ServiceName:+ASM", 
+            "Associations": "", 
+            "Target Name": "+ASM_vdf-cluster"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "osm_instance", 
+            "Properties": "Protocol:TCP;MachineName:vdf1.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521;SID:+ASM1", 
+            "Associations": "", 
+            "Target Name": "+ASM1_vdf1.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "osm_instance", 
+            "Properties": "Protocol:TCP;MachineName:vdf2.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521;SID:+ASM2", 
+            "Associations": "", 
+            "Target Name": "+ASM2_vdf2.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf1.example.com;timezone_region:Europe/London", 
+            "Target Type": "osm_instance", 
+            "Properties": "Protocol:TCP;MachineName:vdf1.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521;SID:+asm1", 
+            "Associations": "", 
+            "Target Name": "+asm1_vdf1.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "osm_instance", 
+            "Properties": "Protocol:TCP;MachineName:vdf2.example.com;OracleHome:/opt/oracle/product/19c/grid;Port:1521;SID:+asm2", 
+            "Associations": "", 
+            "Target Name": "+asm2_vdf2.example.com"
+        }, 
+        {
+            "Host Info": "host:vdf2.example.com;timezone_region:Europe/London", 
+            "Target Type": "rac_database", 
+            "Properties": "ClusterName:vdf-cluster;ServiceName:vdf.example.com", 
+            "Associations": "", 
+            "Target Name": "vdf.example.com"
+        }
+    ]
+}
+Logout successful
