@@ -106,12 +106,16 @@ if args.host:
         target_list = [(lambda x:x+':3872'+subsep+args.type)(i) for i in host_list]
     targets = sep.join(target_list)
 else:
-    targets = '%:' + args.type
+    if args.unmanaged:
+        targets = '%'
+    else:
+        targets = '%:' + args.type
 
 try:
     resp = get_targets(
         targets = targets,
         script = args.script,
+        unmanaged = args.unmanaged,
         separator_properties = sep,
         subseparator_properties = subsep)
 
