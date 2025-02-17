@@ -9,9 +9,9 @@ from utils import getcreds
 parser = argparse.ArgumentParser(
     prog='create_gold_agent_image',
     description='Create gold image from host',
-    epilog='Quote DESCRIPTION if necessary')
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini) and REGION (region.ini)')
 
-# region
+# Region
 config_region = ConfigParser.ConfigParser()
 config_region.read('@PKGDATADIR@/region.ini')
 group_oms = parser.add_mutually_exclusive_group(required=True)
@@ -19,12 +19,19 @@ group_oms.add_argument('-o', '--oms', help='URL for Enterprise Manager Console')
 group_oms.add_argument('-r', '--region',
     choices=config_region.sections(), metavar='REGION', help='REGION: %(choices)s')
 
+# Node
+config_node = ConfigParser.ConfigParser()
+config_node.read('@PKGDATADIR@/node.ini')
+parser.add_argument('-n', '--node', required=True,
+    choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
+
 # nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
 parser.add_argument('-v', '--version_name', required=True, help='source agent version name')
 parser.add_argument('-i', '--image_name', required=True, help='gold agent image name')
 parser.add_argument('-s', '--source_agent', required=True, help='source agent')
 parser.add_argument('-p', '--port', default=3872, type=int, help='source agent port')
 parser.add_argument('-d', '--description', help='source agent description')
+parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -40,8 +47,25 @@ print('Info: connecting to ' + oms)
 set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
 
-creds = getcreds()
-login(username=creds['username'], password=creds['password'])
+if args.username:
+    username = args.username
+else:
+    username = config_node.get(args.node, 'username')
+# otherwise will atempt to obtain default username from getcreds()
+
+if username:
+    creds = getcreds(username)
+else:
+    creds = getcreds()
+    username = creds['username']  # default username
+
+if not username:
+    print('Error: unable to determine username to use')
+    sys.exit(1)
+
+print('Info: username = ' + username)
+
+login(username=username, password=creds['password'])
 
 try:
     resp = create_gold_agent_image(

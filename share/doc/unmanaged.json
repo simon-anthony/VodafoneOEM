@@ -1,6 +1,3 @@
-The Oracle base has been changed from /var/opt/oracle/dbhome to oms13c1
-Info: connecting to https://oms.example.com:7803
-Info: username = sysman
 {
     "data": [
         {
@@ -264,4 +261,3 @@ Info: username = sysman
         }
     ]
 }
-Logout successful

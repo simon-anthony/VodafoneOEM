@@ -10,10 +10,11 @@ dist_tools_DATA = \
 	promote_discovered_targets.py \
 	vf_promote_gold_agent_image.py \
 	submit_add_host.py \
-	update_group_of_agents.py \
+	vf_update_group_of_agents.py \
 	utils.py \
 	vf_deploy_agent.py \
-	vf_run_auto_discovery.py
+	vf_run_auto_discovery.py \
+	vf_list_gold_agent_images.py
 
 do_subst = sed -i \
 	-e 's;[@]BASEDIR[@];$(prefix);g' \

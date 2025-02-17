@@ -5,12 +5,11 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
-import targets
 
 parser = argparse.ArgumentParser(
-    prog='run_auto_discovery',
-    description='Run auto discovery on specified hosts',
-    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini) and REGION (region.ini)')
+    prog='update_group_of_agents',
+    description='Update a group of agents',
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -25,11 +24,15 @@ config_node = ConfigParser.ConfigParser()
 config_node.read('@PKGDATADIR@/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
-parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
-parser.add_argument('-D', '--domain', help='default domain name if missing from host')
 
 # nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
-parser.add_argument('host', nargs='+', metavar='HOST', help='list of host(s)')
+parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
+parser.add_argument('-g', '--group', required=True, help='group')
+parser.add_argument('-i', '--image', required=True, help='gold agent image name')
+
+group_sub = parser.add_mutually_exclusive_group(required=False)
+group_sub.add_argument('-s', '--subscribe', action='store_true', default=False, help='subscribe to the gold image ')
+group_sub.add_argument('-v', '--validate_only', action='store_true', default=False, help='check whether agents can be updated')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -39,14 +42,8 @@ if args.region:
 else:
     oms = args.oms
 
-# Canonicalize host names if default domain available
-if args.domain:
-    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
-else:
-    host_list = args.host
-
-print('Info: connecting to ' + oms)
-
+print('Info: connecting to: ' + oms)
+ 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
 set_client_property('EMCLI_TRUSTALL', 'true')
@@ -71,18 +68,39 @@ print('Info: username = ' + username)
 
 login(username=username, password=creds['password'])
 
-platform = '226'    # default, probably no other platforms than Linux
+# subscribe only
+if args.subscribe:
+    try:
+        resp = subscribe_agents (
+            image_name = args.image,
+            groups = args.group)
 
-# Host names format for emcli
-host_names = ';'.join(host_list)
-print('Info: auto discovery: ' + host_names)
+    except emcli.exception.VerbExecutionError, e:
+       print e.error()
+       exit(1)
 
+    print resp
+    exit(0)
+
+# get all members of the specified group
 try:
-    resp = run_auto_discovery(
-        host = host_names)
+    members = get_group_members(name=args.group).out()['data']
 
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
+
+# extract the target names and create a ',' separated string from the list
+target_names = ','.join([i['Target Name'] for i in members if i['Target Type'] == 'oracle_emd'])
+
+try:
+    resp = update_agents(
+        image_name = args.image,
+        agents = target_names,
+        validate_only = args.validate_only)
+
+except emcli.exception.VerbExecutionError, e:
+   print e.error()
+   exit(1)
 
 print resp

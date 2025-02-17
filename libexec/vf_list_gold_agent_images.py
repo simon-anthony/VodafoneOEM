@@ -5,12 +5,14 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
-import targets
+import csv
+from StringIO import StringIO
+
 
 parser = argparse.ArgumentParser(
-    prog='run_auto_discovery',
-    description='Run auto discovery on specified hosts',
-    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini) and REGION (region.ini)')
+    prog='list_gold_agent_images',
+    description='List gold images',
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -26,10 +28,8 @@ config_node.read('@PKGDATADIR@/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
-parser.add_argument('-D', '--domain', help='default domain name if missing from host')
 
-# nargs=1 produces a list of 1 item, this differs from the default which produces the item itself
-parser.add_argument('host', nargs='+', metavar='HOST', help='list of host(s)')
+# nargs=1 produces a list of 1 item, this differ from the default which produces the item itself
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -38,12 +38,6 @@ if args.region:
     oms = config_region.get(args.region, 'url')
 else:
     oms = args.oms
-
-# Canonicalize host names if default domain available
-if args.domain:
-    host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
-else:
-    host_list = args.host
 
 print('Info: connecting to ' + oms)
 
@@ -71,18 +65,25 @@ print('Info: username = ' + username)
 
 login(username=username, password=creds['password'])
 
-platform = '226'    # default, probably no other platforms than Linux
-
-# Host names format for emcli
-host_names = ';'.join(host_list)
-print('Info: auto discovery: ' + host_names)
-
+# list_gold_agents does not produce a JSON response
 try:
-    resp = run_auto_discovery(
-        host = host_names)
+    resp = list_gold_agent_images(format = 'name:pretty')
 
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-print resp
+# list_gold_agents does not produce a JSON response
+try:
+    resp = list_gold_agent_images(format = 'name:csv')
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+buf = StringIO(resp)
+
+reader = csv.reader(buf)
+
+for line in reader:
+    print(line)

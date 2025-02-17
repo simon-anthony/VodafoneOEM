@@ -20,6 +20,7 @@ TimeoutStopSec=10min
 User=oracle
 Group=oinstall
 
+ExecCondition=
 ExecStart=/opt/oracle/product/13c/agent/agent_13.5.0.0.0/bin/emctl start agent
 ExecStop=/opt/oracle/product/13c/agent/agent_13.5.0.0.0/bin/emctl stop agent
 ExecStopPost=/usr/bin/pkill -KILL -fu oracle oracle.sysman.gcagent.tmmain.TMMain

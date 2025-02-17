@@ -8,7 +8,7 @@ from utils import getcreds
 import json
 
 parser = argparse.ArgumentParser(
-    prog='get_targets',
+    prog='group actions',
     description='Retrieve targets of specified type',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
@@ -25,19 +25,18 @@ config_node = ConfigParser.ConfigParser()
 config_node.read('@PKGDATADIR@/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
-
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 parser.add_argument('-D', '--domain', help='default domain name if missing from host(s) specified')
-parser.add_argument('-U', '--unmanaged', default=False, action='store_true', help='get unmanaged targets (no status or alert information)')
-
-group_output = parser.add_mutually_exclusive_group(required=False)
-group_output.add_argument('-s', '--script', default=False, action='store_true', help='return output in script rather than JSON format)')
-group_output.add_argument('-j', '--json', default=False, action='store_true', help='return complete output in JSON format)')
 
 # target options
 parser.add_argument('-t', '--type', '--target_type', default='host', 
     choices=['host', 'oracle_emd', 'oracle_database', 'oracle_home', 'rac_database', 'cluster'], metavar='TARGET_TYPE', 
     help='TARGET_TYPE: %(choices)s (default is host)')
+# action
+group_action = parser.add_mutually_exclusive_group(required=False)
+group_action.add_argument('-c', '--create', help='Create Group')
+group_action.add_argument('-a', '--add', help='Add to Group')
+group_action.add_argument('-d', '--delete', help='Delete Group')
 
 # nargs=* gather zero or more args into a list
 parser.add_argument('host', nargs='*', metavar='HOST', help='optional list of target(s)')
@@ -83,14 +82,6 @@ print('Info: username = ' + username)
 
 login(username=username, password=creds['password'])
 
-# get_targets() returns:
-#
-# [ {'Host Info': 'host:oel.example.com;timezone_region:Europe/London',
-#    'Target Type': 'oracle_database',
-#    'Properties': 'Protocol:TCP;SID:FREE;MachineName:oel.example.com;OracleHome:/opt/oracle/product/dbhome;Port:1521',
-#    'Associations': '',
-#    'Target Name': 'FREE' }]
-
 # Host names format for emcli
 # By default, the separator_properties is ";" and the subseparator_properties is ":"
 sep = ';'
@@ -108,7 +99,18 @@ if args.host:
 else:
     targets = '%:' + args.type
 
+if args.create:
+    
+elif args.add:
+elif args.delete:
+else
+
 try:
+    create_group
+(name="name"
+[,type=<group>]
+[,add_targets="name1:type1;name2:type2;..."]...
+[,is_propagating="true/false"])
     resp = get_targets(
         targets = targets,
         script = args.script,
