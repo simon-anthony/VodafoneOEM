@@ -75,7 +75,7 @@ login(username=username, password=creds['password'])
 sep = ';'
 subsep = ':'
 
-# Retrieve information about the cluster, not that only *one* node will be
+# Retrieve information about the cluster, note that only *one* node will be
 # present in the 'Host Info'
 targets = args.cluster + ':' + 'cluster'
 

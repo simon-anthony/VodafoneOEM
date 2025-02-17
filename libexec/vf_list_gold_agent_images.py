@@ -73,7 +73,8 @@ except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-# list_gold_agents does not produce a JSON response
+print(resp)
+
 try:
     resp = list_gold_agent_images(format = 'name:csv')
 
@@ -82,8 +83,8 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 buf = StringIO(resp)
+reader = csv.DictReader(buf, dialect='excel')
 
-reader = csv.reader(buf)
-
-for line in reader:
-    print(line)
+for row in reader:
+    resp = list_gold_agent_imageversions(image_name = row['Gold Agent Image'])
+    print resp
