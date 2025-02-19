@@ -43,11 +43,17 @@ class style():
     UNDERLINE = '\033[4m'
     RESET = '\033[0m'
 
+class Enum(set):
+    def __getattr__(self, name):
+        if name in self:
+            return name
+        raise AttributeError
+
+msgLevel = Enum(["ERROR", "WARNING", "INFO", "NOTICE", "USER"])
+
 def msg(s='', level=None, tag=None, color=None):
     """Format a message nicely"""
 
-    # Jython does not like: print(s, file=sys.stderr), so we have to write to
-    # stderr
     if color:
         if color.upper() == BLACK:
             ansicolor = style.BLACK
@@ -66,27 +72,37 @@ def msg(s='', level=None, tag=None, color=None):
         if color.upper() == WHITE:
             ansicolor = style.WHITE
     else:
-        if level.lower() == 'error':
+        if level == msgLevel.ERROR:
             ansicolor = style.RED
-        elif level.lower() == 'warning':
+        elif level == msgLevel.WARNING:
             ansicolor = style.YELLOW
-        elif level.lower() == 'info':
+        elif level == msgLevel.INFO:
             ansicolor = style.GREEN
+        elif level == msgLevel.NOTICE:
+            ansicolor = style.CYAN
+        elif level == msgLevel.USER:
+            ansicolor = style.BLUE
         else:
             ansicolor = None
 
     if not tag:
-        if level.lower() == 'error':
+        if level == msgLevel.ERROR:
             tag = 'Error'
-        elif level.lower() == 'warning':
+        elif level == msgLevel.WARNING:
             tag = 'Warning'
-        elif level.lower() == 'info':
+        elif level == msgLevel.INFO:
             tag = 'Info'
+        elif level == msgLevel.NOTICE:
+            tag = 'Notice'
         else:
-            tag = None
+            tag = None # :-) No default tag for msgLevel.USER
     if tag:
-        prefix = ansicolor + tag + style.RESET + ': '
+        if ansicolor:
+            prefix = ansicolor + tag + style.RESET + ': '
+        else:
+            prefix =  tag + ': '
     else:
         prefix = ''
 
     print(prefix + s)
+

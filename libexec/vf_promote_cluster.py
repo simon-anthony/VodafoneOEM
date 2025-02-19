@@ -5,7 +5,7 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
-from utils import msg
+from utils import msg, msgLevel
 import json
 import re
 debug = True
@@ -41,7 +41,7 @@ if args.region:
 else:
     oms = args.oms
 
-msg('connecting to ' + oms, 'info')
+msg('connecting to ' + oms, msgLevel.INFO)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -63,7 +63,7 @@ if not username:
     print('Error: unable to determine username to use')
     sys.exit(1)
 
-msg('username = ' + username, 'info')
+msg('username = ' + username, msgLevel.INFO)
 
 login(username=username, password=creds['password'])
 
@@ -96,7 +96,7 @@ if debug:
 ####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
-msg(cluster, level='info', tag='Cluster')
+msg(cluster, level=msgLevel.INFO, tag='Cluster')
 
 m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
@@ -145,7 +145,7 @@ for target in resp.out()['data']:   # multiple records
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
-msg(instances, level='info', tag='Instances')
+msg(instances, level=msgLevel.INFO, tag='Instances')
 
 print('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
 
@@ -169,7 +169,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        msg(host, level='info', tag='Oracle Database')
+        msg(host, level=msgLevel.INFO, tag='Oracle Database')
         if host in instances_list: # check host is one of our instances, otherwise ignore
             hosts_list.append(host) 
             dbs_list.append(target['Target Name']) 
@@ -198,7 +198,7 @@ if debug:
 # Find the rac_database with ServiceName the same as the oracle_databases
 # Only one record per rac_database will be returned...
 
-msg('looking for rac_database ' + ServiceName, 'info')
+msg('looking for rac_database ' + ServiceName, msgLevel.INFO)
 
 targets = 'rac_database'
 try:
@@ -230,7 +230,7 @@ for target in resp.out()['data']:   # multiple records
 
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
-    msg(ServiceName, level='info', tag='RAC Database')
+    msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
     print('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+' -instances='+instances+'"')
 
 
