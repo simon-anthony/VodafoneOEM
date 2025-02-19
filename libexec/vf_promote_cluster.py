@@ -5,8 +5,10 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+from utils import msg
 import json
 import re
+debug = True
 
 parser = argparse.ArgumentParser(
     prog='promote_cluster',
@@ -27,12 +29,6 @@ config_node.read('/usr/local/share/vodafoneoem/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 parser.add_argument('-u', '--username', help='OMS user, overides that found in /usr/local/share/vodafoneoem/node.ini')
-#parser.add_argument('-U', '--unmanaged', default=False, action='store_true', help='get unmanaged targets (no status or alert information)')
-
-# target options
-#parser.add_argument('-t', '--type', '--target_type', default='host', 
-#    choices=['host', 'oracle_emd', 'oracle_database', 'oracle_home', 'rac_database', 'cluster', 'osm_cluster', 'has'], metavar='TARGET_TYPE', 
-#    help='TARGET_TYPE: %(choices)s (default is host)')
 
 # only one positional argument - the cluster
 parser.add_argument('cluster', metavar='CLUSTER', help='name of cluster')
@@ -67,16 +63,12 @@ if not username:
     print('Error: unable to determine username to use')
     sys.exit(1)
 
-print('Info: username = ' + username)
+msg('username = ' + username, 'info')
 
 login(username=username, password=creds['password'])
 
-# By default, the separator_properties is ";" and the subseparator_properties is ":"
-sep = ';'
-subsep = ':'
-
 # Retrieve information about the cluster, note that only *one* node will be
-# present in the 'Host Info'
+# present in the 'Host Info' (the last one to be discovered)
 targets = args.cluster + ':' + 'cluster'
 
 try:
@@ -86,23 +78,30 @@ except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
+if len(resp.out()['data']) == 0:
+    print('Error: no such cluster ' + args.cluster)
+    sys.exit(1)
+
+# 1911671.1 How to add Cluster ASM Target
+# 1908635.1 How to Discover the Cluster and Cluster Database (RAC) Target
+
 ################################################################################
 # 1. Add the Cluster Target
 ################################################################################
-print(json.dumps(resp.out(), indent=4))
+if debug:
+    print(json.dumps(resp.out(), indent=4))
 
 ####
 # i. Add the cluster (cluster) target
 ####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
-print('Info: cluster = ' + cluster)
 
 m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
     host = m.group('host')
 else:
-    print 'Error: cannot extract hostname from Host Info'
+    print('Error: cannot extract hostname from Host Info')
     sys.exit(1)
 
 m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", resp.out()['data'][0]['Properties'])
@@ -111,11 +110,10 @@ if m:
     scanName = m.group('scanName')
     scanPort = m.group('scanPort')
 else:
-    print 'Error: cannot extract OracleHome/scanName/scanPort from Properties'
+    print('Error: cannot extract OracleHome/scanName/scanPort from Properties')
     sys.exit(1)
 
 # Retrieve the full list of host members from the SCAN listeners
-
 targets = 'LISTENER_SCAN%_' + cluster + ':oracle_listener'
 try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
@@ -124,7 +122,8 @@ except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-print(json.dumps(resp.out(), indent=4))
+if debug: 
+    print(json.dumps(resp.out(), indent=4))
 
 instances_list = []
 for target in resp.out()['data']:   # multiple records
@@ -136,23 +135,64 @@ for target in resp.out()['data']:   # multiple records
             Machine = m.group('Machine')
             if Machine == scanName: # check Machine matches scanName, otherwise ignore
                 if instance not in instances_list:
-                    instances_list.append(host) 
+                    instances_list.append(instance) 
         else:
             print 'Error: cannot extract MachineName from Properties'
     else:
         print 'Error: cannot extract hostname from Host Info'
         sys.exit(1)
 
-instances_list = [(lambda x:x+':host')(i) for i in instances_list]
-instances = ';'.join(instances_list)
+instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
-print('Instances: '+ instances)
+msg(instances, level='info', tag='Instances')
 
 print('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
 
 ####
-# ii. Add the database instance (oracle_database) targets
+#  ii. Add the database instance (oracle_database) targets
+# iii. Add the remainig nodes
 ####
+# Assume only DBs on instance are for cluster
+
+targets = 'oracle_database'
+try:
+    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+hosts_list = []
+for target in resp.out()['data']:   # multiple records
+    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
+    if m:
+        host = m.group('host')
+        msg(host, level='info', tag='Checking')
+        if host in instances_list: # check host is one of our instances, otherwise ignore
+            hosts_list.append(host) 
+            m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
+            if m:
+                SID = m.group('SID')
+                MachineName = m.group('MachineName')
+                OracleHome = m.group('OracleHome')
+                Port = m.group('Port')
+                ServiceName = m.group('ServiceName')
+
+                print('add_target -name='+ target['Target Name'] + ' -type=oracle_database -host=' + host + ' -monitor_mode=1 -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"')
+            else:
+                print('Error: cannot extract OracleHome/scanName/scanPort from Properties')
+                sys.exit(1)
+    else:
+        print('Error: cannot extract hostname from Host Info')
+        sys.exit(1)
+
+if debug: 
+    print(json.dumps(resp.out(), indent=4))
+
+####
+#  iv. Add the Cluster database (rac_database) target
+####
+
 
 #
 # 2) Add the ASM Instance Targets

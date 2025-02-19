@@ -98,7 +98,7 @@ subsep = ':'
 
 if args.host:
     # targets format; targets = "[name1:]type1;[name2:]type2;..."
-    if args.type == 'host':
+    if args.type == 'host' or args.type == 'rac_database':
         target_list = [(lambda x:x+subsep+args.type)(i) for i in host_list]
     elif args.type == 'oracle_home':
         target_list = [(lambda x:'%_'+x+'_%'+subsep+args.type)(i) for i in host_list]
@@ -116,6 +116,7 @@ try:
         targets = targets,
         script = args.script,
         unmanaged = args.unmanaged,
+        properties = True if args.unmanaged else False,
         separator_properties = sep,
         subseparator_properties = subsep)
 
