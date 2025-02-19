@@ -13,11 +13,11 @@ debug = True
 parser = argparse.ArgumentParser(
     prog='promote_cluster',
     description='Promote a clustser after discovery',
-    epilog='The .ini files found in /usr/local/share/vodafoneoem contain values for NODE (node.ini), REGION (region.ini)')
+    epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
 # Region
 config_region = ConfigParser.ConfigParser()
-config_region.read('/usr/local/share/vodafoneoem/region.ini')
+config_region.read('@PKGDATADIR@/region.ini')
 group_oms = parser.add_mutually_exclusive_group(required=True)
 group_oms.add_argument('-o', '--oms', help='URL for Enterprise Manager Console')
 group_oms.add_argument('-r', '--region',
@@ -25,10 +25,11 @@ group_oms.add_argument('-r', '--region',
 
 # Node
 config_node = ConfigParser.ConfigParser()
-config_node.read('/usr/local/share/vodafoneoem/node.ini')
+config_node.read('@PKGDATADIR@/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
-parser.add_argument('-u', '--username', help='OMS user, overides that found in /usr/local/share/vodafoneoem/node.ini')
+parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
+parser.add_argument('-s', '--dbsnmpuser', help='SNMP user, overides that found in @PKGDATADIR@/node.ini')
 
 # only one positional argument - the cluster
 parser.add_argument('cluster', metavar='CLUSTER', help='name of cluster')
@@ -66,6 +67,21 @@ if not username:
 msg('username = ' + username, msgLevel.INFO)
 
 login(username=username, password=creds['password'])
+
+# retrieve dbsnmp password
+if args.dbsnmpuser:
+    dbsnmpuser = args.dbsnmpuser
+else:
+    dbsnmpuser = config_node.get(args.node, 'dbsnmpuser')
+
+if not dbsnmpuser:
+    msg('unable to determine username for DB snmp', msgLevel.ERROR)
+    sys.exit(1)
+
+dbsnmpcreds = getcreds(dbsnmpuser)
+dbsnmppass = dbsnmpcreds['password']
+
+msg('DB SNMP username = ' + dbsnmpuser, msgLevel.INFO)
 
 # Retrieve information about the cluster, note that only *one* node will be
 # present in the 'Host Info' (the last one to be discovered)
@@ -181,7 +197,11 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 ServiceName = m.group('ServiceName')
 
-                msg('add_target -name='+ target['Target Name'] + ' -type=oracle_database -host=' + host + ' -monitor_mode=1 -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
+                msg('add_target -name='+ target['Target Name'] +
+                ' -type=oracle_database' +
+                ' -host=' + host +
+                ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
+                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
             else:
                 msg('cannot extract OracleHome/scanName/scanPort from Properties', msgLevel.ERROR)
                 sys.exit(1)
@@ -194,7 +214,7 @@ if debug:
 
 ####
 #  iv. Add the Cluster database (rac_database) target
-####o
+####
 # Find the rac_database with ServiceName the same as the oracle_databases
 # Only one record per rac_database will be returned...
 
@@ -231,10 +251,11 @@ for target in resp.out()['data']:   # multiple records
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
     msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
-    msg('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"', msgLevel.USER, tag='EMCLI')
+    msg('add_target -name=' + target['Target Name'] +
+        ' -type=rac_database -host=' + host +
+        ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"', msgLevel.USER, tag='EMCLI')
 
 
-#
+################################################################################
 # 2) Add the ASM Instance Targets
-#
-
+################################################################################
