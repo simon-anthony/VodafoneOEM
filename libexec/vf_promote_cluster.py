@@ -79,7 +79,7 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 if len(resp.out()['data']) == 0:
-    print('Error: no such cluster ' + args.cluster)
+    msg('Error: no such cluster ' + args.cluster, msgLevel.ERROR)
     sys.exit(1)
 
 # 1911671.1 How to add Cluster ASM Target
@@ -102,7 +102,7 @@ m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
     host = m.group('host')
 else:
-    print('Error: cannot extract hostname from Host Info')
+    msg('cannot extract hostname from Host Info', msgLevel.ERROR)
     sys.exit(1)
 
 m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", resp.out()['data'][0]['Properties'])
@@ -111,7 +111,7 @@ if m:
     scanName = m.group('scanName')
     scanPort = m.group('scanPort')
 else:
-    print('Error: cannot extract OracleHome/scanName/scanPort from Properties')
+    msg('cannot extract OracleHome/scanName/scanPort from Properties', msgLevel.ERROR)
     sys.exit(1)
 
 # Retrieve the full list of host members from the SCAN listeners
@@ -138,16 +138,16 @@ for target in resp.out()['data']:   # multiple records
                 if instance not in instances_list: # avoid duplication
                     instances_list.append(instance) 
         else:
-            print 'Error: cannot extract MachineName from Properties'
+            msg('cannot extract MachineName from Properties', msgLevel.ERROR)
     else:
-        print 'Error: cannot extract hostname from Host Info'
+        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
         sys.exit(1)
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
 msg(instances, level=msgLevel.INFO, tag='Instances')
 
-print('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
+msg('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances, msgLevel.USER, tag='EMCLI')
 
 ####
 #  ii. Add the database instance (oracle_database) targets
@@ -181,12 +181,12 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 ServiceName = m.group('ServiceName')
 
-                print('add_target -name='+ target['Target Name'] + ' -type=oracle_database -host=' + host + ' -monitor_mode=1 -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"')
+                msg('add_target -name='+ target['Target Name'] + ' -type=oracle_database -host=' + host + ' -monitor_mode=1 -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
             else:
-                print('Error: cannot extract OracleHome/scanName/scanPort from Properties')
+                msg('cannot extract OracleHome/scanName/scanPort from Properties', msgLevel.ERROR)
                 sys.exit(1)
     else:
-        print('Error: cannot extract hostname from Host Info')
+        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
         sys.exit(1)
 
 if debug: 
@@ -217,7 +217,7 @@ for target in resp.out()['data']:   # multiple records
     if m:
         host = m.group('host')
     else:
-        print('Error: cannot extract hostname from Host Info')
+        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
         sys.exit(1)
 
     m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
@@ -225,13 +225,13 @@ for target in resp.out()['data']:   # multiple records
         ClusterName = m.group('ClusterName')
         ServiceName = m.group('ServiceName')
     else:
-        print('Error: cannot extract ClusterName/ServiceName from Properties')
+        msg('cannot extract ClusterName/ServiceName from Properties', msgLevel.ERROR)
         sys.exit(1)
 
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
     msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
-    print('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+' -instances='+instances+'"')
+    msg('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"', msgLevel.USER, tag='EMCLI')
 
 
 #
