@@ -60,7 +60,7 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    print('Error: unable to determine username to use')
+    msg('unable to determine username to use', msgLevel.ERROR)
     sys.exit(1)
 
 msg('username = ' + username, msgLevel.INFO)
@@ -79,7 +79,7 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 if len(resp.out()['data']) == 0:
-    msg('Error: no such cluster ' + args.cluster, msgLevel.ERROR)
+    msg('no such cluster ' + args.cluster, msgLevel.ERROR)
     sys.exit(1)
 
 # 1911671.1 How to add Cluster ASM Target
