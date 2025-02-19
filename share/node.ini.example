@@ -1,3 +1,10 @@
+# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
+# In the latter case:
+#      config[args.region]['url']
+# would be used instead of:
+#      config.get(args.region, 'url')
+# https://docs.python.org/2.7/library/configparser.html
+#
 # Note that ConfigParser in Jython (Python 2.7) only supports basic
 # interpolation (within the same section) and not the extended interpolation
 # (available between sections) available in configparser in Python 3:
@@ -9,6 +16,7 @@ credential_name: ORACLE_OPC
 credential_owner: SYSMAN
 installation_base_directory: /u01/app/oracle/emagent
 instance_directory: %(installation_base_directory)s/agent_inst
+dbsnmpuser: dbsnmp
 
 [compute]
 username: vf_unix_build
@@ -16,3 +24,4 @@ credential_name: LINUX_OPC_OEM
 credential_owner: VF_UNIX_BUILD
 installation_base_directory: /opt/emagent
 instance_directory: %(installation_base_directory)s/agent_inst
+dbsnmpuser: dbsnmp
