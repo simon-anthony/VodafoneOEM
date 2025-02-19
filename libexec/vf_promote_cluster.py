@@ -135,7 +135,7 @@ for target in resp.out()['data']:   # multiple records
         if m:
             Machine = m.group('Machine')
             if Machine == scanName: # check Machine matches scanName, otherwise ignore
-                if instance not in instances_list:
+                if instance not in instances_list: # avoid duplication
                     instances_list.append(instance) 
         else:
             print 'Error: cannot extract MachineName from Properties'
@@ -196,7 +196,7 @@ if debug:
 #  iv. Add the Cluster database (rac_database) target
 ####o
 # Find the rac_database with ServiceName the same as the oracle_databases
-# Only one record will be returned...
+# Only one record per rac_database will be returned...
 
 msg('looking for rac_database ' + ServiceName, 'info')
 
@@ -231,7 +231,7 @@ for target in resp.out()['data']:   # multiple records
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
     msg(ServiceName, level='info', tag='RAC Database')
-    print('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'-instances='+instances+'"')
+    print('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+' -instances='+instances+'"')
 
 
 #
