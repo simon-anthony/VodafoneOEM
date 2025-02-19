@@ -41,7 +41,7 @@ if args.region:
 else:
     oms = args.oms
 
-print('Info: connecting to ' + oms)
+msg('connecting to ' + oms, 'info')
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -96,6 +96,7 @@ if debug:
 ####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
+msg(cluster, level='info', tag='Cluster')
 
 m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
@@ -163,13 +164,15 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 hosts_list = []
+dbs_list = [] # needed for the targets to add to rac_database
 for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        msg(host, level='info', tag='Checking')
+        msg(host, level='info', tag='Oracle Database')
         if host in instances_list: # check host is one of our instances, otherwise ignore
             hosts_list.append(host) 
+            dbs_list.append(target['Target Name']) 
             m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
             if m:
                 SID = m.group('SID')
@@ -191,7 +194,44 @@ if debug:
 
 ####
 #  iv. Add the Cluster database (rac_database) target
-####
+####o
+# Find the rac_database with ServiceName the same as the oracle_databases
+# Only one record will be returned...
+
+msg('looking for rac_database ' + ServiceName, 'info')
+
+targets = 'rac_database'
+try:
+    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+for target in resp.out()['data']:   # multiple records
+    if target['Target Name'] != ServiceName:  
+        continue
+    # got it!
+
+    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
+    if m:
+        host = m.group('host')
+    else:
+        print('Error: cannot extract hostname from Host Info')
+        sys.exit(1)
+
+    m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
+    if m:
+        ClusterName = m.group('ClusterName')
+        ServiceName = m.group('ServiceName')
+    else:
+        print('Error: cannot extract ClusterName/ServiceName from Properties')
+        sys.exit(1)
+
+    instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
+
+    msg(ServiceName, level='info', tag='RAC Database')
+    print('add_target -name='+ target['Target Name'] + ' -type=rac_database -host=' + host + ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'-instances='+instances+'"')
 
 
 #
