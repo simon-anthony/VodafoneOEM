@@ -57,8 +57,8 @@ class Enum(set):
             return name
         raise AttributeError
 
-msgLevel = Enum(["ERROR", "WARNING", "INFO", "NOTICE", "USER"])
-msgColor = Enum(["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "BRIGHT_BLACK", "BRIGHT_RED", "BRIGHT_GREEN", "BRIGHT_YELLOW", "BRIGHT_BLUE", "BRIGHT_MAGENTA", "BRIGHT_CYAN", "BRIGHT_WHITE", "UNDERLINE"])
+msgLevel = Enum(["ERROR", "WARNING", "INFO", "NOTICE", "USER", "NONE"])
+msgColor = Enum(["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "UNDERLINE", "BRIGHT_BLACK", "BRIGHT_RED", "BRIGHT_GREEN", "BRIGHT_YELLOW", "BRIGHT_BLUE", "BRIGHT_MAGENTA", "BRIGHT_CYAN", "BRIGHT_WHITE"])
 
 def msg(s='', level=None, tag=None, color=None):
     """Format a message nicely"""
@@ -66,25 +66,41 @@ def msg(s='', level=None, tag=None, color=None):
     if color:
         if color == msgColor.BLACK:
             ansicolor = style.BLACK
-        if color == msgColor.RED:
+        elif color == msgColor.RED:
             ansicolor = style.RED
-        if color == msgColor.GREEN:
+        elif color == msgColor.GREEN:
             ansicolor = style.GREEN
-        if color == msgColor.YELLOW:
+        elif color == msgColor.YELLOW:
             ansicolor = style.YELLOW
-        if color == msgColor.BLUE:
+        elif color == msgColor.BLUE:
             ansicolor = style.BLUE
-        if color == msgColor.MAGENTA:
+        elif color == msgColor.MAGENTA:
             ansicolor = style.MAGENTA
-        if color == msgColor.CYAN:
+        elif color == msgColor.CYAN:
             ansicolor = style.CYAN
-        if color == msgColor.WHITE:
+        elif color == msgColor.WHITE:
             ansicolor = style.WHITE
+        elif color == msgColor.BRIGHT_BLACK:
+            ansicolor = style.BRIGHT_BLACK
+        elif color == msgColor.BRIGHT_RED:
+            ansicolor = style.BRIGHT_RED
+        elif color == msgColor.BRIGHT_GREEN:
+            ansicolor = style.BRIGHT_GREEN
+        elif color == msgColor.BRIGHT_YELLOW:
+            ansicolor = style.BRIGHT_YELLOW
+        elif color == msgColor.BRIGHT_BLUE:
+            ansicolor = style.BRIGHT_BLUE
+        elif color == msgColor.BRIGHT_MAGENTA:
+            ansicolor = style.BRIGHT_MAGENTA
+        elif color == msgColor.BRIGHT_CYAN:
+            ansicolor = style.BRIGHT_CYAN
+        elif color == msgColor.BRIGHT_WHITE:
+            ansicolor = style.BRIGHT_WHITE
     else:
         if level == msgLevel.ERROR:
             ansicolor = style.RED
         elif level == msgLevel.WARNING:
-            ansicolor = style.YELLOW
+            ansicolor = style.MAGENTA
         elif level == msgLevel.INFO:
             ansicolor = style.GREEN
         elif level == msgLevel.NOTICE:
