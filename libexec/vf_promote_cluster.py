@@ -5,12 +5,24 @@ from utils import getcreds
 from utils import msg, msgLevel, msgColor
 import json
 import re
-debug = True
+import logging
+from logging_ext import ColoredFormatter
+
 
 parser = argparse.ArgumentParser(
     prog='promote_cluster',
-    description='Promote a clustser after discovery',
+    description='Promote a cluster after discovery',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
+
+# Logging
+log = logging.getLogger(parser.prog) # create top level logger
+
+ch = logging.StreamHandler() # add console handler 
+ch.setLevel(logging.INFO)
+ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
+log.addHandler(ch)
+
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -39,7 +51,15 @@ if args.region:
 else:
     oms = args.oms
 
-msg('connecting to ' + oms, msgLevel.INFO)
+if args.logfile:
+    fh = logging.FileHandler(args.logfile.name) # add file handler
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    log.addHandler(fh)
+
+log.setLevel(logging.DEBUG) # fallback log (default WARNING)
+
+log.info('connecting to ' + oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -58,10 +78,10 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    msg('unable to determine username to use', msgLevel.ERROR)
+    log.error('unable to determine username to use')
     sys.exit(1)
 
-msg('username = ' + username, msgLevel.INFO)
+log.info('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -72,13 +92,13 @@ else:
     dbsnmpuser = config_node.get(args.node, 'dbsnmpuser')
 
 if not dbsnmpuser:
-    msg('unable to determine username for DB snmp', msgLevel.ERROR)
+    log.error('unable to determine username for DB snmp')
     sys.exit(1)
 
 dbsnmpcreds = getcreds(dbsnmpuser)
 dbsnmppass = dbsnmpcreds['password']
 
-msg('DB SNMP username = ' + dbsnmpuser, msgLevel.INFO)
+log.info('DB SNMP username = ' + dbsnmpuser)
 
 # Retrieve information about the cluster, note that only *one* node will be
 # present in the 'Host Info' (the last one to be discovered)
@@ -92,7 +112,7 @@ except emcli.exception.VerbExecutionError, e:
     exit(1)
 
 if len(resp.out()['data']) == 0:
-    msg('no such cluster ' + args.cluster, msgLevel.ERROR)
+    log.error('no such cluster ' + args.cluster)
     sys.exit(1)
 
 # 1911671.1 How to add Cluster ASM Target
@@ -107,13 +127,13 @@ if len(resp.out()['data']) == 0:
 ####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
-msg(cluster, level=msgLevel.INFO, tag='Cluster')
+log.info('cluster: ' + cluster)
 
 m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
     host = m.group('host')
 else:
-    msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+    log.error('cannot extract hostname from Host Info')
     sys.exit(1)
 
 m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", resp.out()['data'][0]['Properties'])
@@ -122,11 +142,10 @@ if m:
     scanName = m.group('scanName')
     scanPort = m.group('scanPort')
 else:
-    msg('cannot extract OracleHome/scanName/scanPort from Properties', msgLevel.ERROR)
+    log.error('cannot extract OracleHome/scanName/scanPort from Properties')
     sys.exit(1)
 
-if debug:
-    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+    log.debug(json.dumps(resp.out(), indent=4))
 
 # Retrieve the full list of host members from the SCAN listeners
 targets = 'LISTENER_SCAN%_' + cluster + ':oracle_listener'
@@ -134,7 +153,7 @@ try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 instances_list = []
@@ -149,19 +168,18 @@ for target in resp.out()['data']:   # multiple records
                 if instance not in instances_list: # avoid duplication
                     instances_list.append(instance) 
         else:
-            msg('cannot extract MachineName from Properties', msgLevel.ERROR)
+            log.error('cannot extract MachineName from Properties')
     else:
-        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        log.error('cannot extract hostname from Host Info')
         sys.exit(1)
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
-msg(instances, level=msgLevel.INFO, tag='Instances')
+log.info('instances: ' + instances)
 
-msg('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances, msgLevel.USER, tag='EMCLI')
+log.notice('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
 
-if debug: 
-    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+log.debug(json.dumps(resp.out(), indent=4))
 
 ####
 #  ii. Add the database instance (oracle_database) targets
@@ -174,7 +192,7 @@ try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 dbs_list = [] # needed for the targets to add to rac_database
@@ -182,7 +200,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        msg(host, level=msgLevel.INFO, tag='Oracle Database')
+        log.info('oracle_database ' + host)
         if host in instances_list: # check host is one of our instances, otherwise ignore
             dbs_list.append(target['Target Name']) 
             m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
@@ -193,20 +211,19 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 ServiceName = m.group('ServiceName')
 
-                msg('add_target -name='+ target['Target Name'] +
+                log.notice('add_target -name='+ target['Target Name'] +
                 ' -type=oracle_database' +
                 ' -host=' + host +
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
-                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
+                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"')
             else:
-                msg('cannot extract SID/MachineName/OracleHome/Port/ServiceName from Properties', msgLevel.ERROR)
+                log.error('cannot extract SID/MachineName/OracleHome/Port/ServiceName from Properties')
                 sys.exit(1)
     else:
-        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        log.error('cannot extract hostname from Host Info')
         sys.exit(1)
 
-if debug: 
-    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+log.debug(json.dumps(resp.out(), indent=4))
 
 ####
 #  iv. Add the Cluster database (rac_database) target
@@ -214,14 +231,14 @@ if debug:
 # Find the rac_database with ServiceName the same as the oracle_databases
 # Only one record per rac_database will be returned...
 
-msg('looking for rac_database ' + ServiceName, msgLevel.INFO)
+log.info('looking for rac_database ' + ServiceName)
 
 targets = 'rac_database'
 try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 for target in resp.out()['data']:   # multiple records
@@ -233,7 +250,7 @@ for target in resp.out()['data']:   # multiple records
     if m:
         host = m.group('host')
     else:
-        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        log.error('cannot extract hostname from Host Info')
         sys.exit(1)
 
     m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
@@ -241,31 +258,30 @@ for target in resp.out()['data']:   # multiple records
         ClusterName = m.group('ClusterName')
         ServiceName = m.group('ServiceName')
     else:
-        msg('cannot extract ClusterName/ServiceName from Properties', msgLevel.ERROR)
+        log.error('cannot extract ClusterName/ServiceName from Properties')
         sys.exit(1)
 
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
-    msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
-    msg('add_target -name=' + target['Target Name'] +
+    log.info('RAC Database ' + ServiceName)
+    log.notice('add_target -name=' + target['Target Name'] +
         ' -type=rac_database -host=' + host +
-        ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"', msgLevel.USER, tag='EMCLI')
+        ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"')
 
-if debug: 
-    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+log.debug(json.dumps(resp.out(), indent=4))
 
 ################################################################################
 # 2) Add the ASM Instance Targets
 ################################################################################
 
-msg('looking for ASM instances on ' + ' '.join(instances_list), msgLevel.INFO)
+log.info('looking for ASM instances on ' + ' '.join(instances_list))
 
 targets = 'osm_instance'
 try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 osm_list = [] # needed for the targets to add to osm_cluster
@@ -273,7 +289,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        msg(host, level=msgLevel.INFO, tag='ASM Instance')
+        log.info('ASM Instance ' + host)
         if host in instances_list: # check host is one of our instances, otherwise ignore
             osm_list.append(target['Target Name']) 
             m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", target['Properties'])
@@ -283,27 +299,26 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 SID = m.group('SID')
 
-                msg('add_target -name='+ target['Target Name'] +
+                log.notice('add_target -name='+ target['Target Name'] +
                 ' -type=osm_instance' +
                 ' -host=' + host +
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
-                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
+                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"')
             else:
-                msg('cannot extract MachineName/OracleHome/Port/SID from Properties', msgLevel.ERROR)
+                log.error('cannot extract MachineName/OracleHome/Port/SID from Properties')
                 sys.exit(1)
     else:
-        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        log.error('cannot extract hostname from Host Info')
         sys.exit(1)
 
-if debug: 
-    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+log.debug(json.dumps(resp.out(), indent=4))
 
 ################################################################################
 # 3) Add Cluster ASM
 ################################################################################
 
 # Only one record per osm_cluster will be returned...
-msg('looking for ASM Cluster *' + cluster, msgLevel.INFO)
+log.info('looking for ASM Cluster ' + cluster)
 
 targets = 'osm_cluster'
 try:
@@ -318,7 +333,7 @@ for target in resp.out()['data']:
     if m:
         host = m.group('host')
     else:
-        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        log.error('cannot extract hostname from Host Info')
         sys.exit(1)
 
     m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
@@ -326,7 +341,7 @@ for target in resp.out()['data']:
         ClusterName = m.group('ClusterName')
         ServiceName = m.group('ServiceName')
     else:
-        msg('cannot extract ClusterName/ServiceName from Properties', msgLevel.ERROR)
+        log.error('cannot extract ClusterName/ServiceName from Properties')
         sys.exit(1)
 
     if ClusterName != cluster:
@@ -336,12 +351,11 @@ for target in resp.out()['data']:
 
     instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in osm_list])
 
-    msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
-    msg('add_target -name=' + target['Target Name'] +
+    log.info('RAC Database '+ServiceName)
+    log.notice('add_target -name=' + target['Target Name'] +
         ' -type=osm_cluster -host=' + host +
         ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName +'"' +
         ' -instances="'+instances+'"' +
-        ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"', msgLevel.USER, tag='EMCLI')
+        ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"')
 
-if debug: 
-    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+log.debug(json.dumps(resp.out(), indent=4))

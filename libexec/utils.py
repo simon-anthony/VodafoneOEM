@@ -57,10 +57,12 @@ class Enum(set):
             return name
         raise AttributeError
 
-# msgLevelJava = Enum(["FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"])
-# msgLevelPython = Enum(["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"])
-msgLevel = Enum(["ERROR", "WARNING", "NOTICE", "INFO", "USER", "NONE"])
-msgColor = Enum(["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "UNDERLINE", "BRIGHT_BLACK", "BRIGHT_RED", "BRIGHT_GREEN", "BRIGHT_YELLOW", "BRIGHT_BLUE", "BRIGHT_MAGENTA", "BRIGHT_CYAN", "BRIGHT_WHITE"])
+# msgLevelSyslog = Enum(['EMERG', 'ALERT', 'CRIT', 'ERR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG'])
+# msgLevelJava = Enum(['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE', 'ALL'])
+# msgLevelPython = Enum(['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
+msgLevel = Enum(['ERROR', 'WARNING', 'NOTICE', 'INFO', 'USER', 'NONE'])
+
+msgColor = Enum(['BLACK', 'RED', 'GREEN', 'YELLOW', 'BLUE', 'MAGENTA', 'CYAN', 'WHITE', 'UNDERLINE', 'BRIGHT_BLACK', 'BRIGHT_RED', 'BRIGHT_GREEN', 'BRIGHT_YELLOW', 'BRIGHT_BLUE', 'BRIGHT_MAGENTA', 'BRIGHT_CYAN', 'BRIGHT_WHITE'])
 
 def msg(s='', level=None, tag=None, color=None):
     """Format a message nicely"""
@@ -119,8 +121,6 @@ def msg(s='', level=None, tag=None, color=None):
             tag = 'Error'
         elif level == msgLevel.WARNING:
             tag = 'Warning'
-        elif level == msgLevel.NOTE:
-            tag = 'Note'
         elif level == msgLevel.INFO:
             tag = 'Info'
         elif level == msgLevel.NOTICE:
