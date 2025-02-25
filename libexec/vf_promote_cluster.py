@@ -17,13 +17,8 @@ parser = argparse.ArgumentParser(
 # Logging
 log = logging.getLogger(parser.prog) # create top level logger
 
-ch = logging.StreamHandler() # add console handler 
-ch.setLevel(logging.INFO)
-ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
-log.addHandler(ch)
-
 parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
-parser.add_argument('-V', '--loglevel', metavar='LEVEL',
+parser.add_argument('-V', '--loglevel', default='INFO', metavar='LEVEL',
     choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level')
 
 # Region
@@ -53,17 +48,21 @@ if args.region:
 else:
     oms = args.oms
 
+# Set up logging
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+
+ch = logging.StreamHandler() # add console handler 
+ch.setLevel(numeric_level)
+ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
+log.addHandler(ch)
+
 if args.logfile:
     fh = logging.FileHandler(args.logfile.name) # add file handler
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     log.addHandler(fh)
-
-if args.loglevel:
-    numeric_level = getattr(logging, args.loglevel.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level: %s' % loglevel)
-    ch.setLevel(numeric_level)
 
 log.setLevel(logging.DEBUG) # fallback log (default WARNING)
 
