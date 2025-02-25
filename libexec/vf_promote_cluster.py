@@ -176,7 +176,6 @@ except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
 
-hosts_list = []
 dbs_list = [] # needed for the targets to add to rac_database
 for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
@@ -184,7 +183,6 @@ for target in resp.out()['data']:   # multiple records
         host = m.group('host')
         msg(host, level=msgLevel.INFO, tag='Oracle Database')
         if host in instances_list: # check host is one of our instances, otherwise ignore
-            hosts_list.append(host) 
             dbs_list.append(target['Target Name']) 
             m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
             if m:
@@ -200,7 +198,7 @@ for target in resp.out()['data']:   # multiple records
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
                 ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
             else:
-                msg('cannot extract OracleHome/scanName/scanPort from Properties', msgLevel.ERROR)
+                msg('cannot extract SID/MachineName/OracleHome/Port/ServiceName from Properties', msgLevel.ERROR)
                 sys.exit(1)
     else:
         msg('cannot extract hostname from Host Info', msgLevel.ERROR)
@@ -256,3 +254,91 @@ for target in resp.out()['data']:   # multiple records
 ################################################################################
 # 2) Add the ASM Instance Targets
 ################################################################################
+
+msg('looking for ASM instances on ' + ' '.join(instances_list), msgLevel.INFO)
+
+targets = 'osm_instance'
+try:
+    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+osm_list = [] # needed for the targets to add to osm_cluster
+for target in resp.out()['data']:   # multiple records
+    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
+    if m:
+        host = m.group('host')
+        msg(host, level=msgLevel.INFO, tag='ASM Instance')
+        if host in instances_list: # check host is one of our instances, otherwise ignore
+            osm_list.append(target['Target Name']) 
+            m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", target['Properties'])
+            if m:
+                MachineName = m.group('MachineName')
+                OracleHome = m.group('OracleHome')
+                Port = m.group('Port')
+                SID = m.group('SID')
+
+                msg('add_target -name='+ target['Target Name'] +
+                ' -type=osm_instance' +
+                ' -host=' + host +
+                ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
+                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"', msgLevel.USER, tag='EMCLI')
+            else:
+                msg('cannot extract MachineName/OracleHome/Port/SID from Properties', msgLevel.ERROR)
+                sys.exit(1)
+    else:
+        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        sys.exit(1)
+
+if debug: 
+    print(json.dumps(resp.out(), indent=4))
+
+################################################################################
+# 3) Add Cluster ASM
+################################################################################
+
+# Only one record per osm_cluster will be returned...
+msg('looking for ASM Cluster *' + cluster, msgLevel.INFO)
+
+targets = 'osm_cluster'
+try:
+    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+except emcli.exception.VerbExecutionError, e:
+    print e.error()
+    exit(1)
+
+for target in resp.out()['data']:
+    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
+    if m:
+        host = m.group('host')
+    else:
+        msg('cannot extract hostname from Host Info', msgLevel.ERROR)
+        sys.exit(1)
+
+    m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
+    if m:
+        ClusterName = m.group('ClusterName')
+        ServiceName = m.group('ServiceName')
+    else:
+        msg('cannot extract ClusterName/ServiceName from Properties', msgLevel.ERROR)
+        sys.exit(1)
+
+    if ClusterName != cluster:
+        continue
+
+    # Got it! - back to where we started withe the cluster name
+
+    instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in osm_list])
+
+    msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
+    msg('add_target -name=' + target['Target Name'] +
+        ' -type=osm_clustere -host=' + host +
+        ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName +'"' +
+        ' -instances="'+instances+'"' +
+        ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"', msgLevel.USER, tag='EMCLI')
+
+if debug: 
+    print(json.dumps(resp.out(), indent=4))

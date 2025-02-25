@@ -24,6 +24,12 @@ jq '.[]|.[]|select(."Target Type" | test("oracle_home"; "ig"))|select(."Target N
 echo "++++++ >>> GI Oracle Home ++++++"
 jq '.[]|.[]|select(."Target Type" | test("oracle_home"; "ig"))|select(."Target Name" | test("^OraGI"; "ig"))' < unmanaged.json
 
+echo "++++++ >>> ASM Instances ++++++"
+jq '.[]|.[]|select(."Target Type" | test("osm_instance"; "ig"))' < unmanaged.json
+
+echo "++++++ >>> Cluster ASM Instances ++++++"
+jq '.[]|.[]|select(."Target Type" | test("osm_cluster"; "ig"))' < unmanaged.json
+
 echo "++++++ >>> Other (Agent) Oracle Home ++++++"
 jq '.[]|.[]|select(."Target Type" | test("oracle_home"; "ig"))|select(."Target Name" | test("^OraHome"; "ig"))' < unmanaged.json
 

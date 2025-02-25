@@ -5,6 +5,7 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+from utils import msg, msgLevel
 import json
 
 parser = argparse.ArgumentParser(
@@ -110,7 +111,7 @@ else:
         targets = '%'
     else:
         targets = '%:' + args.type
-
+msg(targets, level=msgLevel.INFO, tag='Targets')
 try:
     resp = get_targets(
         targets = targets,
