@@ -22,7 +22,9 @@ ch.setLevel(logging.INFO)
 ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
 log.addHandler(ch)
 
-parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH')
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
+parser.add_argument('-V', '--loglevel', metavar='LEVEL',
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -56,6 +58,12 @@ if args.logfile:
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     log.addHandler(fh)
+
+if args.loglevel:
+    numeric_level = getattr(logging, args.loglevel.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % loglevel)
+    ch.setLevel(numeric_level)
 
 log.setLevel(logging.DEBUG) # fallback log (default WARNING)
 
