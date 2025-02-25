@@ -40,6 +40,14 @@ class style():
     MAGENTA = '\033[35m'
     CYAN = '\033[36m'
     WHITE = '\033[37m'
+    BRIGHT_BLACK = '\033[90m'
+    BRIGHT_RED = '\033[91m'
+    BRIGHT_GREEN = '\033[92m'
+    BRIGHT_YELLOW = '\033[93m'
+    BRIGHT_BLUE = '\033[94m'
+    BRIGHT_MAGENTA = '\033[95m'
+    BRIGHT_CYAN = '\033[96m'
+    BRIGHT_WHITE = '\033[97m'
     UNDERLINE = '\033[4m'
     RESET = '\033[0m'
 
@@ -50,26 +58,27 @@ class Enum(set):
         raise AttributeError
 
 msgLevel = Enum(["ERROR", "WARNING", "INFO", "NOTICE", "USER"])
+msgColor = Enum(["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "BRIGHT_BLACK", "BRIGHT_RED", "BRIGHT_GREEN", "BRIGHT_YELLOW", "BRIGHT_BLUE", "BRIGHT_MAGENTA", "BRIGHT_CYAN", "BRIGHT_WHITE", "UNDERLINE"])
 
 def msg(s='', level=None, tag=None, color=None):
     """Format a message nicely"""
 
     if color:
-        if color.upper() == BLACK:
+        if color == msgColor.BLACK:
             ansicolor = style.BLACK
-        if color.upper() == RED:
+        if color == msgColor.RED:
             ansicolor = style.RED
-        if color.upper() == GREEN:
+        if color == msgColor.GREEN:
             ansicolor = style.GREEN
-        if color.upper() == YELLOW:
+        if color == msgColor.YELLOW:
             ansicolor = style.YELLOW
-        if color.upper() == BLUE:
+        if color == msgColor.BLUE:
             ansicolor = style.BLUE
-        if color.upper() == MAGENTA:
+        if color == msgColor.MAGENTA:
             ansicolor = style.MAGENTA
-        if color.upper() == CYAN:
+        if color == msgColor.CYAN:
             ansicolor = style.CYAN
-        if color.upper() == WHITE:
+        if color == msgColor.WHITE:
             ansicolor = style.WHITE
     else:
         if level == msgLevel.ERROR:
@@ -96,13 +105,19 @@ def msg(s='', level=None, tag=None, color=None):
             tag = 'Notice'
         else:
             tag = None # :-) No default tag for msgLevel.USER
+
+    prefix = ''
+    suffix = ''
+
     if tag:
         if ansicolor:
             prefix = ansicolor + tag + style.RESET + ': '
         else:
             prefix =  tag + ': '
-    else:
-        prefix = ''
+    else: # if not tag print the whole message in colour (if defined)
+        if ansicolor:
+            prefix = ansicolor
+            suffix = style.RESET
 
-    print(prefix + s)
+    print(prefix + s + suffix)
 

@@ -2,7 +2,7 @@ import sys
 import argparse
 import ConfigParser
 from utils import getcreds
-from utils import msg, msgLevel
+from utils import msg, msgLevel, msgColor
 import json
 import re
 debug = True
@@ -101,8 +101,6 @@ if len(resp.out()['data']) == 0:
 ################################################################################
 # 1. Add the Cluster Target
 ################################################################################
-if debug:
-    print(json.dumps(resp.out(), indent=4))
 
 ####
 # i. Add the cluster (cluster) target
@@ -127,6 +125,9 @@ else:
     msg('cannot extract OracleHome/scanName/scanPort from Properties', msgLevel.ERROR)
     sys.exit(1)
 
+if debug:
+    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
+
 # Retrieve the full list of host members from the SCAN listeners
 targets = 'LISTENER_SCAN%_' + cluster + ':oracle_listener'
 try:
@@ -135,9 +136,6 @@ try:
 except emcli.exception.VerbExecutionError, e:
     print e.error()
     exit(1)
-
-if debug: 
-    print(json.dumps(resp.out(), indent=4))
 
 instances_list = []
 for target in resp.out()['data']:   # multiple records
@@ -161,6 +159,9 @@ instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 msg(instances, level=msgLevel.INFO, tag='Instances')
 
 msg('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances, msgLevel.USER, tag='EMCLI')
+
+if debug: 
+    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
 
 ####
 #  ii. Add the database instance (oracle_database) targets
@@ -205,7 +206,7 @@ for target in resp.out()['data']:   # multiple records
         sys.exit(1)
 
 if debug: 
-    print(json.dumps(resp.out(), indent=4))
+    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
 
 ####
 #  iv. Add the Cluster database (rac_database) target
@@ -250,6 +251,8 @@ for target in resp.out()['data']:   # multiple records
         ' -type=rac_database -host=' + host +
         ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"', msgLevel.USER, tag='EMCLI')
 
+if debug: 
+    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
 
 ################################################################################
 # 2) Add the ASM Instance Targets
@@ -293,7 +296,7 @@ for target in resp.out()['data']:   # multiple records
         sys.exit(1)
 
 if debug: 
-    print(json.dumps(resp.out(), indent=4))
+    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
 
 ################################################################################
 # 3) Add Cluster ASM
@@ -341,4 +344,4 @@ for target in resp.out()['data']:
         ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"', msgLevel.USER, tag='EMCLI')
 
 if debug: 
-    print(json.dumps(resp.out(), indent=4))
+    msg(json.dumps(resp.out(), indent=4), msgLevel.USER, color=msgColor.YELLOW)
