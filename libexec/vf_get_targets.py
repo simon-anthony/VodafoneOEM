@@ -37,7 +37,8 @@ group_output.add_argument('-j', '--json', default=False, action='store_true', he
 
 # target options
 parser.add_argument('-t', '--type', '--target_type', default='host', 
-    choices=['host', 'oracle_emd', 'oracle_database', 'oracle_home', 'rac_database', 'cluster'], metavar='TARGET_TYPE', 
+    choices=['host', 'oracle_emd', 'oracle_database', 'oracle_home', 'rac_database', 'cluster', 'osm_cluster', 'osm_instance'],
+    metavar='TARGET_TYPE', 
     help='TARGET_TYPE: %(choices)s (default is host)')
 
 # nargs=* gather zero or more args into a list
@@ -58,7 +59,7 @@ if args.host:
     else:
         host_list = args.host
 
-print('Info: connecting to ' + oms)
+msg('connecting to ' + oms, msgLevel.INFO)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -80,7 +81,7 @@ if not username:
     print('Error: unable to determine username to use')
     sys.exit(1)
 
-print('Info: username = ' + username)
+msg('username = ' + username, msgLevel.INFO)
 
 login(username=username, password=creds['password'])
 
@@ -99,19 +100,23 @@ subsep = ':'
 
 if args.host:
     # targets format; targets = "[name1:]type1;[name2:]type2;..."
-    if args.type == 'host' or args.type == 'rac_database':
+    if args.type == 'host' or args.type == 'rac_database' or args.type == 'cluster':
         target_list = [(lambda x:x+subsep+args.type)(i) for i in host_list]
     elif args.type == 'oracle_home':
         target_list = [(lambda x:'%_'+x+'_%'+subsep+args.type)(i) for i in host_list]
     elif args.type == 'oracle_emd':
         target_list = [(lambda x:x+':3872'+subsep+args.type)(i) for i in host_list]
+    if args.type == 'osm_cluster' or args.type == 'osm_instance':
+        target_list = [(lambda x:'%_'+x+subsep+args.type)(i) for i in host_list]
     targets = sep.join(target_list)
 else:
-    if args.unmanaged:
-        targets = '%'
-    else:
+    if args.type:
         targets = '%:' + args.type
+    else:
+        targets = '%'
+
 msg(targets, level=msgLevel.INFO, tag='Targets')
+
 try:
     resp = get_targets(
         targets = targets,
@@ -122,7 +127,8 @@ try:
         subseparator_properties = subsep)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    #print e.error()
+    msg(e.error(), msgLevel.ERROR)
     exit(1)
    
 if resp.isJson():
