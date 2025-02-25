@@ -335,7 +335,7 @@ for target in resp.out()['data']:
 
     msg(ServiceName, level=msgLevel.INFO, tag='RAC Database')
     msg('add_target -name=' + target['Target Name'] +
-        ' -type=osm_clustere -host=' + host +
+        ' -type=osm_cluster -host=' + host +
         ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName +'"' +
         ' -instances="'+instances+'"' +
         ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"', msgLevel.USER, tag='EMCLI')
