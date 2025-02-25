@@ -57,7 +57,7 @@ class Enum(set):
             return name
         raise AttributeError
 
-msgLevel = Enum(["ERROR", "WARNING", "INFO", "NOTICE", "USER", "NONE"])
+msgLevel = Enum(["ERROR", "WARNING", "NOTE", "INFO", "NOTICE", "USER", "NONE"])
 msgColor = Enum(["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "UNDERLINE", "BRIGHT_BLACK", "BRIGHT_RED", "BRIGHT_GREEN", "BRIGHT_YELLOW", "BRIGHT_BLUE", "BRIGHT_MAGENTA", "BRIGHT_CYAN", "BRIGHT_WHITE"])
 
 def msg(s='', level=None, tag=None, color=None):
@@ -98,9 +98,11 @@ def msg(s='', level=None, tag=None, color=None):
             ansicolor = style.BRIGHT_WHITE
     else:
         if level == msgLevel.ERROR:
-            ansicolor = style.RED
+            ansicolor = style.BRIGHT_RED
         elif level == msgLevel.WARNING:
-            ansicolor = style.MAGENTA
+            ansicolor = style.BRIGHT_MAGENTA
+        elif level == msgLevel.NOTE:
+            ansicolor = style.BRIGHT_CYAN
         elif level == msgLevel.INFO:
             ansicolor = style.GREEN
         elif level == msgLevel.NOTICE:
@@ -115,6 +117,8 @@ def msg(s='', level=None, tag=None, color=None):
             tag = 'Error'
         elif level == msgLevel.WARNING:
             tag = 'Warning'
+        elif level == msgLevel.NOTE:
+            tag = 'Note'
         elif level == msgLevel.INFO:
             tag = 'Info'
         elif level == msgLevel.NOTICE:
