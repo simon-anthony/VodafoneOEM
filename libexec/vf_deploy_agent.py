@@ -5,6 +5,7 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+from utils import msg, msgLevel, msgColor
 import targets
 import re 
 
@@ -101,15 +102,15 @@ error = False
 for lval in settings_list:
     try:
         str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
-        print("Info: " + str)
+        msg(str, msgLevel.INFO)
         exec(str)
     except ConfigParser.NoOptionError, e:
-        print('Error: no value for \'' + lval + '\' in section: \'' + args.node + '\'')
+        msg('no value for \'' + lval + '\' in section: \'' + args.node + '\'', msgLevel.ERROR)
         error = True
 if error:
     sys.exit(1)
 
-print('Info: connecting to ' + oms)
+msg('connecting to ' + oms, msgLevel.INFO)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -128,10 +129,10 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    print('Error: unable to determine username to use')
+    msg('unable to determine username to use', msgLevel.ERROR)
     sys.exit(1)
 
-print('Info: username = ' + username)
+msg('username = ' + username, msgLevel.INFO)
 
 login(username=username, password=creds['password'])
 
@@ -143,7 +144,7 @@ if args.exists_check:
     existing_hosts = existing_targets.filterTargets(host_list)
 
     if (existing_hosts):
-        print('Error: the following hosts are already in OEM: ')
+        msg('the following hosts are already in OEM: ', msgLevel.ERROR)
         for host in existing_hosts:
             print(host)
         sys.exit(1)
@@ -151,7 +152,7 @@ if args.exists_check:
 
 # Host names format for emcli
 host_names = ';'.join(host_list)
-print('Info: adding ' + host_names)
+msg('adding: ' + host_names, msgLevel.INFO)
 
 try:
     resp = submit_add_host(
@@ -165,7 +166,7 @@ try:
         image_name = args.image_name)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    msg(e,error(), msgLevel.ERROR)
     exit(1)
 
 print resp
@@ -178,10 +179,10 @@ m = re.search(r"^OverAll Status : (?P<status>.+)$", resp.out(), re.MULTILINE)
 if m:
     status = m.group('status')
 else:
-    print 'Error: Cannot extract status return'
+    msg('cannot extract status return', msgLevel.ERROR)
     sys.exit(1)
 
-print('Info: status is : ' + status)
+msg('status is : ' + status, msgLevel.INFO)
 
 if status != 'Agent Deployment Succeeded':
     sys.exit(1)
@@ -202,5 +203,5 @@ try:
         property_records = property_records)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    msg(e,error(), msgLevel.ERROR)
     exit(1)

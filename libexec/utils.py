@@ -57,7 +57,9 @@ class Enum(set):
             return name
         raise AttributeError
 
-msgLevel = Enum(["ERROR", "WARNING", "NOTE", "INFO", "NOTICE", "USER", "NONE"])
+# msgLevelJava = Enum(["FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"])
+# msgLevelPython = Enum(["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"])
+msgLevel = Enum(["ERROR", "WARNING", "NOTICE", "INFO", "USER", "NONE"])
 msgColor = Enum(["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "UNDERLINE", "BRIGHT_BLACK", "BRIGHT_RED", "BRIGHT_GREEN", "BRIGHT_YELLOW", "BRIGHT_BLUE", "BRIGHT_MAGENTA", "BRIGHT_CYAN", "BRIGHT_WHITE"])
 
 def msg(s='', level=None, tag=None, color=None):
@@ -101,14 +103,14 @@ def msg(s='', level=None, tag=None, color=None):
             ansicolor = style.BRIGHT_RED
         elif level == msgLevel.WARNING:
             ansicolor = style.BRIGHT_MAGENTA
-        elif level == msgLevel.NOTE:
-            ansicolor = style.BRIGHT_CYAN
         elif level == msgLevel.INFO:
             ansicolor = style.GREEN
         elif level == msgLevel.NOTICE:
             ansicolor = style.CYAN
         elif level == msgLevel.USER:
             ansicolor = style.BLUE
+        elif level == msgLevel.DEBUG:
+            ansicolor = style.BRIGHT_BLUE
         else:
             ansicolor = None
 
@@ -123,6 +125,8 @@ def msg(s='', level=None, tag=None, color=None):
             tag = 'Info'
         elif level == msgLevel.NOTICE:
             tag = 'Notice'
+        elif level == msgLevel.DEBUG:
+            tag = 'Debug'
         else:
             tag = None # :-) No default tag for msgLevel.USER
 
