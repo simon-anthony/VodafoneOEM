@@ -17,7 +17,7 @@ log = logging.getLogger(parser.prog) # create top level logger
 
 parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
 parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
-    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level')
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -125,7 +125,7 @@ error = False
 for lval in settings_list:
     try:
         str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
-        log.info(str)
+        log.debug(str)
         exec(str)
     except ConfigParser.NoOptionError, e:
         log.error('no value for \'' + lval + '\' in section: \'' + args.node + '\'')
@@ -172,7 +172,6 @@ if args.exists_check:
             print(host)
         sys.exit(1)
 
-
 # Host names format for emcli
 host_names = ';'.join(host_list)
 log.info('adding: ' + host_names)
@@ -215,6 +214,7 @@ if status != 'Agent Deployment Succeeded':
 #    target_name:target_type:property_name:property_value[;target_name:target_type:property_name:property_value]...
 property_records = []
 
+# TODO: add agent properties - confirm properties
 for host in host_list:
     property_records.append(host + ':host:' + 'Lifecycle Status:' + args.lifecycle_status)
     property_records.append(host + ':host:' + 'Cost Center:' + args.cost_center)

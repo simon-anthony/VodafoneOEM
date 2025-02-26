@@ -73,14 +73,21 @@ mv %{_bindir}/dbhome.bak %{_bindir}/dbhome
 
 
 %files
-%{_bindir}/*
+%{_bindir}/nbread
+%{_bindir}/emrun
+%{_bindir}/unlock-keyring
+%{_bindir}/oemportscan
+%{_bindir}/getcreds
+%{_bindir}/oraenv
+%{_bindir}/dbhome
+%{_bindir}/coraenv
 %attr(4750,oracle,oinstall)      %{_bindir}/oratab
 %{_libdir}/*
 %{_sysconfdir}/profile.d/*
 %{_sysconfdir}/firewalld/services/*
 %{_libexecdir}/*
 %{_datadir}/*
-%{_mandir}/man?/*
+#%{_mandir}/man?/*
 
 
 %changelog

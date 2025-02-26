@@ -88,6 +88,7 @@ then
 	modules=`file -m @DATADIR@/@PACKAGE@/magic:/usr/share/misc/magic.mgc $MODULEDIR/*.py | awk -F: '$2 ~ /Python/ { print $1 }'`
 	if [ $vflg ]
 	then
+		[ $sflg ] && { setoraenv -s $sid || exit; }
 		for i in $modules
 		do
 			emcli @$i -h | sed -n '1,/^$/ p'

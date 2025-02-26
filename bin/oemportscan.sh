@@ -1,4 +1,4 @@
-#!/bin/sh -
+#!/usr/bin/sh -
 PATH=/usr/bin:/usr/sbin export PATH
 prog=`basename $0 .sh`
 

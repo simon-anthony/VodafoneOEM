@@ -18,7 +18,7 @@ log = logging.getLogger(parser.prog) # create top level logger
 
 parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
 parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
-    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level')
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
 # Region
 config_region = ConfigParser.ConfigParser()
