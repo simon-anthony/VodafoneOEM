@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(
 log = logging.getLogger(parser.prog) # create top level logger
 
 parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
-parser.add_argument('-V', '--loglevel', default='INFO', metavar='LEVEL',
+parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
     choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level')
 
 # Region
@@ -66,7 +66,7 @@ if args.logfile:
 
 log.setLevel(logging.DEBUG) # fallback log (default WARNING)
 
-log.info('connecting to ' + oms)
+log.notice('connecting to ' + oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -88,7 +88,7 @@ if not username:
     log.error('unable to determine username to use')
     sys.exit(1)
 
-log.info('username = ' + username)
+log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -105,7 +105,7 @@ if not dbsnmpuser:
 dbsnmpcreds = getcreds(dbsnmpuser)
 dbsnmppass = dbsnmpcreds['password']
 
-log.info('DB SNMP username = ' + dbsnmpuser)
+log.notice('DB SNMP username = ' + dbsnmpuser)
 
 # Retrieve information about the cluster, note that only *one* node will be
 # present in the 'Host Info' (the last one to be discovered)
@@ -134,7 +134,7 @@ if len(resp.out()['data']) == 0:
 ####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
-log.info('cluster: ' + cluster)
+log.notice('cluster: ' + cluster)
 
 m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
@@ -182,9 +182,9 @@ for target in resp.out()['data']:   # multiple records
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
-log.info('instances: ' + instances)
+log.notice('instances: ' + instances)
 
-log.notice('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
+log.info('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
 
 log.debug(json.dumps(resp.out(), indent=4))
 
@@ -207,7 +207,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        log.info('oracle_database ' + host)
+        log.notice('oracle_database ' + host)
         if host in instances_list: # check host is one of our instances, otherwise ignore
             dbs_list.append(target['Target Name']) 
             m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
@@ -218,7 +218,7 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 ServiceName = m.group('ServiceName')
 
-                log.notice('add_target -name='+ target['Target Name'] +
+                log.info('add_target -name='+ target['Target Name'] +
                 ' -type=oracle_database' +
                 ' -host=' + host +
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
@@ -238,7 +238,7 @@ log.debug(json.dumps(resp.out(), indent=4))
 # Find the rac_database with ServiceName the same as the oracle_databases
 # Only one record per rac_database will be returned...
 
-log.info('looking for rac_database ' + ServiceName)
+log.notice('looking for rac_database ' + ServiceName)
 
 targets = 'rac_database'
 try:
@@ -270,8 +270,8 @@ for target in resp.out()['data']:   # multiple records
 
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
-    log.info('RAC Database ' + ServiceName)
-    log.notice('add_target -name=' + target['Target Name'] +
+    log.notice('RAC Database ' + ServiceName)
+    log.info('add_target -name=' + target['Target Name'] +
         ' -type=rac_database -host=' + host +
         ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"')
 
@@ -281,7 +281,7 @@ log.debug(json.dumps(resp.out(), indent=4))
 # 2) Add the ASM Instance Targets
 ################################################################################
 
-log.info('looking for ASM instances on ' + ' '.join(instances_list))
+log.notice('looking for ASM instances on ' + ' '.join(instances_list))
 
 targets = 'osm_instance'
 try:
@@ -296,7 +296,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        log.info('ASM Instance ' + host)
+        log.notice('ASM Instance ' + host)
         if host in instances_list: # check host is one of our instances, otherwise ignore
             osm_list.append(target['Target Name']) 
             m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", target['Properties'])
@@ -306,7 +306,7 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 SID = m.group('SID')
 
-                log.notice('add_target -name='+ target['Target Name'] +
+                log.info('add_target -name='+ target['Target Name'] +
                 ' -type=osm_instance' +
                 ' -host=' + host +
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
@@ -325,7 +325,7 @@ log.debug(json.dumps(resp.out(), indent=4))
 ################################################################################
 
 # Only one record per osm_cluster will be returned...
-log.info('looking for ASM Cluster ' + cluster)
+log.notice('looking for ASM Cluster ' + cluster)
 
 targets = 'osm_cluster'
 try:
@@ -358,8 +358,8 @@ for target in resp.out()['data']:
 
     instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in osm_list])
 
-    log.info('RAC Database '+ServiceName)
-    log.notice('add_target -name=' + target['Target Name'] +
+    log.notice('RAC Database '+ServiceName)
+    log.info('add_target -name=' + target['Target Name'] +
         ' -type=osm_cluster -host=' + host +
         ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName +'"' +
         ' -instances="'+instances+'"' +
