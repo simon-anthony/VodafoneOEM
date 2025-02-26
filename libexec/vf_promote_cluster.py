@@ -2,7 +2,6 @@ import sys
 import argparse
 import ConfigParser
 from utils import getcreds
-from utils import msg, msgLevel, msgColor
 import json
 import re
 import logging

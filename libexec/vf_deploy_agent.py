@@ -1,18 +1,23 @@
 import sys
 import argparse
-# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
-# In the latter case config[args.region]['url'] would be used instead of config.get(args.region, 'url')
-# https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
-from utils import msg, msgLevel, msgColor
 import targets
 import re 
+import logging
+from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
     prog='deploy_agent',
     description='Add agent to hosts with specified proprties',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini) and STATUS, CENTER, DEPT (properties.ini). Values for STATUS, CENTER and DEPT must be quoted if they contain spaces')
+
+# Logging
+log = logging.getLogger(parser.prog) # create top level logger
+
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
+parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -102,15 +107,33 @@ error = False
 for lval in settings_list:
     try:
         str = lval + ' = ' + '"' + config_node.get(args.node, lval) + '"'
-        msg(str, msgLevel.INFO)
+        log.info(str)
         exec(str)
     except ConfigParser.NoOptionError, e:
-        msg('no value for \'' + lval + '\' in section: \'' + args.node + '\'', msgLevel.ERROR)
+        log.error('no value for \'' + lval + '\' in section: \'' + args.node + '\'')
         error = True
 if error:
     sys.exit(1)
 
-msg('connecting to ' + oms, msgLevel.INFO)
+# Set up logging
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+
+ch = logging.StreamHandler() # add console handler 
+ch.setLevel(numeric_level)
+ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
+log.addHandler(ch)
+
+if args.logfile:
+    fh = logging.FileHandler(args.logfile.name) # add file handler
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    log.addHandler(fh)
+
+log.setLevel(logging.DEBUG) # fallback log (default WARNING)
+
+log.notice('connecting to ' + oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -129,10 +152,10 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    msg('unable to determine username to use', msgLevel.ERROR)
+    log.error('unable to determine username to use')
     sys.exit(1)
 
-msg('username = ' + username, msgLevel.INFO)
+log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -144,7 +167,7 @@ if args.exists_check:
     existing_hosts = existing_targets.filterTargets(host_list)
 
     if (existing_hosts):
-        msg('the following hosts are already in OEM: ', msgLevel.ERROR)
+        log.error('the following hosts are already in OEM: ')
         for host in existing_hosts:
             print(host)
         sys.exit(1)
@@ -152,7 +175,7 @@ if args.exists_check:
 
 # Host names format for emcli
 host_names = ';'.join(host_list)
-msg('adding: ' + host_names, msgLevel.INFO)
+log.info('adding: ' + host_names)
 
 try:
     resp = submit_add_host(
@@ -166,7 +189,7 @@ try:
         image_name = args.image_name)
 
 except emcli.exception.VerbExecutionError, e:
-    msg(e,error(), msgLevel.ERROR)
+    log.error(e.error())
     exit(1)
 
 print resp
@@ -179,10 +202,10 @@ m = re.search(r"^OverAll Status : (?P<status>.+)$", resp.out(), re.MULTILINE)
 if m:
     status = m.group('status')
 else:
-    msg('cannot extract status return', msgLevel.ERROR)
+    log.error('cannot extract status return')
     sys.exit(1)
 
-msg('status is : ' + status, msgLevel.INFO)
+log.notice('status is : ' + status)
 
 if status != 'Agent Deployment Succeeded':
     sys.exit(1)
@@ -203,5 +226,5 @@ try:
         property_records = property_records)
 
 except emcli.exception.VerbExecutionError, e:
-    msg(e,error(), msgLevel.ERROR)
+    log.error(e.error())
     exit(1)

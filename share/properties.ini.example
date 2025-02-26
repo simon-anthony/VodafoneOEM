@@ -29,11 +29,11 @@ Vodafone Roaming Services
 Vodafone United Kingdom
 
 [Department]
-VC DCOPS Compute Linux OPS-INFRA SVR
-VC DCOPS Compute Linux-TSSI OPS-INFRA SVR
-VC DCOPS Database Oracle North OPS-INFRA DB
-VC DCOPS Database Oracle North-TSSC OPS-INFRA DB
-VC DCOPS Database Oracle South-TSSC OPS-INFRA DB
+VG DCOPS Compute Linux OPS-INFRA SVR
+VG DCOPS Compute Linux-TSSI OPS-INFRA SVR
+VG DCOPS Database Oracle North OPS-INFRA DB
+VG DCOPS Database Oracle North-TSSC OPS-INFRA DB
+VG DCOPS Database Oracle South-TSSC OPS-INFRA DB
 
 # Vodafone has dozens of these - match not enforceable
 [Line of Business]
