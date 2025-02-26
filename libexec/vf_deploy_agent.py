@@ -80,6 +80,24 @@ if args.domain:
 else:
     host_list = args.host
 
+# Set up logging
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+
+ch = logging.StreamHandler() # add console handler 
+ch.setLevel(numeric_level)
+ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
+log.addHandler(ch)
+
+if args.logfile:
+    fh = logging.FileHandler(args.logfile.name) # add file handler
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    log.addHandler(fh)
+
+log.setLevel(logging.DEBUG) # fallback log (default WARNING)
+
 # Override or retrieve default values for the following settings:
 settings_list = []
 
@@ -114,24 +132,6 @@ for lval in settings_list:
         error = True
 if error:
     sys.exit(1)
-
-# Set up logging
-numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
-if not isinstance(numeric_level, int):
-    raise ValueError('Invalid log level: %s' % loglevel)
-
-ch = logging.StreamHandler() # add console handler 
-ch.setLevel(numeric_level)
-ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
-log.addHandler(ch)
-
-if args.logfile:
-    fh = logging.FileHandler(args.logfile.name) # add file handler
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    log.addHandler(fh)
-
-log.setLevel(logging.DEBUG) # fallback log (default WARNING)
 
 log.notice('connecting to ' + oms)
 
@@ -186,6 +186,7 @@ try:
         credential_owner = credential_owner,
         instance_directory = instance_directory,
         wait_for_completion = args.wait,
+        privilege_delegation_setting = '/usr/bin/sudo -u %RUNAS% %COMMAND%',
         image_name = args.image_name)
 
 except emcli.exception.VerbExecutionError, e:
