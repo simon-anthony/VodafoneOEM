@@ -27,10 +27,14 @@ class TargetsList:
         try:
             targets = get_targets(targets='%:' + target_type)
 
-        # except emcli.exception.VerbExecutionError, e:
-        except VerbExecutionError, e:
-            print e.error()
-            exit(1)
+        # Prevents bytecode compilation...
+        #except emcli.exception.VerbExecutionError, e:
+        #except VerbExecutionError, e:
+        #    print(e.error())
+        #    exit(1)
+        except:
+            print('TargetsList: call to get_targets() failed')
+            return None
 
         for target in targets.out()['data']:
             self.targets_list.append(target['Target Name'])

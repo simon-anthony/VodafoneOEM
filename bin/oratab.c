@@ -24,6 +24,7 @@ static char *svnid = "$Header$";
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 #include <libgen.h>
 #include <signal.h>
 #include <unistd.h>
@@ -31,6 +32,7 @@ static char *svnid = "$Header$";
 
 #define _ORATAB
 #define USAGE "{[-y|-n|-d|-p|-h <ORACLE_HOME>] <ORACLE_SID> | -l[-p][-y|n]}"
+#define MAX_SID 16	/* maximum length of ORACLE_SID */
 
 char *prog;
 
@@ -52,13 +54,13 @@ main(argc, argv)
 	extern	char *optarg;
 	extern	int optind;
 	struct	stat statbuf;
-	char	oracle_sid[BUFSIZ], oracle_home[BUFSIZ], buf[BUFSIZ];
-	char	start, ch;
+	char	oracle_sid[MAX_SID], oracle_home[MAXPATHLEN], buf[BUFSIZ];
+	char	start, ch = 'N';
 	char	*sid, *home, *tmpfile;
 	int		yflg = 0, nflg = 0, dflg = 0, pflg = 0, hflg = 0, lflg = 0,
 			errflg = 0, found = 0;
 	int		c;
-	int		fd, fdt;
+	int		fd;
 	FILE	*fp, *fpt;
 #ifdef __linux
 	char	template[] = "/tmp/filerwXXXXXX";
@@ -187,7 +189,7 @@ main(argc, argv)
 
 		if (strcmp(sid, (char*)oracle_sid) == 0) {
 			if (nflg || hflg || yflg) {
-				sprintf((char *)buf, "%s:%s:%c\n",
+				snprintf((char *)buf, BUFSIZ, "%s:%s:%c\n",
 					(char *)oracle_sid,
 					(hflg ? home : (char *)oracle_home),
 					toupper(start) == 'S' ? 'S' : (nflg||yflg ? ch : start));
@@ -272,7 +274,6 @@ lock(path)
 {
 	int fd, val;
 	struct flock flk;
-	char	buf[10];
 
 	flk.l_type = F_WRLCK;
 	flk.l_start = 0;
@@ -305,7 +306,7 @@ lock(path)
 	val |= FD_CLOEXEC;
 
 	if (fcntl(fd, F_SETFD, val) < 0) {
-		perror("setfd");
+			perror("setfd");
 		exit(1);
 	}
 
