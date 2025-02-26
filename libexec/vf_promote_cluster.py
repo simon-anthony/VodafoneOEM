@@ -6,6 +6,7 @@ import json
 import re
 import logging
 from logging_ext import ColoredFormatter
+from cluster import get_cluster_nodes_from_scan
 
 
 parser = argparse.ArgumentParser(
@@ -167,33 +168,10 @@ else:
     log.error('cannot extract OracleHome/scanName/scanPort from Properties')
     sys.exit(1)
 
-    log.debug(json.dumps(resp.out(), indent=4))
+log.debug(json.dumps(resp.out(), indent=4))
 
 # Retrieve the full list of host members from the SCAN listeners
-targets = 'LISTENER_SCAN%_' + cluster + ':oracle_listener'
-try:
-    resp = get_targets(targets = targets, unmanaged = True, properties = True)
-
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
-
-instances_list = []
-for target in resp.out()['data']:   # multiple records
-    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
-    if m:
-        instance = m.group('host')
-        m = re.search(r"Machine:(?P<Machine>[^;]+)", resp.out()['data'][0]['Properties'])
-        if m:
-            Machine = m.group('Machine')
-            if Machine == scanName: # check Machine matches scanName, otherwise ignore
-                if instance not in instances_list: # avoid duplication
-                    instances_list.append(instance) 
-        else:
-            log.error('cannot extract MachineName from Properties')
-    else:
-        log.error('cannot extract hostname from Host Info')
-        sys.exit(1)
+instances_list = get_cluster_nodes_from_scan(cluster, scanName)
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
@@ -204,8 +182,6 @@ log.notice('add_target -name=' + cluster +
     ' -monitor_mode=1' +
     ' -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + 
     ' -instances=' + instances)
-
-log.debug(json.dumps(resp.out(), indent=4))
 
 ####
 #  ii. Add the database instance (oracle_database) targets

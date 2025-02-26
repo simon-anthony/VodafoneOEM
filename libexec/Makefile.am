@@ -12,6 +12,7 @@ dist_tools_DATA = \
 	submit_add_host.py \
 	vf_update_group_of_agents.py \
 	utils.py \
+	cluster.py \
 	logging_ext.py \
 	vf_deploy_agent.py \
 	vf_run_auto_discovery.py \
