@@ -34,7 +34,8 @@ config_node.read('@PKGDATADIR@/node.ini')
 parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
-parser.add_argument('-s', '--dbsnmpuser', help='SNMP user, overides that found in @PKGDATADIR@/node.ini')
+parser.add_argument('-s', '--dbsnmpuser', help='DB SNMP user, overides that found in @PKGDATADIR@/node.ini')
+parser.add_argument('-a', '--asmsnmpuser', help='ASM SNMP user, overides that found in @PKGDATADIR@/node.ini')
 
 # only one positional argument - the cluster
 parser.add_argument('cluster', metavar='CLUSTER', help='name of cluster')
@@ -106,6 +107,21 @@ dbsnmppass = dbsnmpcreds['password']
 
 log.notice('DB SNMP username = ' + dbsnmpuser)
 
+# retrieve asmsnmp password
+if args.asmsnmpuser:
+    asmsnmpuser = args.asmsnmpuser
+else:
+    asmsnmpuser = config_node.get(args.node, 'asmsnmpuser')
+
+if not asmsnmpuser:
+    log.error('unable to determine username for DB snmp')
+    sys.exit(1)
+
+asmsnmpcreds = getcreds(asmsnmpuser)
+asmsnmppass = asmsnmpcreds['password']
+
+log.notice('ASM SNMP username = ' + asmsnmpuser)
+
 # Retrieve information about the cluster, note that only *one* node will be
 # present in the 'Host Info' (the last one to be discovered)
 targets = args.cluster + ':' + 'cluster'
@@ -133,7 +149,7 @@ if len(resp.out()['data']) == 0:
 ####
 
 cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
-log.notice('cluster: ' + cluster)
+log.info('cluster: ' + cluster)
 
 m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
 if m:
@@ -181,9 +197,13 @@ for target in resp.out()['data']:   # multiple records
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
-log.notice('instances: ' + instances)
+log.info('instances: ' + instances)
 
-log.info('add_target -name='+ cluster + ' -type=cluster -host=' + host + ' -monitor_mode=1 -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + ' -instances=' + instances)
+log.notice('add_target -name=' + cluster +
+    ' -type=cluster -host=' + host + 
+    ' -monitor_mode=1' +
+    ' -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + 
+    ' -instances=' + instances)
 
 log.debug(json.dumps(resp.out(), indent=4))
 
@@ -206,7 +226,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        log.notice('oracle_database ' + host)
+        log.info('oracle_database ' + host)
         if host in instances_list: # check host is one of our instances, otherwise ignore
             dbs_list.append(target['Target Name']) 
             m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
@@ -217,11 +237,11 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 ServiceName = m.group('ServiceName')
 
-                log.info('add_target -name='+ target['Target Name'] +
+                log.notice('add_target -name='+ target['Target Name'] +
                 ' -type=oracle_database' +
                 ' -host=' + host +
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
-                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"')
+                ' -properties="SID:' + SID + ';Port:' + Port + ';OracleHome:' + OracleHome + ';MachineName:' + MachineName + '"')
             else:
                 log.error('cannot extract SID/MachineName/OracleHome/Port/ServiceName from Properties')
                 sys.exit(1)
@@ -237,7 +257,7 @@ log.debug(json.dumps(resp.out(), indent=4))
 # Find the rac_database with ServiceName the same as the oracle_databases
 # Only one record per rac_database will be returned...
 
-log.notice('looking for rac_database ' + ServiceName)
+log.info('looking for rac_database ' + ServiceName)
 
 targets = 'rac_database'
 try:
@@ -269,10 +289,13 @@ for target in resp.out()['data']:   # multiple records
 
     instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
 
-    log.notice('RAC Database ' + ServiceName)
-    log.info('add_target -name=' + target['Target Name'] +
-        ' -type=rac_database -host=' + host +
-        ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName+'" -instances="'+instances+'"')
+    log.info('RAC Database ' + ServiceName)
+    log.notice('add_target -name=' + target['Target Name'] +
+        ' -type=rac_database' +
+        ' -host=' + host +
+        ' -monitor_mode=1' +
+        ' -properties="ServiceName:' + ServiceName + ';ClusterName:' + ClusterName + '"' +
+        ' -instances="' + instances + '"')
 
 log.debug(json.dumps(resp.out(), indent=4))
 
@@ -280,7 +303,7 @@ log.debug(json.dumps(resp.out(), indent=4))
 # 2) Add the ASM Instance Targets
 ################################################################################
 
-log.notice('looking for ASM instances on ' + ' '.join(instances_list))
+log.info('looking for ASM instances on ' + ' '.join(instances_list))
 
 targets = 'osm_instance'
 try:
@@ -295,7 +318,7 @@ for target in resp.out()['data']:   # multiple records
     m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
     if m:
         host = m.group('host')
-        log.notice('ASM Instance ' + host)
+        log.info('ASM Instance ' + host)
         if host in instances_list: # check host is one of our instances, otherwise ignore
             osm_list.append(target['Target Name']) 
             m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", target['Properties'])
@@ -305,11 +328,11 @@ for target in resp.out()['data']:   # multiple records
                 Port = m.group('Port')
                 SID = m.group('SID')
 
-                log.info('add_target -name='+ target['Target Name'] +
+                log.notice('add_target -name=' + target['Target Name'] +
                 ' -type=osm_instance' +
                 ' -host=' + host +
                 ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
-                ' -properties="SID:'+SID+';Port:'+Port+';OracleHome:'+OracleHome+';MachineName:'+MachineName+'"')
+                ' -properties="SID:' + SID + ';Port:' + Port + ';OracleHome:' + OracleHome + ';MachineName:' + MachineName+'"')
             else:
                 log.error('cannot extract MachineName/OracleHome/Port/SID from Properties')
                 sys.exit(1)
@@ -324,7 +347,7 @@ log.debug(json.dumps(resp.out(), indent=4))
 ################################################################################
 
 # Only one record per osm_cluster will be returned...
-log.notice('looking for ASM Cluster ' + cluster)
+log.info('looking for ASM Cluster ' + cluster)
 
 targets = 'osm_cluster'
 try:
@@ -357,11 +380,12 @@ for target in resp.out()['data']:
 
     instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in osm_list])
 
-    log.notice('RAC Database '+ServiceName)
-    log.info('add_target -name=' + target['Target Name'] +
+    log.info('ASM Cluster ' + ServiceName)
+    log.notice('add_target -name=' + target['Target Name'] +
         ' -type=osm_cluster -host=' + host +
-        ' -monitor_mode=1 -properties="ServiceName:'+ServiceName+';ClusterName:'+ClusterName +'"' +
-        ' -instances="'+instances+'"' +
-        ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"')
+        ' -monitor_mode=1 ' +
+        ' -properties="ServiceName:' + ServiceName + ';ClusterName:' + ClusterName + '"' +
+        ' -instances="' + instances + '"' +
+        ' -credentials="UserName:' + asmsnmpuser + ';password=' + asmsnmppass + ';Role:sysdba"')
 
 log.debug(json.dumps(resp.out(), indent=4))

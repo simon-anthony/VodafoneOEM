@@ -17,6 +17,7 @@ credential_owner: SYSMAN
 installation_base_directory: /u01/app/oracle/emagent
 instance_directory: %(installation_base_directory)s/agent_inst
 dbsnmpuser: dbsnmp
+asmsnmpuser: asmsnmp
 
 [compute]
 username: vf_unix_build
@@ -25,3 +26,4 @@ credential_owner: VF_UNIX_BUILD
 installation_base_directory: /opt/emagent
 instance_directory: %(installation_base_directory)s/agent_inst
 dbsnmpuser: dbsnmp
+asmsnmpuser: asmsnmp
