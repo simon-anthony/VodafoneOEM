@@ -9,7 +9,6 @@ do_subst = sed \
 	-e 's;[@]LIBDIR[@];$(libdir);g' \
 	-e 's;[@]DATADIR[@];$(datadir);g' \
 	-e 's;[@]LIBEXECDIR[@];$(libexecdir);g'  \
-	-e 's;[@]DATADIR[@];$(datadir);g' \
 	-e 's;[@]SYSCONFDIR[@];$(sysconfdir);g' \
 	-e 's;[@]LOCALSTATEDIR[@];$(localstatedir);g' \
 	-e 's;[@]PACKAGE[@];$(PACKAGE);g' \
