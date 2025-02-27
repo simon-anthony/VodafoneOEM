@@ -86,8 +86,10 @@ mv %{_bindir}/dbhome.bak %{_bindir}/dbhome
 %{_sysconfdir}/profile.d/*
 %{_sysconfdir}/firewalld/services/*
 %{_libexecdir}/*
-%{_datadir}/*
-#%{_mandir}/man?/*
+%attr(1775,oracle,oinstall)		%{_datadir}/%{_package}
+%attr(0644,root,root)			%{_datadir}/%{_package}/magic
+%attr(0644,root,root)			%{_datadir}/%{_package}/*.example
+%{_mandir}/man?/*
 
 
 %changelog
