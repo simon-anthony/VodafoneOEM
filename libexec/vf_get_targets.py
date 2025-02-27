@@ -13,6 +13,13 @@ parser = argparse.ArgumentParser(
     description='Retrieve targets of specified type',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
+# Logging
+log = logging.getLogger(parser.prog) # create top level logger
+
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
+parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
+
 # Region
 config_region = ConfigParser.ConfigParser()
 config_region.read('@PKGDATADIR@/region.ini')
@@ -59,7 +66,25 @@ if args.host:
     else:
         host_list = args.host
 
-msg('connecting to ' + oms, msgLevel.INFO)
+# Set up logging
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+
+ch = logging.StreamHandler() # add console handler 
+ch.setLevel(numeric_level)
+ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
+log.addHandler(ch)
+
+if args.logfile:
+    fh = logging.FileHandler(args.logfile.name) # add file handler
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    log.addHandler(fh)
+
+log.setLevel(logging.NOTICE) # fallback log level (default WARNING)
+
+log.notice('connecting to ' + oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -81,7 +106,7 @@ if not username:
     print('Error: unable to determine username to use')
     sys.exit(1)
 
-msg('username = ' + username, msgLevel.INFO)
+log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -115,7 +140,7 @@ else:
     else:
         targets = '%'
 
-msg(targets, level=msgLevel.INFO, tag='Targets')
+log.info(targets)
 
 try:
     resp = get_targets(
@@ -127,8 +152,7 @@ try:
         subseparator_properties = subsep)
 
 except emcli.exception.VerbExecutionError, e:
-    #print e.error()
-    msg(e.error(), msgLevel.ERROR)
+    log.error(e.error())
     exit(1)
    
 if resp.isJson():

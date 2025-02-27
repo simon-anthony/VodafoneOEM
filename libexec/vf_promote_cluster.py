@@ -6,7 +6,7 @@ import json
 import re
 import logging
 from logging_ext import ColoredFormatter
-from cluster import get_cluster_nodes_from_scan
+from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts
 
 
 parser = argparse.ArgumentParser(
@@ -65,7 +65,7 @@ if args.logfile:
     fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     log.addHandler(fh)
 
-log.setLevel(logging.DEBUG) # fallback log (default WARNING)
+log.setLevel(logging.NOTICE) # fallback log level (default WARNING)
 
 log.notice('connecting to ' + oms)
 
@@ -131,7 +131,7 @@ try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 if len(resp.out()['data']) == 0:
@@ -183,49 +183,22 @@ log.notice('add_target -name=' + cluster +
     ' -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + 
     ' -instances=' + instances)
 
+
 ####
 #  ii. Add the database instance (oracle_database) targets
 # iii. Add the remainig nodes
 ####
-# Assume only DBs on instance are for cluster
+# There may be multiples DBs on instance for cluster
+databases_list = get_databases_on_hosts(instances_list)
 
-targets = 'oracle_database'
-try:
-    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+for db in databases_list:
+    log.info('ServiceName: ' + db['ServiceName'])
 
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
-
-dbs_list = [] # needed for the targets to add to rac_database
-for target in resp.out()['data']:   # multiple records
-    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
-    if m:
-        host = m.group('host')
-        log.info('oracle_database ' + host)
-        if host in instances_list: # check host is one of our instances, otherwise ignore
-            dbs_list.append(target['Target Name']) 
-            m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
-            if m:
-                SID = m.group('SID')
-                MachineName = m.group('MachineName')
-                OracleHome = m.group('OracleHome')
-                Port = m.group('Port')
-                ServiceName = m.group('ServiceName')
-
-                log.notice('add_target -name='+ target['Target Name'] +
-                ' -type=oracle_database' +
-                ' -host=' + host +
-                ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
-                ' -properties="SID:' + SID + ';Port:' + Port + ';OracleHome:' + OracleHome + ';MachineName:' + MachineName + '"')
-            else:
-                log.error('cannot extract SID/MachineName/OracleHome/Port/ServiceName from Properties')
-                sys.exit(1)
-    else:
-        log.error('cannot extract hostname from Host Info')
-        sys.exit(1)
-
-log.debug(json.dumps(resp.out(), indent=4))
+    log.notice('add_target -name='+ db['target'] +
+        ' -type=oracle_database' +
+        ' -host=' + db['host'] +
+        ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
+        ' -properties="SID:' + db['SID'] + ';Port:' + db['Port'] + ';OracleHome:' + db['OracleHome'] + ';MachineName:' + db['MachineName'] + '"')
 
 ####
 #  iv. Add the Cluster database (rac_database) target
@@ -330,7 +303,7 @@ try:
     resp = get_targets(targets = targets, unmanaged = True, properties = True)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 for target in resp.out()['data']:
