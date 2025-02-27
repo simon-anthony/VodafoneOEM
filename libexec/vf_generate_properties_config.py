@@ -5,6 +5,7 @@ from utils import getcreds
 import json
 import logging
 from logging_ext import ColoredFormatter
+from argparse_ext import CustomExtend
 
 parser = argparse.ArgumentParser(
     prog='generate_properties_config',
@@ -34,11 +35,9 @@ parser.add_argument('-n', '--node', required=True,
 
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
 
-# Jython (Python 2.7) does not have action='extend' (used with nargs='+') so we cannot do:
-# -p 'prop1' 'prop2' -p 'prop3' and get args.property=['prop1', 'prop2', 'prop3']
-
-parser.add_argument('-p', '--property', nargs=1, action='append', metavar='PROPERTY',
+parser.add_argument('-p', '--property', nargs='+', action=CustomExtend, metavar='PROPERTY',
     default=['Lifecycle Status', 'Cost Center', 'Department'],
+    defaultextended=False,
     help='list of properties, default is %(default)s')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
