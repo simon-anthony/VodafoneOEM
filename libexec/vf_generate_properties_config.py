@@ -10,8 +10,8 @@ import logging
 from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
-    prog='get_targets',
-    description='Retrieve targets of specified type',
+    prog='generate_properties_config',
+    description='Retrieve properties master lists',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
 # Logging
@@ -36,21 +36,6 @@ parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
-parser.add_argument('-D', '--domain', help='default domain name if missing from host(s) specified')
-parser.add_argument('-U', '--unmanaged', default=False, action='store_true', help='get unmanaged targets (no status or alert information)')
-
-group_output = parser.add_mutually_exclusive_group(required=False)
-group_output.add_argument('-s', '--script', default=False, action='store_true', help='return output in script rather than JSON format)')
-group_output.add_argument('-j', '--json', default=False, action='store_true', help='return complete output in JSON format)')
-
-# target options
-parser.add_argument('-t', '--type', '--target_type', default='host', 
-    choices=['host', 'oracle_emd', 'oracle_database', 'oracle_home', 'rac_database', 'cluster', 'osm_cluster', 'osm_instance'],
-    metavar='TARGET_TYPE', 
-    help='TARGET_TYPE: %(choices)s (default is host)')
-
-# nargs=* gather zero or more args into a list
-parser.add_argument('host', nargs='*', metavar='HOST', help='optional list of target(s)')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -59,13 +44,6 @@ if args.region:
     oms = config_region.get(args.region, 'url')
 else:
     oms = args.oms
-
-# Canonicalize host names if default domain available
-if args.host:
-    if args.domain:
-        host_list = [(lambda x:x+"."+args.domain if ("." not in x) else x)(i) for i in args.host]
-    else:
-        host_list = args.host
 
 # Set up logging
 numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
@@ -111,56 +89,32 @@ log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
-# get_targets() returns:
-#
-# [ {'Host Info': 'host:oel.example.com;timezone_region:Europe/London',
-#    'Target Type': 'oracle_database',
-#    'Properties': 'Protocol:TCP;SID:FREE;MachineName:oel.example.com;OracleHome:/opt/oracle/product/dbhome;Port:1521',
-#    'Associations': '',
-#    'Target Name': 'FREE' }]
+properties = ['Lifecycle Status', 'Cost Center', 'Department']
 
-# Host names format for emcli
-# By default, the separator_properties is ";" and the subseparator_properties is ":"
-sep = ';'
-subsep = ':'
+for property_name in properties:
+    try:
+        resp = list_target_properties_master_list_values(
+            property_name = property_name )
 
-if args.host:
-    # targets format; targets = "[name1:]type1;[name2:]type2;..."
-    if args.type == 'host' or args.type == 'rac_database' or args.type == 'cluster':
-        target_list = [(lambda x:x+subsep+args.type)(i) for i in host_list]
-    elif args.type == 'oracle_home':
-        target_list = [(lambda x:'%_'+x+'_%'+subsep+args.type)(i) for i in host_list]
-    elif args.type == 'oracle_emd':
-        target_list = [(lambda x:x+':3872'+subsep+args.type)(i) for i in host_list]
-    if args.type == 'osm_cluster' or args.type == 'osm_instance':
-        target_list = [(lambda x:'%_'+x+subsep+args.type)(i) for i in host_list]
-    targets = sep.join(target_list)
-else:
-    if args.type:
-        targets = '%:' + args.type
-    else:
-        targets = '%'
+    except emcli.exception.VerbExecutionError, e:
+        log.error(e.error())
+        exit(1)
+       
+    # Edit the header
+    use_lambda = True
+    # There are numerous ways to this. Turn the string (resp) which contains
+    # newlines into a list using lambda to apply the formatting to the header or
+    # pop() the first row (the header) from the list and edit and print it.
 
-log.info(targets)
+    if use_lambda: # Lambda
+        resp_list = [(lambda x:'[' + x[x.rfind(': ', 1)+2:] + ']' if (':' in x) else x)(i) for i in resp.out().splitlines()]
+    else: # Pop
+        resp_list = resp.out().splitlines()
 
-try:
-    resp = get_targets(
-        targets = targets,
-        script = args.script,
-        unmanaged = args.unmanaged,
-        properties = True if args.unmanaged else False,
-        separator_properties = sep,
-        subseparator_properties = subsep)
+        header = resp_list.pop(0)
+        print('[' + header[header.rfind(': ', 1)+2:] + ']') # header
 
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
-   
-if resp.isJson():
-    if args.json:
-        print(json.dumps(resp.out(), indent=4))
-    else:
-        for target in resp.out()['data']:
-            print(target['Target Type'] + ':' + target['Target Name'])
-else:
-    print(resp.out())
+    for item in resp_list:
+        if len(item) > 0:
+            print(item)
+

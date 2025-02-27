@@ -16,7 +16,8 @@ dist_tools_DATA = \
 	logging_ext.py \
 	vf_deploy_agent.py \
 	vf_run_auto_discovery.py \
-	vf_list_gold_agent_images.py
+	vf_list_gold_agent_images.py \
+	vf_generate_properties_config.py
 
 do_subst = sed -i \
 	-e 's;[@]BASEDIR[@];$(prefix);g' \
