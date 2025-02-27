@@ -27,10 +27,6 @@ group_oms.add_argument('-r', '--region', choices=config.sections())
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
 
-group = parser.add_mutually_exclusive_group()
-group.add_argument('-a', '--all', action='store_true', help='Add all discovered Single Instance DBs')
-group.add_argument('-t', '--target', nargs='+', help='Add only targets listed')
-
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
 

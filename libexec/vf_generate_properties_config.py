@@ -1,8 +1,5 @@
 import sys
 import argparse
-# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
-# In the latter case config[args.region]['url'] would be used instead of config.get(args.region, 'url')
-# https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
 import json
@@ -36,6 +33,13 @@ parser.add_argument('-n', '--node', required=True,
     choices=config_node.sections(), metavar='NODE', help='NODE: %(choices)s')
 
 parser.add_argument('-u', '--username', help='OMS user, overides that found in @PKGDATADIR@/node.ini')
+
+# Jython (Python 2.7) does not have action='extend' (used with nargs='+') so we cannot do:
+# -p 'prop1' 'prop2' -p 'prop3' and get args.property=['prop1', 'prop2', 'prop3']
+
+parser.add_argument('-p', '--property', nargs=1, action='append', metavar='PROPERTY',
+    default=['Lifecycle Status', 'Cost Center', 'Department'],
+    help='list of properties, default is %(default)s')
 
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
@@ -89,9 +93,9 @@ log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
-properties = ['Lifecycle Status', 'Cost Center', 'Department']
+################################################################################
 
-for property_name in properties:
+for property_name in args.property:
     try:
         resp = list_target_properties_master_list_values(
             property_name = property_name )

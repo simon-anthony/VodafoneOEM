@@ -14,6 +14,7 @@ dist_tools_DATA = \
 	utils.py \
 	cluster.py \
 	logging_ext.py \
+	argparse_ext.py \
 	vf_deploy_agent.py \
 	vf_run_auto_discovery.py \
 	vf_list_gold_agent_images.py \
