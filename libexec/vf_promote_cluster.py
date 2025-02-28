@@ -1,7 +1,7 @@
 import sys
 import argparse
 import ConfigParser
-from utils import getcreds
+from utils import getcreds,keyvalues
 import json
 import re
 import logging
@@ -65,7 +65,7 @@ if args.logfile:
     fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     log.addHandler(fh)
 
-log.setLevel(logging.NOTICE) # fallback log level (default WARNING)
+log.setLevel(logging.DEBUG) # fallback log level (default WARNING)
 
 log.notice('connecting to ' + oms)
 
@@ -189,9 +189,9 @@ log.notice('add_target -name=' + cluster +
 # iii. Add the remainig nodes
 ####
 # There may be multiples DBs on instance for cluster
-databases_list = get_databases_on_hosts(instances_list)
+databases_records_list = get_databases_on_hosts(instances_list)
 
-for db in databases_list:
+for db in databases_records_list:
     log.info('ServiceName: ' + db['ServiceName'])
 
     log.notice('add_target -name='+ db['target'] +
@@ -199,6 +199,9 @@ for db in databases_list:
         ' -host=' + db['host'] +
         ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
         ' -properties="SID:' + db['SID'] + ';Port:' + db['Port'] + ';OracleHome:' + db['OracleHome'] + ';MachineName:' + db['MachineName'] + '"')
+
+    # hack
+    ServiceName = db['ServiceName']
 
 ####
 #  iv. Add the Cluster database (rac_database) target
@@ -216,6 +219,7 @@ except emcli.exception.VerbExecutionError, e:
     log.error(e.error())
     exit(1)
 
+dbs_list = keyvalues('target', databases_records_list)
 for target in resp.out()['data']:   # multiple records
     if target['Target Name'] != ServiceName:  
         continue
@@ -236,7 +240,7 @@ for target in resp.out()['data']:   # multiple records
         log.error('cannot extract ClusterName/ServiceName from Properties')
         sys.exit(1)
 
-    instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in dbs_list])
+    instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in instances_list])
 
     log.info('RAC Database ' + ServiceName)
     log.notice('add_target -name=' + target['Target Name'] +

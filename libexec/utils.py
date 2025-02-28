@@ -31,6 +31,16 @@ def getcreds(username = None, hasrun = False):
         print('Cannot extract username/password from output')
         raise CredentialRetrieval()
 
+def keyvalues(key, data, unique=False):
+    """Return a list of key values from a list of dicts:"""
+    """data"""
+    """[ {key1:val1, key2:val2, key3:val3,...},"""
+    """  {key1:val1, key2:val2, key3:val3,...},...]"""
+    if unique:
+        return list({d[key] for d in data if key in d})
+    else:
+        return [d['ServiceName'] for d in data]
+
 class style():
     BLACK = '\033[30m'
     RED = '\033[31m'

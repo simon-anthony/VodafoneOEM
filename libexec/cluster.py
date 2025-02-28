@@ -60,6 +60,8 @@ def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
 
 def get_databases_on_hosts(instances_list):
     """Return list of dictionary entries of database targets in instances in list"""
+    """[{ 'target':'target_host_SID1', 'host':'vdf1.example.com', 'SID':'SID1', 'MachineName':'vdf1.example.com',...},"""
+    """ { 'target':'target_host_SID2', 'host':'vdf2.example.com', 'SID':'SID2', 'MachineName':'vdf2.example.com',...}, ...]"""
 
     log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
 
