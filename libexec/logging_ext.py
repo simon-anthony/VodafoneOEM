@@ -18,8 +18,9 @@ SUFFIX = '\033[0m'
 
 class ColoredFormatter(Formatter):
 
-    def __init__(self, patern):
-        Formatter.__init__(self, patern)
+    def __init__(self, pattern, coloredtext=False):
+        self.text = coloredtext
+        Formatter.__init__(self, pattern)
 
     def format(self, record):
         colored_record = copy(record)
@@ -29,7 +30,8 @@ class ColoredFormatter(Formatter):
         colored_levelname = ('{0}{1}m{2}{3}') \
             .format(PREFIX, seq, levelname, SUFFIX)
         colored_record.levelname = colored_levelname
-        colored_record.msg = ('{0}{1}m{2}{3}').format(PREFIX, seq, msg, SUFFIX)
+        if self.text:
+            colored_record.msg = ('{0}{1}m{2}{3}').format(PREFIX, seq, msg, SUFFIX)
         return Formatter.format(self, colored_record)
 
 logging.NOTICE = 25
