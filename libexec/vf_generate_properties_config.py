@@ -134,3 +134,4 @@ for property_name in args.property:
 if args.outfile: 
     config.write(args.outfile)
 
+log.notice('properties written to ' + args.outfile.name)
