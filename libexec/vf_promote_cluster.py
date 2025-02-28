@@ -6,7 +6,7 @@ import json
 import re
 import logging
 from logging_ext import ColoredFormatter
-from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts
+from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database
 
 
 parser = argparse.ArgumentParser(
@@ -194,7 +194,7 @@ databases_records_list = get_databases_on_hosts(instances_list)
 for db in databases_records_list:
     log.info('ServiceName: ' + db['ServiceName'])
 
-    log.notice('add_target -name='+ db['target'] +
+    log.notice('add_target -name='+ db['Target Name'] +
         ' -type=oracle_database' +
         ' -host=' + db['host'] +
         ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:Normal"' +
@@ -211,44 +211,18 @@ for db in databases_records_list:
 
 log.info('looking for rac_database ' + ServiceName)
 
-targets = 'rac_database'
-try:
-    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+rac_record = get_rac_database(ServiceName)
 
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
+instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in instances_list])
 
-dbs_list = keyvalues('target', databases_records_list)
-for target in resp.out()['data']:   # multiple records
-    if target['Target Name'] != ServiceName:  
-        continue
-    # got it!
+log.info('RAC Database ' + ServiceName)
 
-    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
-    if m:
-        host = m.group('host')
-    else:
-        log.error('cannot extract hostname from Host Info')
-        sys.exit(1)
-
-    m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
-    if m:
-        ClusterName = m.group('ClusterName')
-        ServiceName = m.group('ServiceName')
-    else:
-        log.error('cannot extract ClusterName/ServiceName from Properties')
-        sys.exit(1)
-
-    instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in instances_list])
-
-    log.info('RAC Database ' + ServiceName)
-    log.notice('add_target -name=' + target['Target Name'] +
-        ' -type=rac_database' +
-        ' -host=' + host +
-        ' -monitor_mode=1' +
-        ' -properties="ServiceName:' + ServiceName + ';ClusterName:' + ClusterName + '"' +
-        ' -instances="' + instances + '"')
+log.notice('add_target -name=' + rac_record['Target Name'] +
+    ' -type=rac_database' +
+    ' -host=' + rac_record['host'] +
+    ' -monitor_mode=1' +
+    ' -properties="ServiceName:' + ServiceName + ';ClusterName:' + rac_record['ClusterName'] + '"' +
+    ' -instances="' + instances + '"')
 
 log.debug(json.dumps(resp.out(), indent=4))
 
@@ -282,10 +256,10 @@ for target in resp.out()['data']:   # multiple records
                 SID = m.group('SID')
 
                 log.notice('add_target -name=' + target['Target Name'] +
-                ' -type=osm_instance' +
-                ' -host=' + host +
-                ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
-                ' -properties="SID:' + SID + ';Port:' + Port + ';OracleHome:' + OracleHome + ';MachineName:' + MachineName+'"')
+                    ' -type=osm_instance' +
+                    ' -host=' + host +
+                    ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
+                    ' -properties="SID:' + SID + ';Port:' + Port + ';OracleHome:' + OracleHome + ';MachineName:' + MachineName+'"')
             else:
                 log.error('cannot extract MachineName/OracleHome/Port/SID from Properties')
                 sys.exit(1)

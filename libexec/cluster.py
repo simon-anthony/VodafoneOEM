@@ -74,6 +74,8 @@ def get_databases_on_hosts(instances_list):
         log.error(e.error())
         exit(1)
 
+    log.debug(json.dumps(resp.out(), indent=4))
+
     dbs_list = [] # needed for the targets to add to rac_database
 
     for obj in resp.out()['data']:   # multiple records
@@ -87,7 +89,7 @@ def get_databases_on_hosts(instances_list):
                 m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", obj['Properties'])
                 if m:
                     dbs_list.append({
-                        'target':obj['Target Name'],
+                        'Target Name':obj['Target Name'],
                         'host':host,
                         'SID':m.group('SID'),
                         'MachineName':m.group('MachineName'),
@@ -103,6 +105,49 @@ def get_databases_on_hosts(instances_list):
     return dbs_list
 
 
+
+def get_rac_database(ServiceName):
+    """return dict with information about the RAC database with the given ServiceName"""
+    """there is only one record in the discovery catalog as this is the"""
+    """last record added"""
+
+    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+
+    targets = 'rac_database'
+    try:
+        resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+    except emcli.exception.VerbExecutionError, e:
+        log.error(e.error())
+        exit(1)
+
+    log.debug(json.dumps(resp.out(), indent=4))
+
+    #    cluster_dict = { key: None for key in ['Target Name', 'ClusterName', 'ServiceName', 'host']}
+
+    for obj in resp.out()['data']:   # multiple records
+        if obj['Target Name'] != ServiceName:  
+            continue
+        # got it!
+
+        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
+        if m:
+            host = m.group('host')
+        else:
+            log.error('cannot extract hostname from Host Info')
+            sys.exit(1)
+
+        m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", obj['Properties'])
+        if m:
+            cluster_dict = { 'Target Name': obj['Target Name'], 'ClusterName': m.group('ClusterName'), 'ServiceName': m.group('ServiceName'), 'host': host }
+        else:
+            log.error('cannot extract ClusterName/ServiceName from Properties')
+            sys.exit(1)
+
+        return cluster_dict
+
+################################################################################
+
 def get_databases_on_hosts2(instances_list):
     """Return list of dictionary entries of database targets in instances in list"""
     """This version uses key value split rather than regex"""
@@ -117,6 +162,8 @@ def get_databases_on_hosts2(instances_list):
     except emcli.exception.VerbExecutionError, e:
         log.error(e.error())
         exit(1)
+
+    log.debug(json.dumps(resp.out(), indent=4))
 
     dbs_list = [] # needed for the targets to add to rac_database
 
@@ -146,4 +193,3 @@ def get_databases_on_hosts2(instances_list):
             log.error('cannot extract hostname from Host Info')
             sys.exit(1)
     return dbs_list
-
