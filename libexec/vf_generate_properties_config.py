@@ -40,6 +40,7 @@ parser.add_argument('-p', '--property', nargs='+', action=CustomExtend, metavar=
     defaultextended=False,
     help='list of properties, default is %(default)s')
 
+parser.add_argument('-f', '--outfile', type=argparse.FileType('wb'), metavar='PATH', help='write config to file %(metavar)s')
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
 
@@ -94,6 +95,9 @@ login(username=username, password=creds['password'])
 
 ################################################################################
 
+config = ConfigParser.RawConfigParser(allow_no_value=True)
+config.optionxform = str # these values are to be case sensitive
+
 for property_name in args.property:
     try:
         resp = list_target_properties_master_list_values(
@@ -103,21 +107,30 @@ for property_name in args.property:
         log.error(e.error())
         exit(1)
        
-    # Edit the header
-    use_lambda = True
-    # There are numerous ways to this. Turn the string (resp) which contains
+    # There are numerous ways to do this. Turn the string (resp) which contains
     # newlines into a list using lambda to apply the formatting to the header or
     # pop() the first row (the header) from the list and edit and print it.
 
-    if use_lambda: # Lambda
+    if not args.outfile: # Lambda
+        # edit the header (the line containing ': ')
         resp_list = [(lambda x:'[' + x[x.rfind(': ', 1)+2:] + ']' if (':' in x) else x)(i) for i in resp.out().splitlines()]
+
+        for item in resp_list:
+            if len(item) > 0:
+                print(item)
+        print('')
+
     else: # Pop
         resp_list = resp.out().splitlines()
 
-        header = resp_list.pop(0)
-        print('[' + header[header.rfind(': ', 1)+2:] + ']') # header
+        header = resp_list.pop(0) # pop first line
+        section = header[header.rfind(': ', 1)+2:] # header
+        config.add_section(section)
 
-    for item in resp_list:
-        if len(item) > 0:
-            print(item)
+        for name in resp_list:
+            if len(name) > 0:
+                config.set(section, name)
+
+if args.outfile: 
+    config.write(args.outfile)
 
