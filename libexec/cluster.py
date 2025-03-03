@@ -60,8 +60,8 @@ def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
 
 def get_databases_on_hosts(instances_list):
     """Return list of dictionary entries of database targets in instances in list"""
-    """[{ 'target':'target_host_SID1', 'host':'vdf1.example.com', 'SID':'SID1', 'MachineName':'vdf1.example.com',...},"""
-    """ { 'target':'target_host_SID2', 'host':'vdf2.example.com', 'SID':'SID2', 'MachineName':'vdf2.example.com',...}, ...]"""
+    """[{ 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''},"""
+    """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''}, ...]"""
 
     log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
 
@@ -145,6 +145,67 @@ def get_rac_database(ServiceName):
             sys.exit(1)
 
         return cluster_dict
+
+
+def get_osm_instances_on_hosts(instances_list):
+    """Return list of dictionary entries of osm targets in instances in list"""
+    """[{ 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''},"""
+    """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''}, ...]"""
+    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+
+    targets = 'osm_instance'
+    try:
+        resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+    except emcli.exception.VerbExecutionError, e:
+        log.error(e.error())
+        exit(1)
+
+    log.debug(json.dumps(resp.out(), indent=4))
+
+    osm_list = [] # needed for the targets to add to osm_cluster
+
+    for obj in resp.out()['data']:   # multiple records
+        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
+        if m:
+            host = m.group('host')
+            log.info('ASM Instance ' + host)
+            if host in instances_list: # check host is one of our instances, otherwise ignore
+          
+                m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", obj['Properties'])
+                if m:
+                    osm_list.append({
+                        'Target Name':obj['Target Name'],
+                        'host':host,
+                        'SID':m.group('SID'),
+                        'MachineName':m.group('MachineName'),
+                        'OracleHome':m.group('OracleHome'),
+                        'Port':m.group('Port')})
+                else:
+                    log.error('cannot extract MachineName/OracleHome/Port/SID from Properties')
+                    sys.exit(1)
+        else:
+            log.error('cannot extract hostname from Host Info')
+            sys.exit(1)
+
+    return osm_list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ################################################################################
 

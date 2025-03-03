@@ -6,7 +6,7 @@ import json
 import re
 import logging
 from logging_ext import ColoredFormatter
-from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database
+from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database,get_osm_instances_on_hosts
 
 
 parser = argparse.ArgumentParser(
@@ -189,6 +189,7 @@ log.notice('add_target -name=' + cluster +
 # iii. Add the remainig nodes
 ####
 # There may be multiples DBs on instance for cluster
+log.info('adding oracle_databases ')
 databases_records_list = get_databases_on_hosts(instances_list)
 
 for db in databases_records_list:
@@ -224,50 +225,20 @@ log.notice('add_target -name=' + rac_record['Target Name'] +
     ' -properties="ServiceName:' + ServiceName + ';ClusterName:' + rac_record['ClusterName'] + '"' +
     ' -instances="' + instances + '"')
 
-log.debug(json.dumps(resp.out(), indent=4))
-
 ################################################################################
 # 2) Add the ASM Instance Targets
 ################################################################################
 
 log.info('looking for ASM instances on ' + ' '.join(instances_list))
+osm_records_list = get_osm_instances_on_hosts(instances_list)
 
-targets = 'osm_instance'
-try:
-    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+for osm in osm_records_list:
+    log.notice('add_target -name=' + osm['Target Name'] +
+        ' -type=osm_instance' +
+        ' -host=' + osm['host'] +
+        ' -credentials="UserName:' + asmsnmpuser + ';password=' + asmsnmppass + ';Role:sysdba"' +
+        ' -properties="SID:' + osm['SID'] + ';Port:' + osm['Port'] + ';OracleHome:' + osm['OracleHome'] + ';MachineName:' + osm['MachineName']+'"')
 
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
-
-osm_list = [] # needed for the targets to add to osm_cluster
-for target in resp.out()['data']:   # multiple records
-    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
-    if m:
-        host = m.group('host')
-        log.info('ASM Instance ' + host)
-        if host in instances_list: # check host is one of our instances, otherwise ignore
-            osm_list.append(target['Target Name']) 
-            m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", target['Properties'])
-            if m:
-                MachineName = m.group('MachineName')
-                OracleHome = m.group('OracleHome')
-                Port = m.group('Port')
-                SID = m.group('SID')
-
-                log.notice('add_target -name=' + target['Target Name'] +
-                    ' -type=osm_instance' +
-                    ' -host=' + host +
-                    ' -credentials="UserName:' + dbsnmpuser + ';password=' + dbsnmppass + ';Role:sysdba"' +
-                    ' -properties="SID:' + SID + ';Port:' + Port + ';OracleHome:' + OracleHome + ';MachineName:' + MachineName+'"')
-            else:
-                log.error('cannot extract MachineName/OracleHome/Port/SID from Properties')
-                sys.exit(1)
-    else:
-        log.error('cannot extract hostname from Host Info')
-        sys.exit(1)
-
-log.debug(json.dumps(resp.out(), indent=4))
 
 ################################################################################
 # 3) Add Cluster ASM
