@@ -6,7 +6,7 @@ import json
 import re
 import logging
 from logging_ext import ColoredFormatter
-from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database,get_osm_instances_on_hosts
+from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database,get_osm_instances_on_hosts,get_osm_cluster
 
 
 parser = argparse.ArgumentParser(
@@ -189,7 +189,8 @@ log.notice('add_target -name=' + cluster +
 # iii. Add the remainig nodes
 ####
 # There may be multiples DBs on instance for cluster
-log.info('adding oracle_databases ')
+log.info('oracle databases ')
+
 databases_records_list = get_databases_on_hosts(instances_list)
 
 for db in databases_records_list:
@@ -209,14 +210,11 @@ for db in databases_records_list:
 ####
 # Find the rac_database with ServiceName the same as the oracle_databases
 # Only one record per rac_database will be returned...
-
-log.info('looking for rac_database ' + ServiceName)
+log.info('RAC database ' + ServiceName)
 
 rac_record = get_rac_database(ServiceName)
 
 instances = ';'.join([(lambda x:x+':oracle_database')(i) for i in instances_list])
-
-log.info('RAC Database ' + ServiceName)
 
 log.notice('add_target -name=' + rac_record['Target Name'] +
     ' -type=rac_database' +
@@ -228,8 +226,8 @@ log.notice('add_target -name=' + rac_record['Target Name'] +
 ################################################################################
 # 2) Add the ASM Instance Targets
 ################################################################################
+log.info('ASM instances on ' + ' '.join(instances_list))
 
-log.info('looking for ASM instances on ' + ' '.join(instances_list))
 osm_records_list = get_osm_instances_on_hosts(instances_list)
 
 for osm in osm_records_list:
@@ -245,45 +243,16 @@ for osm in osm_records_list:
 ################################################################################
 
 # Only one record per osm_cluster will be returned...
-log.info('looking for ASM Cluster ' + cluster)
+log.info('ASM cluster ' + cluster)
 
-targets = 'osm_cluster'
-try:
-    resp = get_targets(targets = targets, unmanaged = True, properties = True)
+osm_record = get_osm_cluster(cluster)
 
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
+instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in instances_list])
 
-for target in resp.out()['data']:
-    m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
-    if m:
-        host = m.group('host')
-    else:
-        log.error('cannot extract hostname from Host Info')
-        sys.exit(1)
+log.notice('add_target -name=' + osm_record['Target Name'] +
+    ' -type=osm_cluster -host=' + osm_record['host'] +
+    ' -monitor_mode=1 ' +
+    ' -properties="ServiceName:' + osm_record['ServiceName'] + ';ClusterName:' + osm_record['ClusterName'] + '"' +
+    ' -instances="' + instances + '"' +
+    ' -credentials="UserName:' + asmsnmpuser + ';password=' + asmsnmppass + ';Role:sysdba"')
 
-    m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", target['Properties'])
-    if m:
-        ClusterName = m.group('ClusterName')
-        ServiceName = m.group('ServiceName')
-    else:
-        log.error('cannot extract ClusterName/ServiceName from Properties')
-        sys.exit(1)
-
-    if ClusterName != cluster:
-        continue
-
-    # Got it! - back to where we started withe the cluster name
-
-    instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in osm_list])
-
-    log.info('ASM Cluster ' + ServiceName)
-    log.notice('add_target -name=' + target['Target Name'] +
-        ' -type=osm_cluster -host=' + host +
-        ' -monitor_mode=1 ' +
-        ' -properties="ServiceName:' + ServiceName + ';ClusterName:' + ClusterName + '"' +
-        ' -instances="' + instances + '"' +
-        ' -credentials="UserName:' + asmsnmpuser + ';password=' + asmsnmppass + ';Role:sysdba"')
-
-log.debug(json.dumps(resp.out(), indent=4))

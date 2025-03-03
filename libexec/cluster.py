@@ -191,7 +191,49 @@ def get_osm_instances_on_hosts(instances_list):
     return osm_list
 
 
+def get_osm_cluster(cluster):
+    """return dict with information about the cluster given cluster name"""
+    """there is only one record in the discovery catalog as this is the"""
+    """last record added"""
 
+    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+
+    targets = 'osm_cluster'
+
+    try:
+        resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+    except emcli.exception.VerbExecutionError, e:
+        log.error(e.error())
+        exit(1)
+
+    log.debug(json.dumps(resp.out(), indent=4))
+
+    for obj in resp.out()['data']:
+        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
+        if m:
+            host = m.group('host')
+        else:
+            log.error('cannot extract hostname from Host Info')
+            sys.exit(1)
+
+        m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", obj['Properties'])
+        if m:
+            ClusterName = m.group('ClusterName')
+            ServiceName = m.group('ServiceName')
+        else:
+            log.error('cannot extract ClusterName/ServiceName from Properties')
+            sys.exit(1)
+
+        if ClusterName != cluster:
+            continue
+
+        # Got it! 
+
+        log.info('ASM Cluster ' + ServiceName)
+        osm_cluster_dict = { 'Target Name': obj['Target Name'], 'ClusterName': m.group('ClusterName'), 'ServiceName': m.group('ServiceName'), 'host': host }
+
+        return osm_cluster_dict
 
 
 
@@ -226,7 +268,7 @@ def get_databases_on_hosts2(instances_list):
 
     log.debug(json.dumps(resp.out(), indent=4))
 
-    dbs_list = [] # needed for the targets to add to rac_database
+    # osm_cluster_dict = { key: None for key in ['Target Name', 'ClusterName', 'ServiceName', 'host']}
 
     for obj in resp.out()['data']:   # multiple records
         m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
