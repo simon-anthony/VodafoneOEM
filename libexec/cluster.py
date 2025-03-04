@@ -39,12 +39,7 @@ def get_cluster(cluster):
     log.debug(json.dumps(resp.out(), indent=4))
 
     obj = resp.out()['data'][0]
-    m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
-    if m:
-        host = m.group('host')
-    else:
-        log.error('cannot extract hostname from Host Info')
-        sys.exit(1)
+    host = getprop('host', obj['Host Info'])
 
     cluster_dict = {
         'Target Name': obj['Target Name'],
@@ -83,16 +78,11 @@ def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
     instances_list = []
 
     for obj in resp.out()['data']:   # multiple records
-        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
-        if m:
-            instance = m.group('host')
-            Machine = getprop('Machine', obj['Properties'])
-            if Machine == scanName: # check Machine matches scanName, otherwise ignore
-                if instance not in instances_list: # avoid duplication
-                    instances_list.append(instance) 
-        else:
-            log.error('cannot extract hostname from Host Info')
-            sys.exit(1)
+        instance = getprop('host', obj['Host Info'])
+        Machine = getprop('Machine', obj['Properties'])
+        if Machine == scanName: # check Machine matches scanName, otherwise ignore
+            if instance not in instances_list: # avoid duplication
+                instances_list.append(instance) 
 
     log.info(instances_list)
 
@@ -122,24 +112,19 @@ def get_databases_on_hosts(instances_list):
     dbs_list = [] # needed for the targets to add to rac_database
 
     for obj in resp.out()['data']:   # multiple records
-        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
-        if m:
-            host = m.group('host')
+        host = getprop('host', obj['Host Info'])
 
-            if host in instances_list: # check host is one of our instances, otherwise ignore
-                log.info('oracle_database ' + host)
+        if host in instances_list: # check host is one of our instances, otherwise ignore
+            log.info('oracle_database ' + host)
 
-                dbs_list.append({
-                    'Target Name':obj['Target Name'],
-                    'host':host,
-                    'SID':getprop('SID', obj['Properties']),
-                    'MachineName':getprop('MachineName', obj['Properties']),
-                    'OracleHome':getprop('OracleHome', obj['Properties']),
-                    'Port':getprop('Port', obj['Properties']),
-                    'ServiceName':getprop('ServiceName', obj['Properties'])})
-        else:
-            log.error('cannot extract hostname from Host Info')
-            sys.exit(1)
+            dbs_list.append({
+                'Target Name':obj['Target Name'],
+                'host':host,
+                'SID':getprop('SID', obj['Properties']),
+                'MachineName':getprop('MachineName', obj['Properties']),
+                'OracleHome':getprop('OracleHome', obj['Properties']),
+                'Port':getprop('Port', obj['Properties']),
+                'ServiceName':getprop('ServiceName', obj['Properties'])})
     return dbs_list
 
 
@@ -168,12 +153,7 @@ def get_rac_database(ServiceName):
             continue
         # got it!
 
-        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
-        if m:
-            host = m.group('host')
-        else:
-            log.error('cannot extract hostname from Host Info')
-            sys.exit(1)
+        host = getprop('host', obj['Host Info'])
 
         cluster_dict = {
             'Target Name': obj['Target Name'],
@@ -203,22 +183,17 @@ def get_osm_instances_on_hosts(instances_list):
     osm_list = [] # needed for the targets to add to osm_cluster
 
     for obj in resp.out()['data']:   # multiple records
-        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
-        if m:
-            host = m.group('host')
-            log.info('ASM Instance ' + host)
-            if host in instances_list: # check host is one of our instances, otherwise ignore
-          
-                osm_list.append({
-                    'Target Name':obj['Target Name'],
-                    'host':host,
-                    'SID':getprop('SID', obj['Properties']),
-                    'MachineName':getprop('MachineName', obj['Properties']),
-                    'OracleHome':getprop('OracleHome', obj['Properties']),
-                    'Port':getprop('Port', obj['Properties'])})
-        else:
-            log.error('cannot extract hostname from Host Info')
-            sys.exit(1)
+        host = getprop('host', obj['Host Info'])
+        log.info('ASM Instance ' + host)
+        if host in instances_list: # check host is one of our instances, otherwise ignore
+      
+            osm_list.append({
+                'Target Name':obj['Target Name'],
+                'host':host,
+                'SID':getprop('SID', obj['Properties']),
+                'MachineName':getprop('MachineName', obj['Properties']),
+                'OracleHome':getprop('OracleHome', obj['Properties']),
+                'Port':getprop('Port', obj['Properties'])})
 
     return osm_list
 
@@ -242,12 +217,7 @@ def get_osm_cluster(cluster):
     log.debug(json.dumps(resp.out(), indent=4))
 
     for obj in resp.out()['data']:
-        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
-        if m:
-            host = m.group('host')
-        else:
-            log.error('cannot extract hostname from Host Info')
-            sys.exit(1)
+        host = getprop('host', obj['Host Info'])
 
         ClusterName = getprop('ClusterName', obj['Properties'])
         ServiceName = getprop('ServiceName', obj['Properties'])
@@ -302,28 +272,24 @@ def get_databases_on_hosts2(instances_list):
     # osm_cluster_dict = { key: None for key in ['Target Name', 'ClusterName', 'ServiceName', 'host']}
 
     for obj in resp.out()['data']:   # multiple records
-        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
-        if m:
-            host = m.group('host')
+        host = getprop('host', obj['Host Info'])
 
-            if host in instances_list: # check host is one of our instances, otherwise ignore
-                log.info('oracle_database ' + host)
+        if host in instances_list: # check host is one of our instances, otherwise ignore
+            log.info('oracle_database ' + host)
 
-                for key, value in {k: v for k, v in (item.split(":") for item in obj["Properties"].split(";"))}.items():
-                    log.debug(key + ' = ' + value)
-                    if value.isdigit():
-                        exec(key + ' = ' + 'int(' +  value + ')')
-                    else:
-                        exec(key + ' = ' + '"' + value + '"')
-                dbs_list.append({
-                    'target':object['Target Name'],
-                    'host':host,
-                    'SID':SID,
-                    'MachineName':MachineName,
-                    'OracleHome':OracleHome,
-                    'Port':Port,
-                    'ServiceName':ServiceName})
-        else:
-            log.error('cannot extract hostname from Host Info')
-            sys.exit(1)
+            for key, value in {k: v for k, v in (item.split(":") for item in obj["Properties"].split(";"))}.items():
+                log.debug(key + ' = ' + value)
+                if value.isdigit():
+                    exec(key + ' = ' + 'int(' +  value + ')')
+                else:
+                    exec(key + ' = ' + '"' + value + '"')
+            dbs_list.append({
+                'target':object['Target Name'],
+                'host':host,
+                'SID':SID,
+                'MachineName':MachineName,
+                'OracleHome':OracleHome,
+                'Port':Port,
+                'ServiceName':ServiceName})
+
     return dbs_list
