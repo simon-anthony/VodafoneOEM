@@ -7,6 +7,13 @@ from emcli import *
 from emcli.exception import VerbExecutionError
 from logging_ext import ColoredFormatter
 
+def getprop(name, string):
+    m = re.search(r"{name}:(?P<value>[^;]+).*".format(name=name), string)
+    if m:
+        return m.group('value')
+    log.error('Cannot find ' + name + ' in ' + string)
+    return None
+
 
 def get_cluster(cluster):
     """return dict with information about the clusetr database with the given cluster name"""
@@ -39,14 +46,13 @@ def get_cluster(cluster):
         log.error('cannot extract hostname from Host Info')
         sys.exit(1)
 
-    m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*eonsPort:(?P<eonsPort>\d+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", obj['Properties'])
-
-    if m:
-        cluster_dict = { 'Target Name': obj['Target Name'], 'OracleHome': m.group('OracleHome'), 'eonsPort': m.group('eonsPort'), 'scanName': m.group('scanName'), 'scanPort': m.group('scanPort'), 'host': host }
-
-    else:
-        log.error('cannot extract OracleHome/scanName/scanPort from Properties')
-        sys.exit(1)
+    cluster_dict = {
+        'Target Name': obj['Target Name'],
+        'OracleHome': getprop('OracleHome', obj['Properties']),
+        'eonsPort': getprop('eonsPort', obj['Properties']),
+        'scanName': getprop('scanName', obj['Properties']),
+        'scanPort': getprop('scanPort', obj['Properties']),
+        'host': host }
 
     return cluster_dict
 
@@ -76,18 +82,14 @@ def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
 
     instances_list = []
 
-    for target in resp.out()['data']:   # multiple records
-        m = re.match(r"host:(?P<host>\S+);", target['Host Info'])
+    for obj in resp.out()['data']:   # multiple records
+        m = re.match(r"host:(?P<host>\S+);", obj['Host Info'])
         if m:
             instance = m.group('host')
-            m = re.search(r"Machine:(?P<Machine>[^;]+)", resp.out()['data'][0]['Properties'])
-            if m:
-                Machine = m.group('Machine')
-                if Machine == scanName: # check Machine matches scanName, otherwise ignore
-                    if instance not in instances_list: # avoid duplication
-                        instances_list.append(instance) 
-            else:
-                log.error('cannot extract MachineName from Properties')
+            Machine = getprop('Machine', obj['Properties'])
+            if Machine == scanName: # check Machine matches scanName, otherwise ignore
+                if instance not in instances_list: # avoid duplication
+                    instances_list.append(instance) 
         else:
             log.error('cannot extract hostname from Host Info')
             sys.exit(1)
@@ -127,19 +129,14 @@ def get_databases_on_hosts(instances_list):
             if host in instances_list: # check host is one of our instances, otherwise ignore
                 log.info('oracle_database ' + host)
 
-                m = re.search(r"SID:(?P<SID>[^;]+).*MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", obj['Properties'])
-                if m:
-                    dbs_list.append({
-                        'Target Name':obj['Target Name'],
-                        'host':host,
-                        'SID':m.group('SID'),
-                        'MachineName':m.group('MachineName'),
-                        'OracleHome':m.group('OracleHome'),
-                        'Port':m.group('Port'),
-                        'ServiceName':m.group('ServiceName')})
-                else:
-                    log.error('cannot extract SID/MachineName/OracleHome/Port/ServiceName from Properties')
-                    sys.exit(1)
+                dbs_list.append({
+                    'Target Name':obj['Target Name'],
+                    'host':host,
+                    'SID':getprop('SID', obj['Properties']),
+                    'MachineName':getprop('MachineName', obj['Properties']),
+                    'OracleHome':getprop('OracleHome', obj['Properties']),
+                    'Port':getprop('Port', obj['Properties']),
+                    'ServiceName':getprop('ServiceName', obj['Properties'])})
         else:
             log.error('cannot extract hostname from Host Info')
             sys.exit(1)
@@ -178,12 +175,11 @@ def get_rac_database(ServiceName):
             log.error('cannot extract hostname from Host Info')
             sys.exit(1)
 
-        m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", obj['Properties'])
-        if m:
-            cluster_dict = { 'Target Name': obj['Target Name'], 'ClusterName': m.group('ClusterName'), 'ServiceName': m.group('ServiceName'), 'host': host }
-        else:
-            log.error('cannot extract ClusterName/ServiceName from Properties')
-            sys.exit(1)
+        cluster_dict = {
+            'Target Name': obj['Target Name'],
+            'ClusterName': getprop('ClusterName', obj['Properties']),
+            'ServiceName': getprop('ServiceName', obj['Properties']),
+            'host': host }
 
         return cluster_dict
 
@@ -213,18 +209,13 @@ def get_osm_instances_on_hosts(instances_list):
             log.info('ASM Instance ' + host)
             if host in instances_list: # check host is one of our instances, otherwise ignore
           
-                m = re.search(r"MachineName:(?P<MachineName>[^;]+).*OracleHome:(?P<OracleHome>[^;]+).*Port:(?P<Port>[^;]+).*SID:(?P<SID>[^;]+)", obj['Properties'])
-                if m:
-                    osm_list.append({
-                        'Target Name':obj['Target Name'],
-                        'host':host,
-                        'SID':m.group('SID'),
-                        'MachineName':m.group('MachineName'),
-                        'OracleHome':m.group('OracleHome'),
-                        'Port':m.group('Port')})
-                else:
-                    log.error('cannot extract MachineName/OracleHome/Port/SID from Properties')
-                    sys.exit(1)
+                osm_list.append({
+                    'Target Name':obj['Target Name'],
+                    'host':host,
+                    'SID':getprop('SID', obj['Properties']),
+                    'MachineName':getprop('MachineName', obj['Properties']),
+                    'OracleHome':getprop('OracleHome', obj['Properties']),
+                    'Port':getprop('Port', obj['Properties'])})
         else:
             log.error('cannot extract hostname from Host Info')
             sys.exit(1)
@@ -258,13 +249,8 @@ def get_osm_cluster(cluster):
             log.error('cannot extract hostname from Host Info')
             sys.exit(1)
 
-        m = re.search(r"ClusterName:(?P<ClusterName>[^;]+).*ServiceName:(?P<ServiceName>[^;]+)", obj['Properties'])
-        if m:
-            ClusterName = m.group('ClusterName')
-            ServiceName = m.group('ServiceName')
-        else:
-            log.error('cannot extract ClusterName/ServiceName from Properties')
-            sys.exit(1)
+        ClusterName = getprop('ClusterName', obj['Properties'])
+        ServiceName = getprop('ServiceName', obj['Properties'])
 
         if ClusterName != cluster:
             continue
@@ -272,7 +258,11 @@ def get_osm_cluster(cluster):
         # Got it! 
 
         log.info('ASM Cluster ' + ServiceName)
-        osm_cluster_dict = { 'Target Name': obj['Target Name'], 'ClusterName': m.group('ClusterName'), 'ServiceName': m.group('ServiceName'), 'host': host }
+        osm_cluster_dict = {
+            'Target Name': obj['Target Name'],
+            'ClusterName': ClusterName,
+            'ServiceName': ServiceName,
+            'host': host }
 
         return osm_cluster_dict
 
