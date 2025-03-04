@@ -7,7 +7,48 @@ from emcli import *
 from emcli.exception import VerbExecutionError
 from logging_ext import ColoredFormatter
 
-#log = logging.getLogger('promote_cluster.' + __name__)
+
+def get_cluster(cluster):
+    """return dict with information about the clusetr database with the given cluster name"""
+    """there is only one record in the discovery catalog as this is the"""
+    """last record added"""
+
+    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+
+    log.debug("cluster name is " + cluster)
+
+    targets = cluster + ':cluster'
+    try:
+        resp = get_targets(targets = targets, unmanaged = True, properties = True)
+
+    except emcli.exception.VerbExecutionError, e:
+        log.error(e.error())
+        exit(1)
+
+    if len(resp.out()['data']) == 0:
+        log.error('no such cluster ' + args.cluster)
+        sys.exit(1)
+
+    log.debug(json.dumps(resp.out(), indent=4))
+
+    obj = resp.out()['data'][0]
+    m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
+    if m:
+        host = m.group('host')
+    else:
+        log.error('cannot extract hostname from Host Info')
+        sys.exit(1)
+
+    m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*eonsPort:(?P<eonsPort>\d+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", obj['Properties'])
+
+    if m:
+        cluster_dict = { 'Target Name': obj['Target Name'], 'OracleHome': m.group('OracleHome'), 'eonsPort': m.group('eonsPort'), 'scanName': m.group('scanName'), 'scanPort': m.group('scanPort'), 'host': host }
+
+    else:
+        log.error('cannot extract OracleHome/scanName/scanPort from Properties')
+        sys.exit(1)
+
+    return cluster_dict
 
 
 def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):

@@ -7,7 +7,7 @@ import re
 import logging
 import logging.config
 from logging_ext import ColoredFormatter
-from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database,get_osm_instances_on_hosts,get_osm_cluster
+from cluster import get_cluster,get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database,get_osm_instances_on_hosts,get_osm_cluster
 
 
 parser = argparse.ArgumentParser(
@@ -114,20 +114,6 @@ asmsnmppass = asmsnmpcreds['password']
 
 log.notice('ASM SNMP username = ' + asmsnmpuser)
 
-# Retrieve information about the cluster, note that only *one* node will be
-# present in the 'Host Info' (the last one to be discovered)
-targets = args.cluster + ':' + 'cluster'
-
-try:
-    resp = get_targets(targets = targets, unmanaged = True, properties = True)
-
-except emcli.exception.VerbExecutionError, e:
-    log.error(e.error())
-    exit(1)
-
-if len(resp.out()['data']) == 0:
-    log.error('no such cluster ' + args.cluster)
-    sys.exit(1)
 
 # 1911671.1 How to add Cluster ASM Target
 # 1908635.1 How to Discover the Cluster and Cluster Database (RAC) Target
@@ -139,39 +125,21 @@ if len(resp.out()['data']) == 0:
 ####
 # i. Add the cluster (cluster) target
 ####
-
-cluster = resp.out()['data'][0]['Target Name']  # there will be only one record
-log.info('cluster: ' + cluster)
-
-m = re.match(r"host:(?P<host>\S+);", resp.out()['data'][0]['Host Info'])
-if m:
-    host = m.group('host')
-else:
-    log.error('cannot extract hostname from Host Info')
-    sys.exit(1)
-
-m = re.search(r"OracleHome:(?P<OracleHome>[^;]+).*scanName:(?P<scanName>[^;]+).*scanPort:(?P<scanPort>\d+)", resp.out()['data'][0]['Properties'])
-if m:
-    OracleHome = m.group('OracleHome')
-    scanName = m.group('scanName')
-    scanPort = m.group('scanPort')
-else:
-    log.error('cannot extract OracleHome/scanName/scanPort from Properties')
-    sys.exit(1)
-
-log.debug(json.dumps(resp.out(), indent=4))
+# Retrieve information about the cluster, note that only *one* node will be
+# present in the 'Host Info' (the last one to be discovered)
+cluster_record = get_cluster(args.cluster)
 
 # Retrieve the full list of host members from the SCAN listeners
-instances_list = get_cluster_nodes_from_scan(cluster, scanName)
+instances_list = get_cluster_nodes_from_scan(cluster_record['Target Name'], cluster_record['scanName'])
 
 instances = ';'.join([(lambda x:x+':host')(i) for i in instances_list])
 
 log.info('instances: ' + instances)
 
-log.notice('add_target -name=' + cluster +
-    ' -type=cluster -host=' + host + 
+log.notice('add_target -name=' + cluster_record['Target Name'] +
+    ' -type=cluster -host=' + cluster_record['host'] + 
     ' -monitor_mode=1' +
-    ' -properties=OracleHome:' + OracleHome + ';scanName:' + scanName + ';scanPort:' + scanPort + 
+    ' -properties=OracleHome:' + cluster_record['OracleHome'] + ';scanName:' + cluster_record['scanName'] + ';scanPort:' + cluster_record['scanPort'] + 
     ' -instances=' + instances)
 
 
@@ -234,9 +202,9 @@ for osm in osm_records_list:
 ################################################################################
 
 # Only one record per osm_cluster will be returned...
-log.info('ASM cluster ' + cluster)
+log.info('ASM cluster ' + cluster_record['Target Name'])
 
-osm_record = get_osm_cluster(cluster)
+osm_record = get_osm_cluster(cluster_record['Target Name'])
 
 instances = ';'.join([(lambda x:x+':osm_instance')(i) for i in instances_list])
 
