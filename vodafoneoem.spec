@@ -55,9 +55,13 @@ for file in region node properties
 do
 	if [ ! -f %{_datadir}/%{_package}/$file.ini ]
 	then
-		cp %{_datadir}/%{_package}/$file.ini.example %{_datadir}/%{_package}/$file.ini
+		install -m 0644 -o oracle -g oinstall -T  %{_datadir}/%{_package}/$file.ini.example %{_datadir}/%{_package}/$file.ini
 	fi
 done
+if [ ! -f %{_datadir}/%{_package}/logging.conf ]
+then
+	install -m 0644 -o oracle -g oinstall -T %{_datadir}/%{_package}/logging.conf.example %{_datadir}/%{_package}/logging.conf
+fi
 
 
 %preun

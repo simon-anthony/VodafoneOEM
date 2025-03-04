@@ -5,6 +5,7 @@ from utils import getcreds,keyvalues
 import json
 import re
 import logging
+import logging.config
 from logging_ext import ColoredFormatter
 from cluster import get_cluster_nodes_from_scan,get_databases_on_hosts,get_rac_database,get_osm_instances_on_hosts,get_osm_cluster
 
@@ -15,9 +16,8 @@ parser = argparse.ArgumentParser(
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
 # Logging
-log = logging.getLogger(parser.prog) # create top level logger
-
-parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), default='/dev/null',
+    metavar='PATH', help='write logging to a file')
 parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
     choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
@@ -50,22 +50,13 @@ else:
     oms = args.oms
 
 # Set up logging
+logging.config.fileConfig('@PKGDATADIR@/logging.conf', defaults={'logfilename': args.logfile.name})
+log = logging.getLogger(parser.prog) # create top level logger
+
 numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % loglevel)
-
-ch = logging.StreamHandler() # add console handler 
-ch.setLevel(numeric_level)
-ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
-log.addHandler(ch)
-
-if args.logfile:
-    fh = logging.FileHandler(args.logfile.name) # add file handler
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    log.addHandler(fh)
-
-log.setLevel(logging.DEBUG) # fallback log level (default WARNING)
+log.setLevel(numeric_level)
 
 log.notice('connecting to ' + oms)
 
