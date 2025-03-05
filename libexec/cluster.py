@@ -6,6 +6,8 @@ import json
 from emcli import *
 from emcli.exception import VerbExecutionError
 from logging_ext import ColoredFormatter
+import os.path
+
 
 def getprop(name, string):
     m = re.search(r"{name}:(?P<value>[^;]+).*".format(name=name), string)
@@ -20,7 +22,7 @@ def get_cluster(cluster):
     """there is only one record in the discovery catalog as this is the"""
     """last record added"""
 
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
 
     log.debug("cluster name is " + cluster)
 
@@ -55,7 +57,7 @@ def get_cluster(cluster):
 def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
     """Retrieve the full list of host members from the SCAN listeners"""
 
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
 
     log.debug("SCAN name is " + scanName)
 
@@ -96,7 +98,7 @@ def get_databases_on_hosts(instances_list):
     """[{ 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''},"""
     """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''}, ...]"""
 
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
 
     targets = 'oracle_database'
 
@@ -134,7 +136,7 @@ def get_rac_database(ServiceName):
     """there is only one record in the discovery catalog as this is the"""
     """last record added"""
 
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
 
     targets = 'rac_database'
     try:
@@ -168,7 +170,8 @@ def get_osm_instances_on_hosts(instances_list):
     """Return list of dictionary entries of osm targets in instances in list"""
     """[{ 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''},"""
     """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''}, ...]"""
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+
+    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
 
     targets = 'osm_instance'
     try:
