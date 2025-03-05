@@ -1,15 +1,21 @@
 import sys
 import argparse
-# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
-# In the latter case config[args.region]['url'] would be used instead of config.get(args.region, 'url')
-# https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+import logging
+import logging.config
+from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
     prog='promote_gold_agent_image',
     description='Promote gold image from',
     epilog='Text at the bottom of help')
+
+# Logging
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), default='/dev/null',
+    metavar='PATH', help='write logging to a file')
+parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -39,7 +45,16 @@ if args.region:
 else:
     oms = args.oms
 
-print('Info: connecting to ' + oms)
+# Set up logging
+logging.config.fileConfig('@PKGDATADIR@/logging.conf', defaults={'logfilename': args.logfile.name})
+log = logging.getLogger(parser.prog) # create top level logger
+
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+log.setLevel(numeric_level)
+
+log.notice('connecting to ' + oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -58,10 +73,10 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    print('Error: unable to determine username to use')
+    log.error('unable to determine username to use')
     sys.exit(1)
 
-print('Info: username = ' + username)
+log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -71,7 +86,7 @@ try:
         maturity=args.maturity)
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
-    exit(1)
+    log.error(e.error())
+    sys.exit(1)
     
 print resp

@@ -7,12 +7,21 @@ import ConfigParser
 from utils import getcreds
 import csv
 from StringIO import StringIO
+import logging
+import logging.config
+from logging_ext import ColoredFormatter
 
 
 parser = argparse.ArgumentParser(
     prog='list_gold_agent_images',
     description='List gold images',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
+
+# Logging
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), default='/dev/null',
+    metavar='PATH', help='write logging to a file')
+parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -34,12 +43,20 @@ parser.add_argument('-u', '--username', help='OMS user, overides that found in @
 # Would not usually pass sys.argv to parse_args() but emcli scoffs argv[0]
 args = parser.parse_args(sys.argv)
 
+# Set up logging
+logging.config.fileConfig('@PKGDATADIR@/logging.conf', defaults={'logfilename': args.logfile.name})
+log = logging.getLogger(parser.prog) # create top level logger
+
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+log.setLevel(numeric_level)
 if args.region:
     oms = config_region.get(args.region, 'url')
 else:
     oms = args.oms
 
-print('Info: connecting to ' + oms)
+log.notice('connecting to ' + oms)
 
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -58,10 +75,10 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    print('Error: unable to determine username to use')
+    log.error('unable to determine username to use')
     sys.exit(1)
 
-print('Info: username = ' + username)
+log.info('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -70,7 +87,7 @@ try:
     resp = list_gold_agent_images(format = 'name:pretty')
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 print(resp)
@@ -79,7 +96,7 @@ try:
     resp = list_gold_agent_images(format = 'name:csv')
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
+    log.error(e.error())
     exit(1)
 
 buf = StringIO(resp)

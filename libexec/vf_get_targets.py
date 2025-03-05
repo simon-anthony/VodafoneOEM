@@ -1,12 +1,10 @@
 import sys
 import argparse
-# 'ConfigParser' has been renamed 'configparser' in Python 3 (Jython is ~ 2.7)
-# In the latter case config[args.region]['url'] would be used instead of config.get(args.region, 'url')
-# https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
 import json
 import logging
+import logging.config
 from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
@@ -15,9 +13,8 @@ parser = argparse.ArgumentParser(
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
 # Logging
-log = logging.getLogger(parser.prog) # create top level logger
-
-parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), metavar='PATH', help='write logging to a file')
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), default='/dev/null',
+    metavar='PATH', help='write logging to a file')
 parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
     choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
@@ -68,22 +65,13 @@ if args.host:
         host_list = args.host
 
 # Set up logging
+logging.config.fileConfig('@PKGDATADIR@/logging.conf', defaults={'logfilename': args.logfile.name})
+log = logging.getLogger(parser.prog) # create top level logger
+
 numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % loglevel)
-
-ch = logging.StreamHandler() # add console handler 
-ch.setLevel(numeric_level)
-ch.setFormatter(ColoredFormatter("%(name)s[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"))
-log.addHandler(ch)
-
-if args.logfile:
-    fh = logging.FileHandler(args.logfile.name) # add file handler
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    log.addHandler(fh)
-
-log.setLevel(logging.NOTICE) # fallback log level (default WARNING)
+log.setLevel(numeric_level)
 
 log.notice('connecting to ' + oms)
 
@@ -104,7 +92,7 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    print('Error: unable to determine username to use')
+    log.error('unable to determine username to use')
     sys.exit(1)
 
 log.notice('username = ' + username)

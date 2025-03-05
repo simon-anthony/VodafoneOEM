@@ -5,11 +5,20 @@ import argparse
 # https://docs.python.org/2.7/library/configparser.html
 import ConfigParser
 from utils import getcreds
+import logging
+import logging.config
+from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
     prog='update_group_of_agents',
     description='Update a group of agents',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
+
+# Logging
+parser.add_argument('-L', '--logfile', type=argparse.FileType('a'), default='/dev/null',
+    metavar='PATH', help='write logging to a file')
+parser.add_argument('-V', '--loglevel', default='NOTICE', metavar='LEVEL',
+    choices=['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL'], help='console log level: %(choices)s')
 
 # Region
 config_region = ConfigParser.ConfigParser()
@@ -42,7 +51,16 @@ if args.region:
 else:
     oms = args.oms
 
-print('Info: connecting to: ' + oms)
+# Set up logging
+logging.config.fileConfig('@PKGDATADIR@/logging.conf', defaults={'logfilename': args.logfile.name})
+log = logging.getLogger(parser.prog) # create top level logger
+
+numeric_level = getattr(logging, args.loglevel.upper(), None) # console log level
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % loglevel)
+log.setLevel(numeric_level)
+
+log.notice('connecting to: ' + oms)
  
 # Set Connection properties and logon
 set_client_property('EMCLI_OMS_URL', oms)
@@ -61,10 +79,10 @@ else:
     username = creds['username']  # default username
 
 if not username:
-    print('Error: unable to determine username to use')
+    log.error('unable to determine username to use')
     sys.exit(1)
 
-print('Info: username = ' + username)
+log.notice('username = ' + username)
 
 login(username=username, password=creds['password'])
 
@@ -76,19 +94,19 @@ if args.subscribe:
             groups = args.group)
 
     except emcli.exception.VerbExecutionError, e:
-       print e.error()
-       exit(1)
+       log.error(e.error())
+       sys.exit(1)
 
     print resp
-    exit(0)
+    sys.exit(0)
 
 # get all members of the specified group
 try:
     members = get_group_members(name=args.group).out()['data']
 
 except emcli.exception.VerbExecutionError, e:
-    print e.error()
-    exit(1)
+    log.error(e.error())
+    sys.exit(1)
 
 # extract the target names and create a ',' separated string from the list
 target_names = ','.join([i['Target Name'] for i in members if i['Target Type'] == 'oracle_emd'])
@@ -100,7 +118,7 @@ try:
         validate_only = args.validate_only)
 
 except emcli.exception.VerbExecutionError, e:
-   print e.error()
+   log.error(e.error())
    exit(1)
 
 print resp
