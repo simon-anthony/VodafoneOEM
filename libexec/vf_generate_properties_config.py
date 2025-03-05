@@ -9,7 +9,7 @@ from logging_ext import ColoredFormatter
 from argparse_ext import CustomExtend
 
 parser = argparse.ArgumentParser(
-    prog='generate_properties_config',
+    prog='vf_generate_properties_config',
     description='Retrieve properties master lists',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 

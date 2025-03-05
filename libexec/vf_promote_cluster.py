@@ -11,7 +11,7 @@ from cluster import get_cluster,get_cluster_nodes_from_scan,get_databases_on_hos
 
 
 parser = argparse.ArgumentParser(
-    prog='promote_cluster',
+    prog='vf_promote_cluster',
     description='Promote a cluster after discovery',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 

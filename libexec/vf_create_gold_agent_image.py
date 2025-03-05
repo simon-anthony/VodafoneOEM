@@ -7,7 +7,7 @@ import logging.config
 from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
-    prog='create_gold_agent_image',
+    prog='vf_create_gold_agent_image',
     description='Create gold image from host',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini) and REGION (region.ini)')
 

@@ -7,8 +7,9 @@ import logging
 import logging.config
 from logging_ext import ColoredFormatter
 
+
 parser = argparse.ArgumentParser(
-    prog='run_auto_discovery',
+    prog='vf_run_auto_discovery',
     description='Run auto discovery on specified hosts',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini) and REGION (region.ini)')
 

@@ -9,8 +9,9 @@ import logging
 import logging.config
 from logging_ext import ColoredFormatter
 
+
 parser = argparse.ArgumentParser(
-    prog='update_group_of_agents',
+    prog='vf_update_group_of_agents',
     description='Update a group of agents',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 

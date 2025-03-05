@@ -13,7 +13,7 @@ from logging_ext import ColoredFormatter
 
 
 parser = argparse.ArgumentParser(
-    prog='list_gold_agent_images',
+    prog='vf_list_gold_agent_images',
     description='List gold images',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 

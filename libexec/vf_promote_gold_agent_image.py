@@ -6,8 +6,9 @@ import logging
 import logging.config
 from logging_ext import ColoredFormatter
 
+
 parser = argparse.ArgumentParser(
-    prog='promote_gold_agent_image',
+    prog='vf_promote_gold_agent_image',
     description='Promote gold image from',
     epilog='Text at the bottom of help')
 

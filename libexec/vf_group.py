@@ -8,7 +8,7 @@ import logging.config
 from logging_ext import ColoredFormatter
 
 parser = argparse.ArgumentParser(
-    prog='group actions',
+    prog='vf_group actions',
     description='Retrieve targets of specified type',
     epilog='The .ini files found in @PKGDATADIR@ contain values for NODE (node.ini), REGION (region.ini)')
 
