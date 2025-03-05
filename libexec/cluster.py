@@ -7,6 +7,7 @@ from emcli import *
 from emcli.exception import VerbExecutionError
 from logging_ext import ColoredFormatter
 import os.path
+import inspect
 
 
 def getprop(name, string):
@@ -22,7 +23,9 @@ def get_cluster(cluster):
     """there is only one record in the discovery catalog as this is the"""
     """last record added"""
 
-    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        sys._getframe().f_code.co_name)
 
     log.debug("cluster name is " + cluster)
 
@@ -57,7 +60,9 @@ def get_cluster(cluster):
 def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
     """Retrieve the full list of host members from the SCAN listeners"""
 
-    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        sys._getframe().f_code.co_name)
 
     log.debug("SCAN name is " + scanName)
 
@@ -98,7 +103,9 @@ def get_databases_on_hosts(instances_list):
     """[{ 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''},"""
     """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''}, ...]"""
 
-    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        sys._getframe().f_code.co_name)
 
     targets = 'oracle_database'
 
@@ -136,7 +143,9 @@ def get_rac_database(ServiceName):
     """there is only one record in the discovery catalog as this is the"""
     """last record added"""
 
-    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        sys._getframe().f_code.co_name)
 
     targets = 'rac_database'
     try:
@@ -171,7 +180,9 @@ def get_osm_instances_on_hosts(instances_list):
     """[{ 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''},"""
     """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''}, ...]"""
 
-    log = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0] + '.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        sys._getframe().f_code.co_name)
 
     targets = 'osm_instance'
     try:
@@ -206,7 +217,9 @@ def get_osm_cluster(cluster):
     """there is only one record in the discovery catalog as this is the"""
     """last record added"""
 
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
+    log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        sys._getframe().f_code.co_name)
 
     targets = 'osm_cluster'
 
@@ -243,56 +256,26 @@ def get_osm_cluster(cluster):
 
 
 
-
-
-
-
-
-
-
-
-
-
 ################################################################################
-
-def get_databases_on_hosts2(instances_list):
-    """Return list of dictionary entries of database targets in instances in list"""
-    """This version uses key value split rather than regex"""
-
-    log = logging.getLogger('promote_cluster.' + sys._getframe().f_code.co_name)
-
-    targets = 'oracle_database'
-
-    try:
-        resp = get_targets(targets = targets, unmanaged = True, properties = True)
-
-    except emcli.exception.VerbExecutionError, e:
-        log.error(e.error())
-        exit(1)
-
-    log.debug(json.dumps(resp.out(), indent=4))
-
-    # osm_cluster_dict = { key: None for key in ['Target Name', 'ClusterName', 'ServiceName', 'host']}
-
-    for obj in resp.out()['data']:   # multiple records
-        host = getprop('host', obj['Host Info'])
-
-        if host in instances_list: # check host is one of our instances, otherwise ignore
-            log.info('oracle_database ' + host)
-
-            for key, value in {k: v for k, v in (item.split(":") for item in obj["Properties"].split(";"))}.items():
-                log.debug(key + ' = ' + value)
-                if value.isdigit():
-                    exec(key + ' = ' + 'int(' +  value + ')')
-                else:
-                    exec(key + ' = ' + '"' + value + '"')
-            dbs_list.append({
-                'target':object['Target Name'],
-                'host':host,
-                'SID':SID,
-                'MachineName':MachineName,
-                'OracleHome':OracleHome,
-                'Port':Port,
-                'ServiceName':ServiceName})
-
-    return dbs_list
+#
+# Example of using key value split rather than regex
+#
+#    host = getprop('host', obj['Host Info'])
+#
+#    if host in instances_list: # check host is one of our instances, otherwise ignore
+#        log.info('oracle_database ' + host)
+#
+#        for key, value in {k: v for k, v in (item.split(":") for item in obj["Properties"].split(";"))}.items():
+#            log.debug(key + ' = ' + value)
+#            if value.isdigit():
+#                exec(key + ' = ' + 'int(' +  value + ')')
+#            else:
+#                exec(key + ' = ' + '"' + value + '"')
+#        dbs_list.append({
+#            'target':object['Target Name'],
+#            'host':host,
+#            'SID':SID,
+#            'MachineName':MachineName,
+#            'OracleHome':OracleHome,
+#            'Port':Port,
+#            'ServiceName':ServiceName})
