@@ -24,7 +24,7 @@ def get_cluster(cluster):
     """last record added"""
 
     log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
-        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0].replace('$py','') +'.'+
         sys._getframe().f_code.co_name)
 
     log.debug("cluster name is " + cluster)
@@ -61,7 +61,7 @@ def get_cluster_nodes_from_scan(cluster, scanName, unmanaged=True):
     """Retrieve the full list of host members from the SCAN listeners"""
 
     log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
-        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0].replace('$py','') +'.'+
         sys._getframe().f_code.co_name)
 
     log.debug("SCAN name is " + scanName)
@@ -104,7 +104,7 @@ def get_databases_on_hosts(instances_list):
     """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome:'',, 'Port':'', 'ServiceName':''}, ...]"""
 
     log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
-        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0].replace('$py','') +'.'+
         sys._getframe().f_code.co_name)
 
     targets = 'oracle_database'
@@ -144,7 +144,7 @@ def get_rac_database(ServiceName):
     """last record added"""
 
     log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
-        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0].replace('$py','') +'.'+
         sys._getframe().f_code.co_name)
 
     targets = 'rac_database'
@@ -181,7 +181,7 @@ def get_osm_instances_on_hosts(instances_list):
     """ { 'Target Name':'', 'host':'', 'SID':'', 'MachineName':'', 'OracleHome':'', 'Port':''}, ...]"""
 
     log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
-        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0].replace('$py','') +'.'+
         sys._getframe().f_code.co_name)
 
     targets = 'osm_instance'
@@ -218,7 +218,7 @@ def get_osm_cluster(cluster):
     """last record added"""
 
     log = logging.getLogger(os.path.splitext(os.path.basename(inspect.stack()[1][1]))[0] +'.'+
-        os.path.splitext(os.path.basename(__file__))[0] +'.'+
+        os.path.splitext(os.path.basename(__file__))[0].replace('$py','') +'.'+
         sys._getframe().f_code.co_name)
 
     targets = 'osm_cluster'
